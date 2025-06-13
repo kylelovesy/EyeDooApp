@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import * as Font from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -41,7 +42,6 @@ export default function RootLayout() {
         <AuthProvider>
           <StatusBar style="auto" />
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="splash" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(modals)" options={{ presentation: 'modal' }} />

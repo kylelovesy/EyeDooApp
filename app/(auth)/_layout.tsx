@@ -1,3 +1,4 @@
+// app/(auth)/_layout.tsx
 import { Redirect, Stack } from 'expo-router';
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';

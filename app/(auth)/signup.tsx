@@ -1,3 +1,4 @@
+// app/(auth)/signup.tsx
 import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';

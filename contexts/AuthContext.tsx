@@ -1,97 +1,156 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+// src/contexts/AuthContext.tsx
+import { LoadingState } from '@/components/ui/LoadingState';
+import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import { AuthService } from '../services/authService';
+import { AuthContextType, User } from '../types/auth';
 
-interface User {
-  id: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  // Add any other user-specific fields from your Firestore user document
-}
-
-interface AuthContextType {
+interface AuthState {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName?: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  error: string | null;
+  initialized: boolean;
 }
+
+type AuthAction =
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_USER'; payload: User | null }
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_INITIALIZED'; payload: boolean };
+
+const initialState: AuthState = {
+  user: null,
+  loading: true,
+  error: null,
+  initialized: false,
+};
+
+const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
+    case 'SET_USER':
+      return { ...state, user: action.payload, loading: false, error: null };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload, loading: false };
+    case 'SET_INITIALIZED':
+      return { ...state, initialized: action.payload };
+    default:
+      return state;
+  }
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    const unsubscribe = AuthService.onAuthStateChanged((firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser as User);
-      } else {
-        setUser(null);
+    // Subscribe to authentication state changes
+    const unsubscribe = AuthService.onAuthStateChanged((user) => {
+      dispatch({ type: 'SET_USER', payload: user });
+      if (!state.initialized) {
+        dispatch({ type: 'SET_INITIALIZED', payload: true });
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return unsubscribe;
+  }, [state.initialized]);
 
-  const signIn = async (email: string, password: string) => {
-    setLoading(true);
+  const signIn = async (email: string, password: string): Promise<void> => {
     try {
-      const userData = await AuthService.signIn(email, password);
-      setUser(userData as User);
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+      
+      const user = await AuthService.signIn(email, password);
+      dispatch({ type: 'SET_USER', payload: user });
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
+      throw error;
     }
   };
 
-  const signUp = async (email: string, password: string, displayName?: string) => {
-    setLoading(true);
+  const signUp = async (email: string, password: string, displayName?: string): Promise<void> => {
     try {
-      const userData = await AuthService.signUp(email, password, displayName);
-      setUser(userData as User);
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+      
+      const user = await AuthService.signUp(email, password, displayName);
+      dispatch({ type: 'SET_USER', payload: user });
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
+      throw error;
     }
   };
 
-  const signOut = async () => {
-    setLoading(true);
+  const signOut = async (): Promise<void> => {
     try {
+      dispatch({ type: 'SET_LOADING', payload: true });
       await AuthService.signOut();
-      setUser(null);
-    } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_USER', payload: null });
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
+      throw error;
     }
   };
 
-  const resetPassword = async (email: string) => {
-    setLoading(true);
+  const resetPassword = async (email: string): Promise<void> => {
     try {
+      dispatch({ type: 'SET_ERROR', payload: null });
       await AuthService.resetPassword(email);
-    } finally {
-      setLoading(false);
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
+      throw error;
     }
   };
 
-  const value = {
-    user,
-    loading,
+  const updateProfile = async (updates: Partial<User>): Promise<void> => {
+    try {
+      if (!state.user) throw new Error('No user logged in');
+      
+      await AuthService.updateUserProfile(state.user.id, updates);
+      dispatch({ type: 'SET_USER', payload: { ...state.user, ...updates } });
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
+      throw error;
+    }
+  };
+
+  const uploadProfileImage = async (imageUri: string): Promise<string> => {
+    try {
+      if (!state.user) throw new Error('No user logged in');
+      
+      const photoURL = await AuthService.uploadProfileImage(state.user.id, imageUri);
+      dispatch({ type: 'SET_USER', payload: { ...state.user, photoURL } });
+      return photoURL;
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
+      throw error;
+    }
+  };
+
+  const value: AuthContextType = {
+    user: state.user,
+    loading: state.loading,
     signIn,
     signUp,
     signOut,
     resetPassword,
+    updateProfile,
+    uploadProfileImage,
   };
+
+  // Don't render children until auth state is initialized
+  if (!state.initialized) {
+    return <LoadingState message="Initializing..." />;
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
