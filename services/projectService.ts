@@ -1,19 +1,19 @@
 // src/services/projectService.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    onSnapshot,
-    orderBy,
-    query,
-    serverTimestamp,
-    Timestamp,
-    updateDoc,
-    where
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  Timestamp,
+  updateDoc,
+  where
 } from 'firebase/firestore';
 import { CreateProjectInput, Project, ProjectStatus, UpdateProjectInput } from '../types/project';
 import { db } from './firebase';
@@ -150,14 +150,13 @@ export class ProjectService {
     try {
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       
-      const updateData = {
+      const updateData: any = {
         ...updates,
         updatedAt: serverTimestamp(),
       };
 
-      // Convert Date objects to Timestamps for Firestore
       if (updates.eventDate) {
-        updateData.eventDate = Timestamp.fromDate(updates.eventDate);
+        (updateData as any).eventDate = Timestamp.fromDate(updates.eventDate);
       }
 
       await updateDoc(projectRef, updateData);

@@ -97,6 +97,11 @@ export interface ProjectContextType {
   createProject: (project: CreateProjectInput) => Promise<Project>;
   updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
+  searchProjects: (query: string) => Promise<void>;
+  loadUpcomingProjects: () => Promise<void>;
+  searchResults: Project[];
+  upcomingProjects: Project[];
+  // getProjectsByStatus: (status: ProjectStatus) => Project[];
   setCurrentProject: (project: Project | null) => void;
   getProject: (id: string) => Promise<Project | null>;
 }

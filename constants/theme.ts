@@ -1,5 +1,7 @@
-// src/utils/theme.ts
+// constants/theme.ts
+import { useColorScheme } from 'react-native';
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+
 
 // EyeDooApp color palette based on the provided theme
 const eyeDooAppLightColors = {
@@ -96,6 +98,12 @@ export const darkTheme = {
     ...MD3DarkTheme.colors,
     ...eyeDooAppDarkColors,
   },
+};
+
+// Hook to get the current theme based on device preference
+export const useAppTheme = () => {
+  const colorScheme = useColorScheme();
+  return colorScheme === 'dark' ? darkTheme : lightTheme;
 };
 
 // Theme utilities

@@ -1,27 +1,32 @@
-// app/(auth)/_layout.tsx
-import { Redirect, Stack } from 'expo-router';
-import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+// # 2.0 Authentication Group
+// # Auth stack layout
+// - Header: hidden or minimal
+// - Screens: login, register, reset-password
+// - Transition: slide animation
 
+
+import { Stack } from 'expo-router';
+import { useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AuthLayout() {
-  const { user, loading } = useAuth();
-
-  // Show loading state while checking authentication
-  if (loading) {
-    return null; // The AuthProvider handles loading state
-  }
-
-  // Redirect to main app if user is authenticated
-  if (user) {
-    return <Redirect href="/(tabs)" />;
-  }
-
+    const theme = useTheme();
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="signup" />
-      <Stack.Screen name="forgot-password" />
-    </Stack>
+    <SafeAreaView style={{ 
+        flex: 1, 
+        backgroundColor: theme.colors.background 
+        }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: theme.colors.background },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="login" />
+        <Stack.Screen name="register" />
+        <Stack.Screen name="reset-password" />
+      </Stack>
+    </SafeAreaView>
   );
 }

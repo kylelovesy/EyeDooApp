@@ -1,4 +1,3 @@
-// src/contexts/ProjectContext.tsx
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import { ProjectService } from '../services/projectService';
 import { CreateProjectInput, Project, ProjectContextType, ProjectStatus } from '../types/project';
@@ -132,7 +131,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       dispatch({ type: 'SET_ERROR', payload: null });
       
-    //   await ProjectService.updateProject(id, updates);
+      await ProjectService.updateProject(id, updates as any);
       dispatch({ type: 'UPDATE_PROJECT', payload: { id, updates } });
     } catch (error: any) {
       dispatch({ type: 'SET_ERROR', payload: error.message });
@@ -218,6 +217,11 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     deleteProject,
     setCurrentProject,
     getProject,
+    searchProjects,
+    loadUpcomingProjects,
+    searchResults: state.searchResults,
+    upcomingProjects: state.upcomingProjects,
+    // getProjectsByStatus,
   };
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
@@ -237,19 +241,21 @@ export const useCurrentProject = () => {
   return { currentProject, setCurrentProject };
 };
 
-// export const useProjectSearch = () => {
-//   const { searchProjects } = useProjects();
-//   const [searchResults, setSearchResults] = React.useState<Project[]>([]);
-//   const [searching, setSearching] = React.useState(false);
+export const useProjectSearch = () => {
+  const { searchProjects } = useProjects();
+  const [searchResults, setSearchResults] = React.useState<Project[]>([]);
+  const [searching, setSearching] = React.useState(false);
 
-//   const search = async (term: string) => {
-//     setSearching(true);
-//     try {
-//       await searchProjects(term);
-//     } finally {
-//       setSearching(false);
-//     }
-//   };
+  const search = async (term: string) => {
+    setSearching(true);
+    try {
+      await searchProjects(term);
+    } finally {
+      setSearching(false);
+    }
+  };
 
-//   return { searchResults, searching, search };
-// };
+  return { searchResults, searching, search };
+};
+
+

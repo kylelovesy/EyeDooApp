@@ -1,78 +1,134 @@
-// app/(auth)/login.tsx
 import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 import { Divider, TextInput } from 'react-native-paper';
 import { CustomButton } from '../../components/ui/CustomButton';
 import { Screen } from '../../components/ui/Screen';
+import { Toast, useToast } from '../../components/ui/Toast';
 import { BodyText, HeadlineText } from '../../components/ui/Typography';
-import { spacing } from '../../constants/theme';
+import { commonStyles, createThemedStyles } from '../../constants/styles';
+import { useAppTheme } from '../../constants/theme';
+import { typography } from '../../constants/typography';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginScreen() {
+  const theme = useAppTheme();
+  const themedStyles = createThemedStyles(theme);
+  const { signIn } = useAuth();
+  const { toastProps, showError, showSuccess } = useToast();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn } = useAuth();
 
+  /**
+   * Validates the login form inputs
+   * Shows toast notifications for validation errors
+   * @returns {boolean} - True if form is valid, false otherwise
+   */
   const validateForm = (): boolean => {
     if (!email.trim()) {
-      Alert.alert('Validation Error', 'Please enter your email address');
+      showError('Validation Error', 'Please enter your email address');
       return false;
     }
     
     if (!email.includes('@')) {
-      Alert.alert('Validation Error', 'Please enter a valid email address');
+      showError('Validation Error', 'Please enter a valid email address');
       return false;
     }
     
     if (!password.trim()) {
-      Alert.alert('Validation Error', 'Please enter your password');
+      showError('Validation Error', 'Please enter your password');
       return false;
     }
     
     if (password.length < 6) {
-      Alert.alert('Validation Error', 'Password must be at least 6 characters long');
+      showError('Validation Error', 'Password must be at least 6 characters long');
       return false;
     }
     
     return true;
   };
 
+  /**
+   * Handles the login process
+   * Shows appropriate toast notifications for success/error states
+   */
   const handleLogin = async () => {
     if (!validateForm()) return;
 
     setLoading(true);
     try {
       await signIn(email.trim().toLowerCase(), password);
-      router.replace('/(tabs)');
+      
+      // Show success toast
+      showSuccess(
+        'Welcome Back!', 
+        'You have been successfully signed in.',
+        { duration: 2000 }
+      );
+      
+      // Navigate after a brief moment to show the success toast
+      setTimeout(() => {
+        router.replace('/(app)/events');
+      }, 1000);
+      
     } catch (error: any) {
-      Alert.alert('Login Error', error.userMessage || 'Failed to sign in. Please try again.');
+      // Show error toast instead of Alert
+      showError(
+        'Login Failed',
+        error.userMessage || 'Failed to sign in. Please check your credentials and try again.',
+        { duration: 5000 }
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Screen scrollable padding="lg">
+    <Screen 
+      scrollable 
+      padding="lg"
+      style={themedStyles.container}
+    >
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={commonStyles.container}
       >
-        <View style={{ flex: 1, justifyContent: 'center', maxWidth: 400, alignSelf: 'center', width: '100%' }}>
-          {/* Header */}
-          <View style={{ alignItems: 'center', marginBottom: spacing.xxl }}>
-            <HeadlineText size="large" textAlign="center" style={{ marginBottom: spacing.sm }}>
+        <View style={commonStyles.authContainer}>
+          {/* Header Section */}
+          <View style={commonStyles.authHeader}>
+            <HeadlineText 
+              size="large" 
+              style={[
+                commonStyles.textCenter,
+                { 
+                  ...typography.headlineLarge,
+                  color: theme.colors.onBackground,
+                  marginBottom: 8,
+                }
+              ]}
+            >
               Welcome Back
             </HeadlineText>
-            <BodyText size="large" textAlign="center" style={{ opacity: 0.7 }}>
+            <BodyText 
+              size="large" 
+              style={[
+                commonStyles.textCenter,
+                {
+                  ...typography.bodyLarge,
+                  color: theme.colors.onSurfaceVariant,
+                  opacity: 0.8,
+                }
+              ]}
+            >
               Sign in to your EyeDooApp account
             </BodyText>
           </View>
 
-          {/* Form */}
-          <View style={{ gap: spacing.md }}>
+          {/* Form Section */}
+          <View style={commonStyles.form}>
             <TextInput
               label="Email Address"
               value={email}
@@ -86,6 +142,14 @@ export default function LoginScreen() {
               left={<TextInput.Icon icon="email" />}
               error={email.length > 0 && !email.includes('@')}
               testID="login-email-input"
+              style={{
+                backgroundColor: theme.colors.surface,
+              }}
+              theme={theme}
+              outlineColor={theme.colors.outline}
+              activeOutlineColor={theme.colors.primary}
+              textColor={theme.colors.onSurface}
+              placeholderTextColor={theme.colors.onSurfaceVariant}
             />
             
             <TextInput
@@ -106,6 +170,14 @@ export default function LoginScreen() {
               }
               error={password.length > 0 && password.length < 6}
               testID="login-password-input"
+              style={{
+                backgroundColor: theme.colors.surface,
+              }}
+              theme={theme}
+              outlineColor={theme.colors.outline}
+              activeOutlineColor={theme.colors.primary}
+              textColor={theme.colors.onSurface}
+              placeholderTextColor={theme.colors.onSurfaceVariant}
             />
 
             <CustomButton
@@ -120,9 +192,9 @@ export default function LoginScreen() {
             />
           </View>
 
-          {/* Links */}
-          <View style={{ alignItems: 'center', marginTop: spacing.lg, gap: spacing.md }}>
-            <Link href="/(auth)/forgot-password" asChild>
+          {/* Links Section */}
+          <View style={commonStyles.authLinks}>
+            <Link href="/(auth)/reset-password" asChild>
               <CustomButton
                 title="Forgot Password?"
                 variant="text"
@@ -131,11 +203,16 @@ export default function LoginScreen() {
               />
             </Link>
             
-            <Divider style={{ width: '100%', marginVertical: spacing.sm }} />
+            <Divider style={themedStyles.authDivider} />
             
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <BodyText size="medium">Don&apos;t have an account?</BodyText>
-              <Link href="/(auth)/signup" asChild>
+            <View style={commonStyles.authSignupRow}>
+              <Text style={{
+                ...typography.bodyMedium,
+                color: theme.colors.onSurfaceVariant,
+              }}>
+                Don&apos;t have an account?
+              </Text>
+              <Link href="/(auth)/register" asChild>
                 <CustomButton
                   title="Sign Up"
                   variant="text"
@@ -147,6 +224,9 @@ export default function LoginScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Toast Notification */}
+      {toastProps && <Toast {...toastProps} />}
     </Screen>
   );
 }
