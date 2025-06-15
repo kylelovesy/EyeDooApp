@@ -3,10 +3,8 @@
 // ######################################################################
 
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
-// Make sure you have a firebase config file that exports 'db'
-import { db } from './firebase';
-// The types below should be imported from the file above
 import { EssentialInfo, FinalTouches, PeopleAndRoles, PhotographyPlan, Questionnaire } from '../types/questionnaire';
+import { db } from './firebase';
 
 export class QuestionnaireService {
   private static readonly COLLECTION_NAME = 'questionnaires';
