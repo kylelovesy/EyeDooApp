@@ -2,25 +2,42 @@
 // # Main app layout
 // app/(app)/_layout.tsx
 import { Stack } from 'expo-router';
-import { useTheme } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { useColorScheme } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import { darkTheme, lightTheme } from '../../constants/theme';
+// import { ProjectProvider } from '../../contexts/ProjectContext';
+import { ProjectProvider } from '../../contexts/ProjectContext';
+import { ProjectFormProvider } from '../../contexts/ProjectFormContext';
+
 
 export default function AppLayout() {
-  const theme = useTheme();
+  // const colorScheme = useColorScheme();
+  // const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   return (
-    <SafeAreaView style={{ 
-        flex: 1, 
-        backgroundColor: theme.colors.background 
-        }}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.colors.background },
-        }}
-      >
-        <Stack.Screen name="events" />
-        <Stack.Screen name="dashboard" />
-      </Stack>
-    </SafeAreaView>
+    <ProjectProvider>
+      <ProjectFormProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="projects" />
+          <Stack.Screen name="dashboard" />
+        </Stack>
+      </ProjectFormProvider>
+    </ProjectProvider>
+    // <ProjectProvider>
+    //   <SafeAreaView style={{ 
+    //     flex: 1, 
+    //     backgroundColor: theme.colors.primary 
+    //     }}>
+    //   <Stack
+    //     screenOptions={{
+    //       headerShown: false,
+    //       contentStyle: { backgroundColor: theme.colors.primary },
+    //     }}
+    //   >
+    //     <Stack.Screen name="projects" />
+    //     <Stack.Screen name="dashboard" />
+    //   </Stack>
+    // </SafeAreaView>
+    // </ProjectProvider>
+    
   );
 }

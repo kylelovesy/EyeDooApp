@@ -1,343 +1,227 @@
-// components/ui/Toast.tsx
-import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef } from 'react';
-import {
-    Animated,
-    Dimensions,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { borderRadius, spacing, useAppTheme } from '../../constants/theme';
-import { typography } from '../../constants/typography';
+// src/components/ui/Toast.tsx
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useCallback, useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Snackbar, useTheme } from 'react-native-paper';
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-export interface ToastConfig {
-  type: ToastType;
-  title: string;
-  message?: string;
-  duration?: number;
-  onPress?: () => void;
-  onDismiss?: () => void;
-}
-
-interface ToastProps extends ToastConfig {
+interface ToastProps {
+  message: string | null;
+  type?: 'success' | 'error' | 'warning' | 'info';
   visible: boolean;
-  onHide: () => void;
+  onDismiss: () => void;
+  duration?: number;
+  action?: {
+    label: string;
+    onPress: () => void;
+  };
 }
 
-const { width: screenWidth } = Dimensions.get('window');
-const TOAST_WIDTH = screenWidth - 32; // 16px margin on each side
+interface ToastState {
+  message: string | null;
+  type: 'success' | 'error' | 'warning' | 'info';
+  visible: boolean;
+  duration: number;
+  action?: {
+    label: string;
+    onPress: () => void;
+  };
+}
 
-/**
- * Toast notification component for displaying temporary messages
- * Supports different types: success, error, warning, info
- * Can be positioned at top or bottom of screen
- * Includes auto-dismiss functionality and manual dismiss option
- */
+interface UseToastOptions {
+  duration?: number;
+  action?: {
+    label: string;
+    onPress: () => void;
+  };
+}
+
 export const Toast: React.FC<ToastProps> = ({
-  visible,
-  type,
-  title,
   message,
-  duration = 4000,
-  onPress,
+  type = 'info',
+  visible,
   onDismiss,
-  onHide,
+  duration = 4000,
+  action,
 }) => {
-  const theme = useAppTheme();
-  const translateY = useRef(new Animated.Value(-100)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const theme = useTheme();
 
-  const getToastConfig = () => {
+  useEffect(() => {
+    if (visible && duration > 0) {
+      const timer = setTimeout(() => {
+        onDismiss();
+      }, duration);
+
+      return () => clearTimeout(timer);
+    }
+  }, [visible, duration, onDismiss]);
+
+  const getToastStyle = () => {
     switch (type) {
       case 'success':
         return {
-          backgroundColor: theme.colors.primaryContainer,
-          borderColor: theme.colors.primary,
-          textColor: theme.colors.onPrimaryContainer,
-          icon: 'checkmark-circle' as const,
-          iconColor: theme.colors.primary,
+          backgroundColor: '#4CAF50',
+          color: '#FFFFFF',
         };
       case 'error':
         return {
-          backgroundColor: theme.colors.errorContainer,
-          borderColor: theme.colors.error,
-          textColor: theme.colors.onErrorContainer,
-          icon: 'close-circle' as const,
-          iconColor: theme.colors.error,
+          backgroundColor: '#F44336',
+          color: '#FFFFFF',
         };
       case 'warning':
         return {
-          backgroundColor: theme.colors.tertiaryContainer,
-          borderColor: theme.colors.tertiary,
-          textColor: theme.colors.onTertiaryContainer,
-          icon: 'warning' as const,
-          iconColor: theme.colors.tertiary,
-        };
-      case 'info':
-        return {
-          backgroundColor: theme.colors.secondaryContainer,
-          borderColor: theme.colors.secondary,
-          textColor: theme.colors.onSecondaryContainer,
-          icon: 'information-circle' as const,
-          iconColor: theme.colors.secondary,
+          backgroundColor: '#FF9800',
+          color: '#FFFFFF',
         };
       default:
         return {
-          backgroundColor: theme.colors.surface,
-          borderColor: theme.colors.outline,
-          textColor: theme.colors.onSurface,
-          icon: 'information-circle' as const,
-          iconColor: theme.colors.onSurfaceVariant,
+          backgroundColor: theme.colors.inverseSurface,
+          color: theme.colors.inverseOnSurface,
         };
     }
   };
 
-  const config = getToastConfig();
-
-  useEffect(() => {
-    if (visible) {
-      // Show animation
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Auto-hide after duration
-      if (duration > 0) {
-        timeoutRef.current = setTimeout(() => {
-          hideToast();
-        }, duration);
-      }
-    } else {
-      hideToast();
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return 'check-circle';
+      case 'error':
+        return 'alert-circle';
+      case 'warning':
+        return 'alert';
+      default:
+        return 'information';
     }
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [visible, duration]);
-
-  const hideToast = () => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: -100,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      onHide();
-    });
   };
 
-  const handlePress = () => {
-    if (onPress) {
-      onPress();
-    }
-    hideToast();
-  };
+  const toastStyle = getToastStyle();
 
-  const handleDismiss = () => {
-    if (onDismiss) {
-      onDismiss();
-    }
-    hideToast();
-  };
-
-  if (!visible) {
-    return null;
-  }
-
-  const styles = StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: Platform.OS === 'ios' ? 60 : 40,
-      left: 16,
-      right: 16,
-      zIndex: 9999,
-    },
-    toast: {
-      backgroundColor: config.backgroundColor,
-      borderLeftWidth: 4,
-      borderLeftColor: config.borderColor,
-      borderRadius: borderRadius.md,
-      padding: spacing.md,
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-    iconContainer: {
-      marginRight: spacing.sm,
-      marginTop: 2,
-    },
-    content: {
-      flex: 1,
-      marginRight: spacing.sm,
-    },
-    title: {
-      ...typography.titleMedium,
-      color: config.textColor,
-      marginBottom: message ? spacing.xs : 0,
-    },
-    message: {
-      ...typography.bodyMedium,
-      color: config.textColor,
-      opacity: 0.9,
-    },
-    dismissButton: {
-      padding: spacing.xs,
-      marginTop: -spacing.xs,
-      marginRight: -spacing.xs,
-    },
-  });
+  if (!message) return null;
 
   return (
-    <Animated.View
+    <Snackbar
+      visible={visible}
+      onDismiss={onDismiss}
+      duration={duration}
+      action={action}
       style={[
-        styles.container,
-        {
-          transform: [{ translateY }],
-          opacity,
-        },
+        styles.snackbar,
+        { backgroundColor: toastStyle.backgroundColor }
       ]}
+      theme={{
+        colors: {
+          inverseOnSurface: toastStyle.color,
+          inverseSurface: toastStyle.backgroundColor,
+        }
+      }}
     >
-      <TouchableOpacity
-        style={styles.toast}
-        onPress={onPress ? handlePress : undefined}
-        activeOpacity={onPress ? 0.8 : 1}
-      >
-        <View style={styles.iconContainer}>
-          <Ionicons
-            name={config.icon}
-            size={24}
-            color={config.iconColor}
-          />
-        </View>
-        
-        <View style={styles.content}>
-          <Text style={styles.title}>{title}</Text>
-          {message && (
-            <Text style={styles.message}>{message}</Text>
-          )}
-        </View>
-        
-        <TouchableOpacity
-          style={styles.dismissButton}
-          onPress={handleDismiss}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons
-            name="close"
-            size={20}
-            color={config.textColor}
-          />
-        </TouchableOpacity>
-      </TouchableOpacity>
-    </Animated.View>
+      <View style={styles.content}>
+        <MaterialCommunityIcons
+          name={getIcon()}
+          size={20}
+          color={toastStyle.color}
+          style={styles.icon}
+        />
+        {message}
+      </View>
+    </Snackbar>
   );
 };
 
-// Hook for managing toast state
 export const useToast = () => {
-  const [toastConfig, setToastConfig] = React.useState<ToastConfig | null>(null);
-  const [visible, setVisible] = React.useState(false);
+  const [toastState, setToastState] = useState<ToastState>({
+    message: null,
+    type: 'info',
+    visible: false,
+    duration: 4000,
+  });
 
-  const showToast = (config: ToastConfig) => {
-    setToastConfig(config);
-    setVisible(true);
-  };
+  const hideToast = useCallback(() => {
+    setToastState(prev => ({ ...prev, visible: false }));
+  }, []);
 
-  const hideToast = () => {
-    setVisible(false);
-    // Clear config after animation completes
-    setTimeout(() => {
-      setToastConfig(null);
-    }, 300);
-  };
+  const showToast = useCallback((
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'info',
+    options?: UseToastOptions
+  ) => {
+    setToastState({
+      message,
+      type,
+      visible: true,
+      duration: options?.duration || 4000,
+      action: options?.action,
+    });
+  }, []);
 
-  const showSuccess = (title: string, message?: string, options?: Partial<ToastConfig>) => {
-    showToast({ type: 'success', title, message, ...options });
-  };
+  const showSuccess = useCallback((
+    title: string,
+    message?: string,
+    options?: UseToastOptions
+  ) => {
+    const fullMessage = message ? `${title}: ${message}` : title;
+    showToast(fullMessage, 'success', options);
+  }, [showToast]);
 
-  const showError = (title: string, message?: string, options?: Partial<ToastConfig>) => {
-    showToast({ type: 'error', title, message, ...options });
-  };
+  const showError = useCallback((
+    title: string,
+    message?: string,
+    options?: UseToastOptions
+  ) => {
+    const fullMessage = message ? `${title}: ${message}` : title;
+    showToast(fullMessage, 'error', options);
+  }, [showToast]);
 
-  const showWarning = (title: string, message?: string, options?: Partial<ToastConfig>) => {
-    showToast({ type: 'warning', title, message, ...options });
-  };
+  const showWarning = useCallback((
+    title: string,
+    message?: string,
+    options?: UseToastOptions
+  ) => {
+    const fullMessage = message ? `${title}: ${message}` : title;
+    showToast(fullMessage, 'warning', options);
+  }, [showToast]);
 
-  const showInfo = (title: string, message?: string, options?: Partial<ToastConfig>) => {
-    showToast({ type: 'info', title, message, ...options });
-  };
+  const showInfo = useCallback((
+    title: string,
+    message?: string,
+    options?: UseToastOptions
+  ) => {
+    const fullMessage = message ? `${title}: ${message}` : title;
+    showToast(fullMessage, 'info', options);
+  }, [showToast]);
+
+  const toastProps = toastState.visible ? {
+    message: toastState.message,
+    type: toastState.type,
+    visible: toastState.visible,
+    onDismiss: hideToast,
+    duration: toastState.duration,
+    action: toastState.action,
+  } : null;
 
   return {
-    // Toast component props
-    toastProps: toastConfig ? {
-      ...toastConfig,
-      visible,
-      onHide: hideToast,
-    } : null,
-    
-    // Toast control methods
+    toastProps,
     showToast,
-    hideToast,
     showSuccess,
     showError,
     showWarning,
     showInfo,
+    hideToast,
   };
 };
 
-/**
- * Usage Example:
- * 
- * import { Toast, useToast } from '../components/ui/Toast';
- * 
- * const MyComponent = () => {
- *   const { toastProps, showError, showSuccess } = useToast();
- * 
- *   const handleError = () => {
- *     showError('Login Failed', 'Please check your credentials and try again.');
- *   };
- * 
- *   const handleSuccess = () => {
- *     showSuccess('Success!', 'You have been logged in successfully.');
- *   };
- * 
- *   return (
- *     <View>
- *       <Button onPress={handleError} title="Show Error" />
- *       <Button onPress={handleSuccess} title="Show Success" />
- *       {toastProps && <Toast {...toastProps} />}
- *     </View>
- *   );
- * };
- */
+const styles = StyleSheet.create({
+  snackbar: {
+    marginBottom: 20,
+    marginHorizontal: 16,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: 8,
+  },
+});
+
+export default Toast;
+

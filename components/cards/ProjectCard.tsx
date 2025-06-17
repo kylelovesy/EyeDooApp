@@ -3,16 +3,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
-import { Card, Chip, IconButton, useTheme } from 'react-native-paper';
-import { spacing } from '../../constants/theme';
-import { Project, ProjectStatus } from '../../types/project';
+import { Card, Chip, IconButton } from 'react-native-paper';
+import { spacing, useAppTheme } from '../../constants/theme';
+import { ProjectStatus, ProjectWithProgress } from '../../types/project';
 import { BodyText, LabelText, TitleText } from '../ui/Typography';
 
 interface ProjectCardProps {
-  project: Project;
+  project: ProjectWithProgress;
   onPress: () => void;
   onDelete?: () => void;
   style?: ViewStyle;
+  isActive?: boolean;
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -20,21 +21,20 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   onPress,
   onDelete,
   style,
+  isActive = false,
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   const getStatusColor = (status: ProjectStatus) => {
     switch (status) {
       case ProjectStatus.ACTIVE:
-        return '#4CAF50';
+        return theme.colors.primary;
       case ProjectStatus.COMPLETED:
-        return '#2196F3';
+        return theme.colors.secondary;
       case ProjectStatus.DRAFT:
-        return '#FF9800';
+        return theme.colors.tertiary;
       case ProjectStatus.CANCELLED:
-        return '#F44336';
-      case ProjectStatus.ARCHIVED:
-        return '#9E9E9E';
+        return theme.colors.error;
       default:
         return theme.colors.outline;
     }
@@ -57,19 +57,29 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   const getDaysUntilEvent = () => {
-    const now = new Date();
-    const eventDate = new Date(project.eventDate);
-    const diffTime = eventDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // const now = new Date();
+    // const eventDate = project.eventDate.toDate();
+    // const diffTime = eventDate.getTime() - now.getTime();
+    // const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays < 0) return 'Past event';
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Tomorrow';
-    return `${diffDays} days`;
+    // if (diffDays < 0) return 'Past event';
+    // if (diffDays === 0) return 'Today';
+    // if (diffDays === 1) return 'Tomorrow';
+    // return `${diffDays} days`;
+    return '10 days';
   };
 
+  const cardStyle: ViewStyle[] = [style || {}];
+  if (isActive) {
+    cardStyle.push({
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+      backgroundColor: theme.colors.primaryContainer,
+    });
+  }
+
   return (
-    <Card style={style} onPress={onPress}>
+    <Card style={cardStyle} onPress={onPress}>
       <Card.Content>
         {/* Header */}
         <View style={{ 
@@ -80,7 +90,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         }}>
           <View style={{ flex: 1, marginRight: spacing.sm }}>
             <TitleText size="large" numberOfLines={1}>
-              {project.title}
+              {project.projectName}
             </TitleText>
             <BodyText size="medium" style={{ opacity: 0.7, marginTop: spacing.xs }}>
               {project.clientName}
@@ -90,15 +100,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Chip
               style={{ 
-                backgroundColor: getStatusColor(project.status) + '20',
+                backgroundColor: getStatusColor(project.projectStatus) + '20',
                 marginRight: spacing.xs 
               }}
               textStyle={{ 
-                color: getStatusColor(project.status),
+                color: getStatusColor(project.projectStatus),
                 fontSize: 12 
               }}
             >
-              {project.status.toUpperCase()}
+              {project.projectStatus.toUpperCase()}
             </Chip>
             
             {onDelete && (
@@ -125,7 +135,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             style={{ marginRight: spacing.xs }}
           />
           <BodyText size="small" style={{ marginRight: spacing.md }}>
-            {formatEventDate(project.eventDate)}
+            {project.projectStatus}
+            {/* {formatEventDate(project.eventDate.toDate())} */}
           </BodyText>
           
           <MaterialCommunityIcons 

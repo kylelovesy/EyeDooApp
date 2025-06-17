@@ -1,9 +1,10 @@
 // src/components/ui/LoadingState.tsx
 import React from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
-import { ActivityIndicator, useTheme } from 'react-native-paper';
-import { spacing } from '../../constants/theme';
+import { StyleSheet, useColorScheme, View, ViewStyle } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
+import { darkTheme, lightTheme, spacing } from '../../constants/theme';
 import { BodyText } from './Typography';
+
 
 interface LoadingStateProps {
   message?: string;
@@ -13,6 +14,8 @@ interface LoadingStateProps {
   testID?: string;
 }
 
+
+
 export const LoadingState: React.FC<LoadingStateProps> = ({
   message = 'Loading...',
   size = 'large',
@@ -20,8 +23,9 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   style,
   testID,
 }) => {
-  const theme = useTheme();
-
+  
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const containerStyle: ViewStyle = {
     ...styles.container,
     ...(overlay && styles.overlay),

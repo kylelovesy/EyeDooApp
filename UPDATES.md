@@ -1,0 +1,17 @@
+- `app/(app)/dashboard/(home)/index.tsx`: Refactored to use `useAppTheme` and custom `Typography` components. Replaced hardcoded styles with theme variables for colors, spacing, and elevation to ensure UI consistency.
+- `app/(app)/dashboard/(timeline)/index.tsx`: Refactored to use `useAppTheme` and custom `Typography` components. Replaced hardcoded styles with theme variables and fixed linter errors by adding a `TimelineEvent` interface.
+- `app/(app)/dashboard/(shots)/index.tsx`: Refactored to use `useAppTheme`, `Typography`, and `CustomButton` components. Replaced hardcoded styles with theme variables.
+- `app/(app)/dashboard/(other)/index.tsx`: Refactored Notes screen to use `useAppTheme`, `Typography`, and `CustomButton` components. Replaced hardcoded styles with theme variables.
+- `app/(app)/dashboard/(settings)/index.tsx`: Refactored Account screen to use `useAppTheme`, `Typography`, and `CustomButton` components. Replaced hardcoded styles with theme variables.
+- **New Component**: Created `components/navigation/ThemedMaterialTopTabs.tsx` to standardize top tab navigators.
+- **Refactor**: Updated all five dashboard layouts in `app/(app)/dashboard/**/_layout.tsx` to use the new `ThemedMaterialTopTabs` component, removing significant code duplication and applying the theme.
+- `app/(auth)/register.tsx`: Refactored to use `useAppTheme` and common styles, moving style definitions outside the component to prevent re-creation on render.
+- `app/(auth)/reset-password.tsx`: Refactored to use `useAppTheme` and common styles, moving style definitions outside the component and fixing a linter error related to toast usage.
+- `app/(app)/projects/delete.tsx`: Refactored to use the `Screen` component and themed styles for UI consistency.
+- `app/(app)/projects/index.tsx`: Integrated the `QuestionnaireModal` to allow for project creation through the UI.
+- `types/project.ts`: Removed significant duplicated and commented-out legacy code to clarify the core project type definitions.
+- `types/index.ts`: Deleted the file as it contained redundant and outdated type definitions.
+- `app/(app)/dashboard/(home)/index.tsx`: Refactored to display dynamic data from the `currentProject` in `ProjectContext`. Also added properties to the `Project` type to support the UI.
+- `contexts/ProjectContext.tsx`: Added a development-only seeding mechanism to create sample projects for new users.
+- `components/cards/ProjectCard.tsx`: Refactored to be fully theme-aware, use the correct `Project` type properties, and manage its own `isActive` state for styling.
+- `app/(app)/projects/index.tsx`: Fixed routing and linter errors by updating navigation paths and simplifying the `renderProjectCard` function to correctly use the refactored `ProjectCard`.

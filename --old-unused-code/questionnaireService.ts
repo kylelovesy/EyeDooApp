@@ -47,9 +47,10 @@ export class QuestionnaireService {
         // We also need to convert Date objects to Firestore Timestamps.
         const dataToSave = { ...data };
         if (dataToSave.essentialInfo?.weddingDate) {
+            // Convert Date to Timestamp for Firestore storage
             dataToSave.essentialInfo = {
                 ...dataToSave.essentialInfo,
-                weddingDate: Timestamp.fromDate(dataToSave.essentialInfo.weddingDate)
+                weddingDate: Timestamp.fromDate(dataToSave.essentialInfo.weddingDate) as unknown as Date
             };
         }
 

@@ -4,14 +4,14 @@
 // app-updating/(auth)/forgot-password.tsx
 import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { CustomButton } from '../../components/ui/CustomButton';
 import { Screen } from '../../components/ui/Screen';
 import { Toast, useToast } from '../../components/ui/Toast';
 import { BodyText, HeadlineText } from '../../components/ui/Typography';
+import { commonStyles, createThemedStyles } from '../../constants/styles';
 import { spacing, useAppTheme } from '../../constants/theme';
-import { typography } from '../../constants/typography';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ForgotPasswordScreen() {
@@ -20,6 +20,7 @@ export default function ForgotPasswordScreen() {
   const [emailSent, setEmailSent] = useState(false);
   const { resetPassword } = useAuth();
   const theme = useAppTheme();
+  const styles = useStyles(theme);
   const { toastProps, showError, showSuccess } = useToast();
 
   const validateEmail = (): boolean => {
@@ -48,9 +49,11 @@ export default function ForgotPasswordScreen() {
         'Check your email for instructions to reset your password.',
         {
           duration: 6000,
-          onDismiss: () => router.back(),
         }
       );
+      setTimeout(() => {
+        router.back();
+      }, 3000);
     } catch (error: any) {
       showError('Reset Error', error.userMessage || 'Failed to send reset email. Please try again.');
     } finally {
@@ -58,54 +61,34 @@ export default function ForgotPasswordScreen() {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    contentContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      maxWidth: 400,
-      alignSelf: 'center',
-      width: '100%',
-    },
-    header: {
-      alignItems: 'center',
-      marginBottom: spacing.xxl,
-    },
-    subtitle: {
-      ...typography.bodyLarge,
-      color: theme.colors.onSurfaceVariant,
-      textAlign: 'center',
-    },
-    form: {
-      gap: spacing.md,
-    },
-    backLinkContainer: {
-      alignItems: 'center',
-      marginTop: spacing.lg,
-    },
-  });
-
   return (
     <Screen scrollable padding="lg">
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <View style={styles.contentContainer}>
           {/* Header */}
-          <View style={styles.header}>
-            <HeadlineText size="large" textAlign="center" style={{ marginBottom: spacing.sm }}>
+          <View style={commonStyles.authHeader}>
+            <HeadlineText
+              size="large"
+              textAlign="center"
+              style={{ color: theme.colors.onBackground, marginBottom: spacing.sm }}
+            >
               Reset Password
             </HeadlineText>
-            <BodyText size="large" textAlign="center" style={styles.subtitle}>
-              Enter your email address and we&apos;ll send you instructions to reset your password
+            <BodyText
+              size="large"
+              textAlign="center"
+              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}
+            >
+              Enter your email address and we&apos;ll send you instructions to
+              reset your password
             </BodyText>
           </View>
 
           {/* Form */}
-          <View style={styles.form}>
+          <View style={commonStyles.form}>
             <TextInput
               label="Email Address"
               value={email}
@@ -119,6 +102,7 @@ export default function ForgotPasswordScreen() {
               left={<TextInput.Icon icon="email" />}
               error={email.length > 0 && !email.includes('@')}
               testID="forgot-password-email-input"
+              theme={theme}
             />
 
             <CustomButton
@@ -134,7 +118,7 @@ export default function ForgotPasswordScreen() {
           </View>
 
           {/* Back Link */}
-          <View style={styles.backLinkContainer}>
+          <View style={commonStyles.authLinks}>
             <Link href="/(auth)/login" asChild>
               <CustomButton
                 title="Back to Sign In"
@@ -152,3 +136,13 @@ export default function ForgotPasswordScreen() {
     </Screen>
   );
 }
+
+const useStyles = (theme: any) => {
+  const themedStyles = createThemedStyles(theme);
+  return {
+    ...themedStyles,
+    contentContainer: {
+      ...commonStyles.authContainer,
+    },
+  };
+};

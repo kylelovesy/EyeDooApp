@@ -1,6 +1,6 @@
 // src/components/ui/Screen.tsx
 import React from 'react';
-import { ScrollView, StatusBar, View, ViewStyle } from 'react-native';
+import { ScrollView, View, ViewStyle } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { spacing } from '../../constants/theme';
@@ -52,10 +52,10 @@ export const Screen: React.FC<ScreenProps> = ({
 
   return (
     <SafeAreaView style={containerStyle} edges={edges} testID={testID}>
-      <StatusBar 
+      {/* <StatusBar 
         barStyle={statusBarStyle === 'auto' ? undefined : statusBarStyle as any}
         backgroundColor={backgroundColor || theme.colors.background}
-        />
+        /> */}
       <Container {...containerProps}>
         {children}
       </Container>

@@ -6,10 +6,13 @@
 // app/(app)/events/_layout.tsx
 import { Stack } from 'expo-router';
 import { useTheme } from 'react-native-paper';
+import { CustomButton } from '../../../components/ui/CustomButton';
 import { typography } from '../../../constants/typography';
+import { useAuth } from '../../../contexts/AuthContext';
 
-export default function EventsLayout() {
+export default function ProjectsLayout() {
   const theme = useTheme();
+  const { signOut } = useAuth();
   return (
     <Stack
       screenOptions={{
@@ -18,7 +21,7 @@ export default function EventsLayout() {
         },
         headerTintColor: theme.colors.onSurface,
         headerTitleStyle: {
-          ...typography.headlineLarge,
+          ...typography.headlineMedium,
           color: theme.colors.onSurface,
         },
       }}
@@ -26,25 +29,21 @@ export default function EventsLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: 'Events',
+          title: 'My Projects',
           headerLargeTitle: true,
           headerTitleStyle: {
-            ...typography.headlineLarge,
+            ...typography.headlineMedium,
             color: theme.colors.onSurface,
           },
+          headerRight: () => (
+            <CustomButton
+              title="Sign Out"
+              variant="text"
+              onPress={signOut}
+            />
+          ),
         }}
-      />
-      <Stack.Screen
-        name="delete"
-        options={{
-          title: 'Delete Event',
-          presentation: 'modal',
-          headerTitleStyle: {
-            ...typography.titleMedium,
-            color: theme.colors.onSurface,
-          },
-        }}
-      />
+      />      
     </Stack>
   );
 }

@@ -1,299 +1,259 @@
-// # 3.0 Projects
-// # 3.1 Select/create project screen
 
-// ######################################################################
-// # FILE: src/app/(app)/projects/index.tsx
-// ######################################################################
+// src/screens/ProjectsPage.tsx
+import React from 'react';
+import { Button, Text, View } from 'react-native';
+import { ProjectModalContainer } from '../../../components/modals/ProjectModalContainer';
+import { useProjectForm } from '../../../contexts/ProjectFormContext';
 
+const ProjectsPage = () => {
+  // Assume you get the userId from your auth context
+  const authenticatedUserId = "user-123"; 
 
-import { router } from 'expo-router';
-import React, { useCallback, useEffect } from 'react';
-import { FlatList, RefreshControl, StyleSheet, useColorScheme, View } from 'react-native';
-import { FAB, Searchbar } from 'react-native-paper';
-// Assume UI components and services are imported from your project
-import { ProjectCard } from '../../../components/cards/ProjectCard';
-import { Screen } from '../../../components/ui/Screen';
-import { BodyText, HeadlineText } from '../../../components/ui/Typography';
-import { darkTheme, lightTheme } from '../../../constants/theme';
-import { useProjects } from '../../../contexts/ProjectContext';
-
-
-export default function ProjectsScreen() {
-  
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
-  
-  
-  const { projects, loading, error, loadProjects, searchProjects, searchResults } = useProjects();
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [isSearching, setIsSearching] = React.useState(false);
-
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
-
-  const handleRefresh = useCallback(async () => {
-    await loadProjects();
-  }, [loadProjects]);
-  
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if(query.length > 2) {
-        setIsSearching(true);
-        searchProjects(query);
-    } else {
-        setIsSearching(false);
-    }
-  };
-
-  const handleCreateEvent = () => {
-    router.push('/(app)/projects/create');
-  };
-
-  const handleEventSelect = (projectId: string) => {
-    router.push(`/(app)/projects/${projectId}`);
-  };
-
-  const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <HeadlineText size="small" textAlign="center">No Projects Yet</HeadlineText>
-      <BodyText textAlign="center" style={{ opacity: 0.7, marginTop: 10 }}>
-        Press the '+' button to create your first project.
-      </BodyText>
-    </View>
-  );
-
-  const renderErrorState = () => (
-     <View style={styles.emptyContainer}>
-      <HeadlineText size="small" textAlign="center" style={{color: theme.colors.error}}>Error Loading Projects</HeadlineText>
-      <BodyText textAlign="center" style={{ opacity: 0.7, marginTop: 10 }}>
-        {error}
-      </BodyText>
-    </View>
-  );
-  
-  const displayedProjects = isSearching ? searchResults : projects;
-
-  if (loading && !projects.length) {
-    return (
-      <Screen style={styles.centered}>
-        <ActivityIndicator animating={true} size="large" />
-      </Screen>
-    );
-  }
+  const { openModal } = useProjectForm();
 
   return (
-    <Screen>
-      <FlatList
-        data={displayedProjects}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ProjectCard
-            project={item}
-            onPress={() => handleEventSelect(item.id)}
-            style={styles.card}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <HeadlineText size="large">Projects</HeadlineText>
-            <Searchbar
-                placeholder="Search projects..."
-                onChangeText={handleSearch}
-                value={searchQuery}
-                style={styles.searchbar}
-            />
-          </View>
-        }
-        ListEmptyComponent={!loading ? (error ? renderErrorState() : renderEmptyState()) : null}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} colors={[theme.colors.primary]}/>
-        }
-      />
-      <FAB
-        icon="plus"
-        style={[styles.fab, {backgroundColor: theme.colors.primary}]}
-        onPress={handleCreateEvent}
-        label="New Project"
-        color={theme.colors.onPrimary}
-      />
-    </Screen>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Your Projects List Would Be Here</Text>
+      <Button title="Create New Project" onPress={openModal} />
+      
+      {/* The Modal is here, ready to be opened */}
+      <ProjectModalContainer userId={authenticatedUserId} />
+    </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  header: { paddingHorizontal: 15, paddingTop: 15, marginBottom: 10 },
-  searchbar: { marginTop: 15 },
-  listContent: { paddingBottom: 100 },
-  card: { marginHorizontal: 15, marginBottom: 15 },
-  fab: { position: 'absolute', margin: 16, right: 0, bottom: 0 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, marginTop: '30%' },
-});
+export default ProjectsPage;
 
-
-
+// import { ProjectCard } from '@/components/cards/ProjectCard';
+// import { LoadingState } from '@/components/ui/LoadingState';
 // import { router } from 'expo-router';
-// import React, { useState } from 'react';
-// import {
-//   Alert,
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   View,
-// } from 'react-native';
-// // import QuestionnaireA from '../../../components/modals/QuestionnaireA';
-// // import QuestionnaireB from '../../../components/modals/QuestionnaireB';
-// // import QuestionnaireC from '../../../components/modals/QuestionnaireC';
+// import React, { useCallback, useEffect, useState } from 'react';
+// import { Alert, FlatList, useColorScheme, View } from 'react-native';
+// import { QuestionnaireModal } from '../../../components/modals/QuestionnaireModal';
+// import { CustomButton } from '../../../components/ui/CustomButton';
+// import { Screen } from '../../../components/ui/Screen';
+// import { Toast, useToast } from '../../../components/ui/Toast';
+// import { BodyText, HeadlineText } from '../../../components/ui/Typography';
+// import { commonStyles } from '../../../constants/styles';
+// import { darkTheme, lightTheme } from '../../../constants/theme';
+// import { useProjects } from '../../../contexts/ProjectContext';
+// import { Project, ProjectStatus } from '../../../types/project';
 
-// export default function EventsScreen() {
-//   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
-//   const [modalVisible, setModalVisible] = useState<{
-//     type: 'A' | 'B' | 'C' | null;
-//     visible: boolean;
-//   }>({ type: null, visible: false });
+// export default function ProjectsScreen() {
+//   const colorScheme = useColorScheme();
+//   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  
+//   const { 
+//     projects, 
+//     loading, 
+//     error, 
+//     loadProjects, 
+//     searchProjects, 
+//     searchResults,
+//     currentProject,
+//     setCurrentProject,
+//     deleteProject,
+//     createProject
+//   } = useProjects();
 
-//   const events = [
-//     { id: '1', name: 'Wedding - Sarah & John', date: '2025-07-15' },
-//     { id: '2', name: 'Corporate Event - TechCorp', date: '2025-08-20' },
-//     { id: '3', name: 'Birthday Party - Emma', date: '2025-09-10' },
-//   ];
+//   const [searchQuery, setSearchQuery] = useState('');
+//   const [isSearching, setIsSearching] = useState(false);
+//   const [showQuestionnaireModal, setShowQuestionnaireModal] = useState(false);
+//   const [showDeleteModal, setShowDeleteModal] = useState(false);
+//   const { toastProps, showError, showSuccess, showWarning } = useToast();
 
-//   const handleEventSelect = (eventId: string) => {
-//     setSelectedEvent(eventId);
-//     router.push('/dashboard');
+//   // Load projects on component mount
+//   useEffect(() => {
+//     loadProjects();
+//   }, [loadProjects]);
+
+//   // Show toast messages for errors
+//   useEffect(() => {
+//     if (error) {
+//       showError(error, 'Error loading projects');
+//     }
+//   }, [showError, error]);
+
+//   const handleRefresh = useCallback(async () => {
+//     await loadProjects();
+//   }, [loadProjects]);
+
+//   const handleCreateProject = () => {
+//     setShowQuestionnaireModal(true);
 //   };
 
-//   const handleCreateEvent = () => {
+//   const handleProjectSelect = (project: Project) => {
+//     console.log('Selected project:', project.id);
+//     setCurrentProject(project);
+//   };
+
+//   const handleLaunchProject = () => {
+//     if (currentProject) {
+//       // Navigate to dashboard with active project
+//       router.push('/(app)/dashboard/(home)');
+//       showSuccess(`Launching ${currentProject.projectName}`, 'success');
+//     }
+//   };
+
+//   const handleDeleteProject = () => {
+//     if (currentProject) {
+//       console.log('Show Delete Modal For Project:', currentProject.id);
+//       setShowDeleteModal(true);
+//     }
+//   };
+
+//   const confirmDeleteProject = async (projectId: string) => {
+//     try {
+//       await deleteProject(projectId);
+//       setCurrentProject(null);
+//       setShowDeleteModal(false);
+//       showSuccess('Project deleted successfully', 'success');
+//     } catch (error: any) {
+//       showError(error.message || 'Failed to delete project', 'error');
+//     }
+//   };
+
+//   const handleQuestionnaireComplete = async (projectData: any) => {
+//     try {
+//       const newProject = await createProject(projectData);
+//       setShowQuestionnaireModal(false);
+//       showSuccess('Project created successfully!', 'success');
+//       setCurrentProject(newProject);
+//     } catch (error: any) {
+//       showError(error.message || 'Failed to create project', 'error');
+//     }
+//   };
+
+//   const handleQuestionnaireClose = () => {
 //     Alert.alert(
-//       'Create New Event',
-//       'Choose questionnaire type:',
+//       'Unsaved Changes',
+//       'Are you sure you want to close? Any unsaved changes will be lost.',
 //       [
-//         { text: 'Wedding (A)', onPress: () => setModalVisible({ type: 'A', visible: true }) },
-//         { text: 'Corporate (B)', onPress: () => setModalVisible({ type: 'B', visible: true }) },
-//         { text: 'Other (C)', onPress: () => setModalVisible({ type: 'C', visible: true }) },
 //         { text: 'Cancel', style: 'cancel' },
+//         { 
+//           text: 'Close', 
+//           style: 'destructive',
+//           onPress: () => setShowQuestionnaireModal(false)
+//         }
 //       ]
 //     );
 //   };
 
-//   const closeModal = () => {
-//     setModalVisible({ type: null, visible: false });
+//   // Sort projects by wedding date (eventDate) and then by status
+//   const sortedProjects = React.useMemo(() => {
+//     const projectsToSort = isSearching ? searchResults : projects;
+//     return [...projectsToSort].sort((a, b) => {
+//       // First sort by event date
+//       // const dateA = new Date(a.eventDate.toDate()).getTime();
+//       // const dateB = new Date(b.eventDate.toDate()).getTime();
+//       // const currentDate = new Date().getTime();
+      
+//       // // Compare with current date
+//       // const diffA = Math.abs(dateA - currentDate);
+//       // const diffB = Math.abs(dateB - currentDate);
+      
+//       // if (diffA !== diffB) {
+//       //   return diffA - diffB; // Closer dates first
+//       // }
+      
+//       // If dates are similar, sort by status priority
+//       const statusPriority = {
+//         [ProjectStatus.ACTIVE]: 1,
+//         [ProjectStatus.DRAFT]: 2,
+//         [ProjectStatus.COMPLETED]: 3,
+//         [ProjectStatus.CANCELLED]: 4,
+//       };
+      
+//       return statusPriority[a.projectStatus] - statusPriority[b.projectStatus];
+//     });
+//   }, [projects, searchResults, isSearching]);
+
+//   const getStatusText = () => {
+//     if (projects.length === 0) return "No Projects Found";
+//     if (!currentProject) return "Please Select A Project";    
+//     // Extract couple names from the project title or use a default format
+//     const title = currentProject.projectName || "Selected";
+//     return title;
 //   };
 
-//   return (
-//     <View style={styles.container}>
-//       <ScrollView style={styles.scrollView}>
-//         <Text style={styles.title}>Select an Event</Text>
-        
-//         {events.map((event) => (
-//           <TouchableOpacity
-//             key={event.id}
-//             style={[
-//               styles.eventCard,
-//               selectedEvent === event.id && styles.selectedCard,
-//             ]}
-//             onPress={() => handleEventSelect(event.id)}
-//           >
-//             <Text style={styles.eventName}>{event.name}</Text>
-//             <Text style={styles.eventDate}>{event.date}</Text>
-//           </TouchableOpacity>
-//         ))}
-
-//         <TouchableOpacity style={styles.createButton} onPress={handleCreateEvent}>
-//           <Text style={styles.createButtonText}>+ Create New Event</Text>
-//         </TouchableOpacity>
-//       </ScrollView>
-
-//       {/* Questionnaire Modals */}
-//       {/* {modalVisible.type === 'A' && (
-//         <QuestionnaireA
-//           visible={modalVisible.visible}
-//           onClose={closeModal}
-//           onSubmit={(data) => {
-//             console.log('Questionnaire A data:', data);
-//             closeModal();
-//           }}
-//         />
-//       )}
-//       {modalVisible.type === 'B' && (
-//         <QuestionnaireB
-//           visible={modalVisible.visible}
-//           onClose={closeModal}
-//           onSubmit={(data) => {
-//             console.log('Questionnaire B data:', data);
-//             closeModal();
-//           }}
-//         />
-//       )}
-//       {modalVisible.type === 'C' && (
-//         <QuestionnaireC
-//           visible={modalVisible.visible}
-//           onClose={closeModal}
-//           onSubmit={(data) => {
-//             console.log('Questionnaire C data:', data);
-//             closeModal();
-//           }}
-//         />
-//       )} */}
+//   const renderEmptyState = () => (
+//     <View style={commonStyles.centerContent}>
+//       <HeadlineText size="small" textAlign="center">No Projects Yet</HeadlineText>
+//       <BodyText textAlign="center" style={{ opacity: 0.7, marginTop: 10, marginBottom: 30 }}>
+//         Create your first project to get started with planning your special day.
+//       </BodyText>
+//       <CustomButton
+//         title="Create Your First Project"
+//         variant="primary"
+//         onPress={handleCreateProject}
+//         // style={styles.createFirstProjectButton}
+//       />
 //     </View>
 //   );
-// }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#f8f9fa',
-//   },
-//   scrollView: {
-//     flex: 1,
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     marginBottom: 20,
-//     color: '#333',
-//   },
-//   eventCard: {
-//     backgroundColor: '#fff',
-//     padding: 16,
-//     marginBottom: 12,
-//     borderRadius: 8,
-//     borderWidth: 1,
-//     borderColor: '#e0e0e0',
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 1 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 2,
-//     elevation: 2,
-//   },
-//   selectedCard: {
-//     borderColor: '#007AFF',
-//     backgroundColor: '#f0f8ff',
-//   },
-//   eventName: {
-//     fontSize: 16,
-//     fontWeight: '600',
-//     color: '#333',
-//     marginBottom: 4,
-//   },
-//   eventDate: {
-//     fontSize: 14,
-//     color: '#666',
-//   },
-//   createButton: {
-//     backgroundColor: '#007AFF',
-//     padding: 16,
-//     borderRadius: 8,
-//     alignItems: 'center',
-//     marginTop: 20,
-//   },
-//   createButtonText: {
-//     color: '#fff',
-//     fontSize: 16,
-//     fontWeight: '600',
-//   },
-// });
+//   const renderProjectCard = ({ item }: { item: Project }) => {
+//     const isActive = currentProject?.id === item.id;
+//     return (
+//       <ProjectCard
+//         project={item}
+//         onPress={() => handleProjectSelect(item)}
+//         style={commonStyles.card}
+//         isActive={isActive}
+//       />
+//     );
+//   };
+
+//   // Show loading overlay on initial load
+//   if (loading && !projects.length) {
+//     return (
+//       <Screen style={commonStyles.centerContent}>
+//         <LoadingState overlay message="Loading projects..." />
+//       </Screen>
+//     );
+//   }
+
+//   return (
+//     <Screen>
+//       <FlatList
+//         data={sortedProjects}
+//         keyExtractor={(item) => item.id}
+//         renderItem={renderProjectCard}
+//         ListEmptyComponent={renderEmptyState}
+//         contentContainerStyle={{ padding: 15 }}
+//         ListHeaderComponent={
+//           <View style={{ marginBottom: 15 }}>
+//             <HeadlineText size="large">My Projects</HeadlineText>
+//             <BodyText style={{ opacity: 0.7 }}>
+//               Select a project to view its dashboard or create a new one.
+//             </BodyText>
+//           </View>
+//         }
+//       />
+
+//       <View style={commonStyles.buttonContainer}>
+//         <CustomButton
+//           title="New Project"
+//           variant="secondary"
+//           onPress={handleCreateProject}
+//           style={{ flex: 1 }}
+//         />
+//         <CustomButton
+//           title="Launch Dashboard"
+//           variant="primary"
+//           onPress={handleLaunchProject}
+//           disabled={!currentProject}
+//           style={{ flex: 1 }}
+//         />
+//       </View>
+
+//       <QuestionnaireModal
+//         visible={showQuestionnaireModal}
+//         onClose={handleQuestionnaireClose}
+//         onComplete={handleQuestionnaireComplete}
+//       />
+
+//       {/* Toast Notification */}
+//       {toastProps && <Toast {...toastProps} />}
+//     </Screen>
+//   );
+// }

@@ -3,14 +3,14 @@
 // app/(auth)/signup.tsx
 import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { Divider, TextInput } from 'react-native-paper';
 import { CustomButton } from '../../components/ui/CustomButton';
 import { Screen } from '../../components/ui/Screen';
 import { Toast, useToast } from '../../components/ui/Toast';
 import { BodyText, HeadlineText } from '../../components/ui/Typography';
+import { commonStyles, createThemedStyles } from '../../constants/styles';
 import { spacing, useAppTheme } from '../../constants/theme';
-import { typography } from '../../constants/typography';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function SignUpScreen() {
@@ -25,6 +25,7 @@ export default function SignUpScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signUp } = useAuth();
   const theme = useAppTheme();
+  const styles = useStyles(theme);
   const { toastProps, showError, showSuccess } = useToast();
 
   const updateFormData = (field: keyof typeof formData, value: string) => {
@@ -78,7 +79,7 @@ export default function SignUpScreen() {
         formData.displayName.trim()
       );
       showSuccess('Welcome!', 'Your account has been created successfully.');
-      router.replace('/(app)/events');
+      router.replace('/(app)/projects');
     } catch (error: any) {
       showError('Sign Up Error', error.userMessage || 'Failed to create account. Please try again.');
     } finally {
@@ -86,64 +87,33 @@ export default function SignUpScreen() {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    contentContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      maxWidth: 400,
-      alignSelf: 'center',
-      width: '100%',
-    },
-    header: {
-      alignItems: 'center',
-      marginBottom: spacing.xxl,
-    },
-    subtitle: {
-      ...typography.bodyLarge,
-      color: theme.colors.onSurfaceVariant,
-      textAlign: 'center',
-    },
-    form: {
-      gap: spacing.md,
-    },
-    linksContainer: {
-      alignItems: 'center',
-      marginTop: spacing.lg,
-    },
-    divider: {
-      width: '100%',
-      marginVertical: spacing.sm,
-      backgroundColor: theme.colors.outline,
-    },
-    linkRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-  });
-
   return (
     <Screen scrollable padding="lg">
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <View style={styles.contentContainer}>
           {/* Header */}
-          <View style={styles.header}>
-            <HeadlineText size="large" textAlign="center" style={{ marginBottom: spacing.sm }}>
+          <View style={commonStyles.authHeader}>
+            <HeadlineText
+              size="large"
+              textAlign="center"
+              style={{ color: theme.colors.onBackground, marginBottom: spacing.sm }}
+            >
               Create Account
             </HeadlineText>
-            <BodyText size="large" textAlign="center" style={styles.subtitle}>
+            <BodyText
+              size="large"
+              textAlign="center"
+              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}
+            >
               Join EyeDooApp to streamline your wedding photography workflow
             </BodyText>
           </View>
 
           {/* Form */}
-          <View style={styles.form}>
+          <View style={commonStyles.form}>
             <TextInput
               label="Display Name"
               value={formData.displayName}
@@ -155,6 +125,7 @@ export default function SignUpScreen() {
               disabled={loading}
               left={<TextInput.Icon icon="account" />}
               testID="signup-name-input"
+              theme={theme}
             />
 
             <TextInput
@@ -170,6 +141,7 @@ export default function SignUpScreen() {
               left={<TextInput.Icon icon="email" />}
               error={formData.email.length > 0 && !formData.email.includes('@')}
               testID="signup-email-input"
+              theme={theme}
             />
             
             <TextInput
@@ -190,6 +162,7 @@ export default function SignUpScreen() {
               }
               error={formData.password.length > 0 && formData.password.length < 6}
               testID="signup-password-input"
+              theme={theme}
             />
 
             <TextInput
@@ -213,6 +186,7 @@ export default function SignUpScreen() {
                 formData.password !== formData.confirmPassword
               }
               testID="signup-confirm-password-input"
+              theme={theme}
             />
 
             <CustomButton
@@ -228,10 +202,10 @@ export default function SignUpScreen() {
           </View>
 
           {/* Links */}
-          <View style={styles.linksContainer}>
-            <Divider style={styles.divider} />
+          <View style={commonStyles.authLinks}>
+            <Divider style={[commonStyles.authDivider, { backgroundColor: theme.colors.outline }]} />
             
-            <View style={styles.linkRow}>
+            <View style={commonStyles.authSignupRow}>
               <BodyText size="medium">Already have an account?</BodyText>
               <Link href="/(auth)/login" asChild>
                 <CustomButton
@@ -251,3 +225,13 @@ export default function SignUpScreen() {
     </Screen>
   );
 }
+
+const useStyles = (theme: any) => {
+  const themedStyles = createThemedStyles(theme);
+  return {
+    ...themedStyles,
+    contentContainer: {
+      ...commonStyles.authContainer,
+    },
+  };
+};

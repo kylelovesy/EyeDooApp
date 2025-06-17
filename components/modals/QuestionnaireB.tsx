@@ -1,1 +1,0 @@
-// # 3.1.2 Event questionnaire B modal
