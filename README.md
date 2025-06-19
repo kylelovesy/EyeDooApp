@@ -1,6 +1,24 @@
-# Welcome to your Expo app 👋
+# EyeDooApp - Photography Project Management 📸
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is a React Native photography project management application built with [Expo](https://expo.dev) and designed for professional photographers to manage their wedding and event photography projects.
+
+## ✅ **MAJOR MILESTONE: Context & Modal Standardization COMPLETED**
+
+**All form contexts and modal components have been successfully standardized!** This represents a major architecture improvement that provides:
+
+- **Consistent Modal Behavior** - All modals now use the standardized `BaseFormModal` pattern
+- **Unified Context System** - All 4 form contexts use the `useBaseFormContext` pattern
+- **Context-based Visibility** - No more manual modal state management
+- **Centralized Error Handling** - Consistent snackbar system across all forms
+- **Type Safety** - Full TypeScript integration with proper generics
+
+## Project Features
+
+- **Project Management** - Create, edit, and manage photography projects
+- **Timeline Management** - Plan and track project milestones and events
+- **People & Persona Management** - Manage client information and key people
+- **Photo Requirements** - Define and track shot lists and photo requirements
+- **Responsive Design** - Works on both iOS and Android devices
 
 ## Get started
 
@@ -25,15 +43,44 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+## Project Structure
 
-When you're ready, run:
+- **`/components`** - Reusable UI components with standardized BaseFormModal system
+- **`/contexts`** - React Context providers with unified useBaseFormContext pattern
+- **`/types`** - TypeScript type definitions and Zod schemas
+- **`/services`** - Firebase integration and external API services
+- **`/constants`** - Theme, styling, and configuration constants
 
-```bash
-npm run reset-project
+## Architecture Highlights
+
+### ✅ Standardized Form System
+All form modals now follow the same pattern:
+- Use `BaseFormModal` for consistent UI and behavior
+- Context-based state management with `useBaseFormContext`
+- Unified validation using Zod schemas
+- Consistent error handling and snackbar notifications
+
+### ✅ Context Standardization
+- **Form1EssentialInfoContext** - Project creation and essential info
+- **Form2TimelineContext** - Timeline events management
+- **Form3PersonaContext** - People and persona management
+- **Form4PhotosContext** - Photo requirements and shot lists
+
+### ✅ Provider Composition
+Clean provider wrapper system for different app sections:
+```typescript
+<FormProviders.All>        // All form providers
+<FormProviders.Dashboard>  // Dashboard-specific providers
+<FormProviders.Essential>  // Essential form only
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Documentation
+
+For detailed documentation on specific systems:
+
+- **[Components Documentation](./components/README.md)** - UI components and form system
+- **[Contexts Documentation](./contexts/README.md)** - Context providers and state management
+- **[Types Documentation](./types/README.md)** - TypeScript types and schemas
 
 ## Learn more
 

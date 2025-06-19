@@ -1,259 +1,256 @@
+import { router, Stack } from 'expo-router';
+import React, { useState } from 'react';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Button, Dialog, FAB, HelperText, IconButton, Portal, Text, TextInput } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-// src/screens/ProjectsPage.tsx
-import React from 'react';
-import { Button, Text, View } from 'react-native';
-import { ProjectModalContainer } from '../../../components/modals/ProjectModalContainer';
-import { useProjectForm } from '../../../contexts/ProjectFormContext';
+import { useAuth } from '../../../contexts/AuthContext';
+import { ProjectFormProvider, useForm1 } from '../../../contexts/Form1EssentialInfoContext';
+import { ProjectProvider, useProjects } from '../../../contexts/ProjectContext';
 
-const ProjectsPage = () => {
-  // Assume you get the userId from your auth context
-  const authenticatedUserId = "user-123"; 
+import { ProjectCard } from '../../../components/cards/ProjectCard';
+import { EssentialInfoFormModal } from '../../../components/modals/EssentialInfoForm';
+import { CustomButton } from '../../../components/ui/CustomButton';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { LoadingState } from '../../../components/ui/LoadingState';
+import { BodyText, HeadlineText } from '../../../components/ui/Typography';
+import { spacing, useAppTheme } from '../../../constants/theme';
+import { Project } from '../../../types/project';
 
-  const { openModal } = useProjectForm();
+// The screen is now wrapped in providers to ensure context is available
+const ProjectsScreenWrapper = () => (
+    <ProjectProvider>
+        <ProjectFormProvider>
+            <ProjectsScreen />
+        </ProjectFormProvider>
+    </ProjectProvider>
+);
+
+const ProjectsScreen = () => {
+  const theme = useAppTheme();
+  
+  // State for managing UI
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [helpDialogVisible, setHelpDialogVisible] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+
+  // Hooks for context data and functions
+  const { projects, isLoading, setCurrentProjectById, deleteProject } = useProjects();
+  const { signOut } = useAuth();
+  const { openModal } = useForm1(); // Get modal control from context
+
+  // --- Handlers ---
+  const handleProjectPress = (project: Project) => {
+    setActiveProject(prev => (prev?.id === project.id ? null : project));
+  };
+
+  const handleLaunchProject = () => {
+    if (!activeProject) return;
+    setCurrentProjectById(activeProject.id);
+    router.push('/(app)/dashboard/(home)');
+  };
+
+  const handleCreateProject = () => {
+    openModal(); // Use context to open modal
+  };
+  
+  const openDeleteDialog = () => {
+      if (!activeProject) return;
+      setDeleteDialogVisible(true);
+      setDeleteError('');
+      setDeleteConfirmText('');
+  }
+
+  const closeDeleteDialog = () => setDeleteDialogVisible(false);
+  const showHelpDialog = () => setHelpDialogVisible(true);
+  const hideHelpDialog = () => setHelpDialogVisible(false);
+
+  const handleConfirmDelete = async () => {
+    if (!activeProject) return;
+    const personA = activeProject.form1.personA.firstName.toLowerCase();
+    const personB = activeProject.form1.personB.firstName.toLowerCase();
+    if (deleteConfirmText.toLowerCase() !== personA && deleteConfirmText.toLowerCase() !== personB) {
+        setDeleteError("The name does not match. Deletion cancelled.");
+        return;
+    }
+    await deleteProject(activeProject.id);
+    setActiveProject(null);
+    closeDeleteDialog();
+  };
+
+  // --- Render Logic ---
+  const getStatusText = () => {
+    if (isLoading) return 'Loading projects...';
+    if (projects.length === 0) return 'No Projects Found';
+    if (!activeProject) return 'Please Select A Project';
+    return `Selected: ${activeProject.form1.personA.firstName} & ${activeProject.form1.personB.firstName}`;
+  };
+
+  const mainFabAction = () => {
+      if (projects.length === 0) {
+          showHelpDialog();
+      } else if (activeProject) {
+          openDeleteDialog();
+      } else {
+          handleCreateProject();
+      }
+  }
+
+  const mainFabIcon = projects.length === 0 ? 'help' : (activeProject ? 'delete' : 'plus');
+  
+  if (isLoading) {
+    return <LoadingState />;
+  }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Your Projects List Would Be Here</Text>
-      <Button title="Create New Project" onPress={openModal} />
-      
-      {/* The Modal is here, ready to be opened */}
-      <ProjectModalContainer userId={authenticatedUserId} />
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+        <Stack.Screen options={{ headerShown: false }} />
+        
+        <IconButton
+            icon="logout"
+            size={24}
+            onPress={signOut}
+            style={styles.signOutButton}
+        />
+
+        <View style={styles.header}>
+            <HeadlineText>My Projects</HeadlineText>
+            <BodyText style={{color: theme.colors.onSurfaceVariant}}>{getStatusText()}</BodyText>
+        </View>
+
+        {projects.length === 0 ? (
+            <View style={styles.centeredContent}>
+                 <EmptyState
+                    title="Welcome!"
+                    description="It looks like you don't have any projects yet."
+                    onAction={handleCreateProject}
+                 />
+                 <Button 
+                    mode="contained" 
+                    onPress={handleCreateProject} 
+                    style={styles.createProjectButton}
+                    contentStyle={{paddingVertical: 8}}
+                    labelStyle={{fontSize: 18}}
+                >
+                    Create Your First Project
+                </Button>
+            </View>
+        ) : (
+            <>
+                <FlatList
+                    data={projects}
+                    renderItem={({ item }) => (
+                        <ProjectCard
+                            project={item}
+                            onPress={() => handleProjectPress(item)}
+                            isActive={activeProject?.id === item.id}
+                        />
+                    )}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={styles.list}
+                />
+                <View style={styles.footer}>
+                    <CustomButton 
+                        title="Launch Project" 
+                        onPress={handleLaunchProject}
+                        disabled={!activeProject}
+                    />
+                </View>
+            </>
+        )}
+        
+        <FAB
+            style={[styles.fab, { bottom: projects.length > 0 ? 80 : 16 }, activeProject ? { backgroundColor: theme.colors.errorContainer } : {}]}
+            color={activeProject ? theme.colors.onErrorContainer : theme.colors.onPrimaryContainer}
+            icon={mainFabIcon}
+            onPress={mainFabAction}
+        />
+
+        {/* Standardized Modal - managed by context */}
+        <EssentialInfoFormModal />
+
+        <Portal>
+            <Dialog visible={deleteDialogVisible} onDismiss={closeDeleteDialog}>
+                <Dialog.Title>Are you sure?</Dialog.Title>
+                <Dialog.Content>
+                    <Text variant="bodyMedium">This action is permanent and cannot be undone. To confirm, please type the first name of either person in the couple.</Text>
+                    <TextInput label="Confirm Name" value={deleteConfirmText} onChangeText={setDeleteConfirmText} mode="outlined" style={{ marginTop: spacing.md }} error={!!deleteError}/>
+                    <HelperText type="error" visible={!!deleteError}>{deleteError}</HelperText>
+                </Dialog.Content>
+                <Dialog.Actions>
+                    <Button onPress={closeDeleteDialog}>Cancel</Button>
+                    <Button onPress={handleConfirmDelete} disabled={!deleteConfirmText}>Delete</Button>
+                </Dialog.Actions>
+            </Dialog>
+
+            <Dialog visible={helpDialogVisible} onDismiss={hideHelpDialog}>
+                <Dialog.Title>Getting Started</Dialog.Title>
+                <Dialog.Content>
+                    <Text variant="bodyMedium">
+                        This is your project dashboard!
+                        {"\n\n"}
+                        - Use the large button in the center or the &apos;+&apos; icon to create your first project.
+                        {"\n\n"}
+                        - Once you have projects, you can tap to select them and then launch them to view their details.
+                    </Text>
+                </Dialog.Content>
+                 <Dialog.Actions>
+                    <Button onPress={hideHelpDialog}>Got it</Button>
+                </Dialog.Actions>
+            </Dialog>
+        </Portal>
+    </SafeAreaView>
   );
 };
 
-export default ProjectsPage;
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fcfcff',
+  },
+  signOutButton: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      zIndex: 1,
+  },
+  header: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xl, // Increased top padding to make space for sign out button
+      paddingBottom: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: '#e0e0e0',
+  },
+  centeredContent: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.lg,
+  },
+  createProjectButton: {
+      marginTop: spacing.xl,
+      width: '80%',
+  },
+  list: {
+    paddingBottom: 100,
+  },
+  footer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: spacing.md,
+      backgroundColor: '#fcfcff',
+      borderTopWidth: 1,
+      borderTopColor: '#e0e0e0'
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+  },
+});
 
-// import { ProjectCard } from '@/components/cards/ProjectCard';
-// import { LoadingState } from '@/components/ui/LoadingState';
-// import { router } from 'expo-router';
-// import React, { useCallback, useEffect, useState } from 'react';
-// import { Alert, FlatList, useColorScheme, View } from 'react-native';
-// import { QuestionnaireModal } from '../../../components/modals/QuestionnaireModal';
-// import { CustomButton } from '../../../components/ui/CustomButton';
-// import { Screen } from '../../../components/ui/Screen';
-// import { Toast, useToast } from '../../../components/ui/Toast';
-// import { BodyText, HeadlineText } from '../../../components/ui/Typography';
-// import { commonStyles } from '../../../constants/styles';
-// import { darkTheme, lightTheme } from '../../../constants/theme';
-// import { useProjects } from '../../../contexts/ProjectContext';
-// import { Project, ProjectStatus } from '../../../types/project';
-
-// export default function ProjectsScreen() {
-//   const colorScheme = useColorScheme();
-//   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
-  
-//   const { 
-//     projects, 
-//     loading, 
-//     error, 
-//     loadProjects, 
-//     searchProjects, 
-//     searchResults,
-//     currentProject,
-//     setCurrentProject,
-//     deleteProject,
-//     createProject
-//   } = useProjects();
-
-//   const [searchQuery, setSearchQuery] = useState('');
-//   const [isSearching, setIsSearching] = useState(false);
-//   const [showQuestionnaireModal, setShowQuestionnaireModal] = useState(false);
-//   const [showDeleteModal, setShowDeleteModal] = useState(false);
-//   const { toastProps, showError, showSuccess, showWarning } = useToast();
-
-//   // Load projects on component mount
-//   useEffect(() => {
-//     loadProjects();
-//   }, [loadProjects]);
-
-//   // Show toast messages for errors
-//   useEffect(() => {
-//     if (error) {
-//       showError(error, 'Error loading projects');
-//     }
-//   }, [showError, error]);
-
-//   const handleRefresh = useCallback(async () => {
-//     await loadProjects();
-//   }, [loadProjects]);
-
-//   const handleCreateProject = () => {
-//     setShowQuestionnaireModal(true);
-//   };
-
-//   const handleProjectSelect = (project: Project) => {
-//     console.log('Selected project:', project.id);
-//     setCurrentProject(project);
-//   };
-
-//   const handleLaunchProject = () => {
-//     if (currentProject) {
-//       // Navigate to dashboard with active project
-//       router.push('/(app)/dashboard/(home)');
-//       showSuccess(`Launching ${currentProject.projectName}`, 'success');
-//     }
-//   };
-
-//   const handleDeleteProject = () => {
-//     if (currentProject) {
-//       console.log('Show Delete Modal For Project:', currentProject.id);
-//       setShowDeleteModal(true);
-//     }
-//   };
-
-//   const confirmDeleteProject = async (projectId: string) => {
-//     try {
-//       await deleteProject(projectId);
-//       setCurrentProject(null);
-//       setShowDeleteModal(false);
-//       showSuccess('Project deleted successfully', 'success');
-//     } catch (error: any) {
-//       showError(error.message || 'Failed to delete project', 'error');
-//     }
-//   };
-
-//   const handleQuestionnaireComplete = async (projectData: any) => {
-//     try {
-//       const newProject = await createProject(projectData);
-//       setShowQuestionnaireModal(false);
-//       showSuccess('Project created successfully!', 'success');
-//       setCurrentProject(newProject);
-//     } catch (error: any) {
-//       showError(error.message || 'Failed to create project', 'error');
-//     }
-//   };
-
-//   const handleQuestionnaireClose = () => {
-//     Alert.alert(
-//       'Unsaved Changes',
-//       'Are you sure you want to close? Any unsaved changes will be lost.',
-//       [
-//         { text: 'Cancel', style: 'cancel' },
-//         { 
-//           text: 'Close', 
-//           style: 'destructive',
-//           onPress: () => setShowQuestionnaireModal(false)
-//         }
-//       ]
-//     );
-//   };
-
-//   // Sort projects by wedding date (eventDate) and then by status
-//   const sortedProjects = React.useMemo(() => {
-//     const projectsToSort = isSearching ? searchResults : projects;
-//     return [...projectsToSort].sort((a, b) => {
-//       // First sort by event date
-//       // const dateA = new Date(a.eventDate.toDate()).getTime();
-//       // const dateB = new Date(b.eventDate.toDate()).getTime();
-//       // const currentDate = new Date().getTime();
-      
-//       // // Compare with current date
-//       // const diffA = Math.abs(dateA - currentDate);
-//       // const diffB = Math.abs(dateB - currentDate);
-      
-//       // if (diffA !== diffB) {
-//       //   return diffA - diffB; // Closer dates first
-//       // }
-      
-//       // If dates are similar, sort by status priority
-//       const statusPriority = {
-//         [ProjectStatus.ACTIVE]: 1,
-//         [ProjectStatus.DRAFT]: 2,
-//         [ProjectStatus.COMPLETED]: 3,
-//         [ProjectStatus.CANCELLED]: 4,
-//       };
-      
-//       return statusPriority[a.projectStatus] - statusPriority[b.projectStatus];
-//     });
-//   }, [projects, searchResults, isSearching]);
-
-//   const getStatusText = () => {
-//     if (projects.length === 0) return "No Projects Found";
-//     if (!currentProject) return "Please Select A Project";    
-//     // Extract couple names from the project title or use a default format
-//     const title = currentProject.projectName || "Selected";
-//     return title;
-//   };
-
-//   const renderEmptyState = () => (
-//     <View style={commonStyles.centerContent}>
-//       <HeadlineText size="small" textAlign="center">No Projects Yet</HeadlineText>
-//       <BodyText textAlign="center" style={{ opacity: 0.7, marginTop: 10, marginBottom: 30 }}>
-//         Create your first project to get started with planning your special day.
-//       </BodyText>
-//       <CustomButton
-//         title="Create Your First Project"
-//         variant="primary"
-//         onPress={handleCreateProject}
-//         // style={styles.createFirstProjectButton}
-//       />
-//     </View>
-//   );
-
-//   const renderProjectCard = ({ item }: { item: Project }) => {
-//     const isActive = currentProject?.id === item.id;
-//     return (
-//       <ProjectCard
-//         project={item}
-//         onPress={() => handleProjectSelect(item)}
-//         style={commonStyles.card}
-//         isActive={isActive}
-//       />
-//     );
-//   };
-
-//   // Show loading overlay on initial load
-//   if (loading && !projects.length) {
-//     return (
-//       <Screen style={commonStyles.centerContent}>
-//         <LoadingState overlay message="Loading projects..." />
-//       </Screen>
-//     );
-//   }
-
-//   return (
-//     <Screen>
-//       <FlatList
-//         data={sortedProjects}
-//         keyExtractor={(item) => item.id}
-//         renderItem={renderProjectCard}
-//         ListEmptyComponent={renderEmptyState}
-//         contentContainerStyle={{ padding: 15 }}
-//         ListHeaderComponent={
-//           <View style={{ marginBottom: 15 }}>
-//             <HeadlineText size="large">My Projects</HeadlineText>
-//             <BodyText style={{ opacity: 0.7 }}>
-//               Select a project to view its dashboard or create a new one.
-//             </BodyText>
-//           </View>
-//         }
-//       />
-
-//       <View style={commonStyles.buttonContainer}>
-//         <CustomButton
-//           title="New Project"
-//           variant="secondary"
-//           onPress={handleCreateProject}
-//           style={{ flex: 1 }}
-//         />
-//         <CustomButton
-//           title="Launch Dashboard"
-//           variant="primary"
-//           onPress={handleLaunchProject}
-//           disabled={!currentProject}
-//           style={{ flex: 1 }}
-//         />
-//       </View>
-
-//       <QuestionnaireModal
-//         visible={showQuestionnaireModal}
-//         onClose={handleQuestionnaireClose}
-//         onComplete={handleQuestionnaireComplete}
-//       />
-
-//       {/* Toast Notification */}
-//       {toastProps && <Toast {...toastProps} />}
-//     </Screen>
-//   );
-// }
+export default ProjectsScreenWrapper;

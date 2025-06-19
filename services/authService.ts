@@ -1,16 +1,18 @@
 // src/services/authService.ts
 import {
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    sendPasswordResetEmail,
-    signInWithEmailAndPassword,
-    signOut,
-    updateProfile
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile
 } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { User } from '../types/auth';
+import { LanguageOption, SubscriptionPlan, WeatherUnit } from '../types/user';
 import { auth, db, storage } from './firebase';
+import { convertTimestampFields } from './utils/timestampHelpers';
 
 export interface AuthError {
   code: string;
@@ -41,24 +43,26 @@ export class AuthService {
         id: firebaseUser.uid,
         email: firebaseUser.email!,
         displayName: displayName || firebaseUser.displayName || '',
-        photoURL: firebaseUser.photoURL || '',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        // EyeDooApp specific fields
-        businessName: '',
-        specialties: [],
-        location: '',
+        photoURL: firebaseUser.photoURL || undefined,
+        createdAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
+        updatedAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
         preferences: {
           notifications: true,
           darkMode: false,
-          language: 'en',
-          weatherUnits: 'metric',
+          language: LanguageOption.ENGLISH,
+          weatherUnits: WeatherUnit.METRIC,
+          emailMarketing: false,
+          weekStartsOn: 1,
         },
         subscription: {
-          plan: 'free',
+          plan: SubscriptionPlan.FREE,
           expiresAt: null,
-          features: ['basic_questionnaire', 'basic_timeline', 'basic_checklists'],
+          features: [],
+          isActive: true,
+          autoRenew: false,
         },
+        isEmailVerified: false,
+        isActive: true,
       };
 
       await setDoc(doc(db, 'users', firebaseUser.uid), {
@@ -88,40 +92,49 @@ export class AuthService {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         console.log('EyeDooApp: User signed in successfully');
-        return {
-          ...userData,
-          createdAt: userData.createdAt?.toDate() || new Date(),
-          updatedAt: userData.updatedAt?.toDate() || new Date(),
-        } as User;
+        
+        await updateDoc(doc(db, 'users', firebaseUser.uid), {
+          lastLoginAt: serverTimestamp(),
+        });
+        
+        return convertTimestampFields(
+          { ...userData } as User,
+          ['createdAt', 'updatedAt', 'lastLoginAt']
+        );
       } else {
         // Create user document if it doesn't exist (for existing Firebase users)
         const userData: User = {
           id: firebaseUser.uid,
           email: firebaseUser.email!,
           displayName: firebaseUser.displayName || '',
-          photoURL: firebaseUser.photoURL || '',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          businessName: '',
-          specialties: [],
-          location: '',
+          photoURL: firebaseUser.photoURL || undefined,
+          createdAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
+          updatedAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
+          lastLoginAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
           preferences: {
             notifications: true,
             darkMode: false,
-            language: 'en',
-            weatherUnits: 'metric',
+            language: LanguageOption.ENGLISH,
+            weatherUnits: WeatherUnit.METRIC,
+            emailMarketing: false,
+            weekStartsOn: 1,
           },
           subscription: {
-            plan: 'free',
+            plan: SubscriptionPlan.FREE,
             expiresAt: null,
-            features: ['basic_questionnaire', 'basic_timeline', 'basic_checklists'],
+            features: [],
+            isActive: true,
+            autoRenew: false,
           },
+          isEmailVerified: firebaseUser.emailVerified || false,
+          isActive: true,
         };
         
         await setDoc(doc(db, 'users', firebaseUser.uid), {
           ...userData,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          lastLoginAt: serverTimestamp(),
         });
         
         return userData;
@@ -186,11 +199,12 @@ export class AuthService {
       const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        return {
-          ...userData,
-          createdAt: userData.createdAt?.toDate() || new Date(),
-          updatedAt: userData.updatedAt?.toDate() || new Date(),
-        } as User;
+        
+        // Convert timestamp fields using standardized helper
+        return convertTimestampFields(
+          { ...userData } as User,
+          ['createdAt', 'updatedAt', 'lastLoginAt']
+        );
       }
       return null;
     } catch (error: any) {
