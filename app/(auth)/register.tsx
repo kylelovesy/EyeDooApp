@@ -206,7 +206,9 @@ export default function SignUpScreen() {
             <Divider style={[commonStyles.authDivider, { backgroundColor: theme.colors.outline }]} />
             
             <View style={commonStyles.authSignupRow}>
-              <BodyText size="medium">Already have an account?</BodyText>
+              <BodyText size="medium" style={{ color: theme.colors.onSurfaceVariant }}>
+                Already have an account?
+              </BodyText>
               <Link href="/(auth)/login" asChild>
                 <CustomButton
                   title="Sign In"

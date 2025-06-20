@@ -10,9 +10,8 @@ import {
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { User } from '../types/auth';
-import { LanguageOption, SubscriptionPlan, WeatherUnit } from '../types/user';
+import { LanguageOption, SubscriptionPlan, UserSchema, WeatherUnit } from '../types/user';
 import { auth, db, storage } from './firebase';
-import { convertTimestampFields } from './utils/timestampHelpers';
 
 export interface AuthError {
   code: string;
@@ -43,9 +42,10 @@ export class AuthService {
         id: firebaseUser.uid,
         email: firebaseUser.email!,
         displayName: displayName || firebaseUser.displayName || '',
-        photoURL: firebaseUser.photoURL || undefined,
-        createdAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
-        updatedAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
+        // ✅ Only include photoURL if it exists
+        ...(firebaseUser.photoURL && { photoURL: firebaseUser.photoURL }),
+        createdAt: serverTimestamp() as any,
+        updatedAt: serverTimestamp() as any,
         preferences: {
           notifications: true,
           darkMode: false,
@@ -56,20 +56,27 @@ export class AuthService {
         },
         subscription: {
           plan: SubscriptionPlan.FREE,
-          expiresAt: null,
+          // expiresAt: undefined,
           features: [],
           isActive: true,
           autoRenew: false,
         },
-        isEmailVerified: false,
+        isEmailVerified: firebaseUser.emailVerified || false,
         isActive: true,
       };
 
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
+      const firestoreData = {
         ...userData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      // Remove photoURL if it's undefined to prevent Firestore errors
+      if (firestoreData.photoURL === undefined) {
+        delete firestoreData.photoURL;
+      }
+
+      await setDoc(doc(db, 'users', firebaseUser.uid), firestoreData);
       
       console.log('EyeDooApp: User account created successfully');
       return userData;
@@ -97,20 +104,19 @@ export class AuthService {
           lastLoginAt: serverTimestamp(),
         });
         
-        return convertTimestampFields(
-          { ...userData } as User,
-          ['createdAt', 'updatedAt', 'lastLoginAt']
-        );
+        // Let Zod handle the timestamp conversion
+        return UserSchema.parse(userData);
       } else {
         // Create user document if it doesn't exist (for existing Firebase users)
         const userData: User = {
           id: firebaseUser.uid,
           email: firebaseUser.email!,
           displayName: firebaseUser.displayName || '',
-          photoURL: firebaseUser.photoURL || undefined,
-          createdAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
-          updatedAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
-          lastLoginAt: new Date() as any, // Will be converted by timestampHelpers when reading from DB
+          // ✅ Only include photoURL if it exists
+          ...(firebaseUser.photoURL && { photoURL: firebaseUser.photoURL }),
+          createdAt: new Date() as any,
+          updatedAt: new Date() as any,
+          lastLoginAt: new Date() as any,
           preferences: {
             notifications: true,
             darkMode: false,
@@ -121,7 +127,7 @@ export class AuthService {
           },
           subscription: {
             plan: SubscriptionPlan.FREE,
-            expiresAt: null,
+            // expiresAt: undefined,
             features: [],
             isActive: true,
             autoRenew: false,
@@ -130,12 +136,19 @@ export class AuthService {
           isActive: true,
         };
         
-        await setDoc(doc(db, 'users', firebaseUser.uid), {
+        const firestoreData = {
           ...userData,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           lastLoginAt: serverTimestamp(),
-        });
+        };
+
+        // Remove photoURL if it's undefined
+        if (firestoreData.photoURL === undefined) {
+          delete firestoreData.photoURL;
+        }
+
+        await setDoc(doc(db, 'users', firebaseUser.uid), firestoreData);
         
         return userData;
       }
@@ -201,10 +214,7 @@ export class AuthService {
         const userData = userDoc.data();
         
         // Convert timestamp fields using standardized helper
-        return convertTimestampFields(
-          { ...userData } as User,
-          ['createdAt', 'updatedAt', 'lastLoginAt']
-        );
+        return UserSchema.parse(userData);
       }
       return null;
     } catch (error: any) {
@@ -292,5 +302,39 @@ export class AuthService {
       message: error.message || 'Unknown error',
       userMessage,
     };
+  }
+
+  private static createFirestoreUserData(firebaseUser: any, displayName?: string): any {
+    const userData: any = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email!,
+      displayName: displayName || firebaseUser.displayName || '',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      preferences: {
+        notifications: true,
+        darkMode: false,
+        language: LanguageOption.ENGLISH,
+        weatherUnits: WeatherUnit.METRIC,
+        emailMarketing: false,
+        weekStartsOn: 1,
+      },
+      subscription: {
+        plan: SubscriptionPlan.FREE,
+        // expiresAt: undefined,
+        features: [],
+        isActive: true,
+        autoRenew: false,
+      },
+      isEmailVerified: firebaseUser.emailVerified || false,
+      isActive: true,
+    };
+
+    // Only add photoURL if it exists
+    if (firebaseUser.photoURL) {
+      userData.photoURL = firebaseUser.photoURL;
+    }
+
+    return userData;
   }
 }

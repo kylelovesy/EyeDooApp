@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { FirestoreTimestampSchema, PhoneSchema } from './reusableSchemas';
+import { FirestoreTimestampSchema, OptionalFirestoreTimestampSchema, PhoneSchema } from './reusableSchemas';
 
 /**
  * User type definitions for the EyeDooApp
@@ -108,8 +108,7 @@ export const UserSubscriptionSchema = z.object({
     .default(SubscriptionPlan.FREE)
     .describe('Current subscription plan'),
   
-  expiresAt: FirestoreTimestampSchema
-    .nullable()
+  expiresAt: OptionalFirestoreTimestampSchema
     .describe('Subscription expiration date'),
   
   features: z.array(z.nativeEnum(SubscriptionFeature))
@@ -157,8 +156,7 @@ export const UserSchema = z.object({
   updatedAt: FirestoreTimestampSchema
     .describe('Last profile update timestamp'),
   
-  lastLoginAt: FirestoreTimestampSchema
-    .optional()
+  lastLoginAt: OptionalFirestoreTimestampSchema
     .describe('Last login timestamp'),
   
   // Contact information

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
-    Button,
-    Divider,
-    HelperText,
-    Menu,
-    useTheme
+  Button,
+  Divider,
+  HelperText,
+  Menu,
+  useTheme
 } from 'react-native-paper';
 import { Typography } from '../ui/Typography';
 

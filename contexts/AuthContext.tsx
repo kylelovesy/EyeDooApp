@@ -2,7 +2,7 @@
 import { LoadingState } from '@/components/ui/LoadingState';
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import { AuthService } from '../services/authService';
-import { AuthContextType, User } from '../types/auth';
+import { AuthContextType, User, UserPreferences, UserSubscription } from '../types/auth';
 
 interface AuthState {
   user: User | null;
@@ -137,6 +137,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     updateProfile,
     uploadProfileImage,
+    updatePreferences: function (updates: Partial<UserPreferences>): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    sendEmailVerification: function (): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    deleteAccount: function (): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    updateSubscription: function (subscription: Partial<UserSubscription>): Promise<void> {
+      throw new Error('Function not implemented.');
+    }
   };
 
   // Don't render children until auth state is initialized

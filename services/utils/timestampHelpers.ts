@@ -39,6 +39,16 @@ export const convertFirestoreTimestamp = (timestamp: any): Date => {
 };
 
 /**
+ * DEPRECATED: This conversion is now handled automatically by Zod schemas
+ * Keep this file for backward compatibility, but new code should rely on Zod preprocessing
+ */
+
+// Add this warning function
+export const deprecationWarning = () => {
+  console.warn('EyeDooApp: Direct timestamp conversion is deprecated. Use Zod schema validation instead.');
+};
+
+/**
  * Safely converts multiple timestamp fields in an object
  * Used for converting Firestore documents with timestamp fields
  */
@@ -46,6 +56,7 @@ export const convertTimestampFields = <T extends Record<string, any>>(
   data: T,
   timestampFields: (keyof T)[]
 ): T => {
+  deprecationWarning();
   const converted = { ...data };
   
   timestampFields.forEach(field => {

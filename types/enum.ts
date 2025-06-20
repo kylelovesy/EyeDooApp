@@ -236,15 +236,6 @@ export enum CandidShotCategory {
   OTHER = 'Other',
 }
 
-// === CANDID SHOT CATEGORIES ===
-
-/**
- * Candid shot category enum
- */
-
-
-
-// === CONVERT ENUMS TO ARRAYS FOR DROPDOWN OPTIONS ===
 
 export const PROJECT_STATUS = Object.values(ProjectStatus);
 export const PROJECT_TYPES = Object.values(ProjectType);

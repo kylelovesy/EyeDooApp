@@ -1,5 +1,7 @@
-import React, { createContext, ReactNode, useContext } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { z } from 'zod';
+import { removeUndefinedValues } from '../services/utils/errorHelpers';
+import { EventStyle, LocationType, ProjectStatus, ProjectType, Pronoun } from '../types/enum';
 import { CreateProjectInput } from '../types/project';
 import { form1EssentialInfoSchema } from '../types/project-EssentialInfoSchema';
 import { form3PeopleSchema } from '../types/project-PersonaSchema';
@@ -12,89 +14,96 @@ import { BaseFormContextType, useBaseFormContext } from './useBaseFormContext';
 type Form1Data = z.infer<typeof form1EssentialInfoSchema>;
 
 const initialForm1Data: Form1Data = {
-  name: '',
-  type: 'Wedding',
-  status: 'Draft',
+  projectName: '',
+  projectType: ProjectType.WEDDING,
+  projectStatus: ProjectStatus.DRAFT,
   personA: { 
-    preferredPronouns: 'Prefer not to say', 
+    preferredPronouns: Pronoun.PREFER_NOT_TO_SAY, 
     firstName: '', 
-    surname: '', 
-    contactPhone: '', 
+    surname: undefined, 
+    contactPhone: undefined, 
     contactEmail: '' 
   },
   personB: { 
-    preferredPronouns: 'Prefer not to say', 
+    preferredPronouns: Pronoun.PREFER_NOT_TO_SAY, 
     firstName: '', 
-    surname: '', 
-    contactPhone: '', 
+    surname: undefined, 
+    contactPhone: undefined, 
     contactEmail: '' 
   },
-  locations: [],
-  notes: '',
+  sharedEmail: undefined,
+  eventStyle: EventStyle.MODERN,
+  eventDate: new Date(), // Set a default; user will change this in the form
+  locations: [{ locationType: LocationType.MAIN_VENUE }],
+  notes: undefined,
 };
 
-// Extended interface for Form1-specific functionality
-interface Form1ContextType extends BaseFormContextType<Form1Data> {
-  handleCreateProject: () => Promise<void>;
-}
+// Use a type alias to avoid the empty interface linting error.
+type Form1ContextType = BaseFormContextType<Form1Data>;
 
 const Form1Context = createContext<Form1ContextType | undefined>(undefined);
 
 export const Form1Provider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const { createProject } = useProjects();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Use the base form context
   const baseContext = useBaseFormContext(
     form1EssentialInfoSchema,
     'form1',
     initialForm1Data,
     {
-      successMessage: 'Project updated successfully!',
-      createSuccessMessage: 'Project created successfully!',
       errorMessage: 'Failed to save project. Please try again.'
     }
   );
 
-  // Form1-specific create project function
-  const handleCreateProject = async () => {
+  const handleSubmit = async () => {
     if (!user) {
-      baseContext.showSnackbar?.("Cannot create project, no user is authenticated.", 'error');
+      baseContext.showSnackbar("Cannot create project, no user is authenticated.", 'error');
       return;
     }
 
-    if (!baseContext.isValid || !baseContext.formData) {
-      const firstError = baseContext.errors ? 
-        Object.values(baseContext.errors as any)[0]?._errors?.[0] : 
-        'Please check the form for errors.';
-      baseContext.showSnackbar?.(firstError || 'Please check the form for errors.', 'error');
+    // Safely parse the data to get either success with data or an error.
+    const result = form1EssentialInfoSchema.safeParse(baseContext.formData);
+
+    if (!result.success) {
+      // Safely get the first error message from the validation result.
+      const firstError = result.error.errors[0]?.message || 'Please check the form for errors.';
+      baseContext.showSnackbar(firstError, 'error');
       return;
     }
-
+    
+    setIsSubmitting(true);
     try {
+      // Clean the data by removing undefined values before sending to Firestore
+      const cleanedForm1Data = removeUndefinedValues(result.data);
+      
+      // Use the successfully parsed and validated data (`result.data`).
       const projectToCreate: CreateProjectInput = {
-        userId: user.id,
-        form1: baseContext.formData,
+        form1: cleanedForm1Data,
         form2: form2TimelineSchema.parse({}),
         form3: form3PeopleSchema.parse({}),
         form4: form4PhotosSchema.parse({}),
       };
 
       await createProject(projectToCreate);
-      baseContext.showSnackbar?.('Project created successfully!', 'success');
+      baseContext.showSnackbar('Project created successfully!', 'success');
       
       setTimeout(() => {
         baseContext.closeModal();
       }, 1000);
     } catch (error) {
       console.error("Failed to create project:", error);
-      baseContext.showSnackbar?.('Failed to create project. Please try again.', 'error');
+      baseContext.showSnackbar('Failed to create project. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const value: Form1ContextType = {
     ...baseContext,
-    handleCreateProject,
+    isSubmitting: isSubmitting || baseContext.isSubmitting,
+    handleSubmit,
   };
 
   return (

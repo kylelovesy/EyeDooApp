@@ -50,7 +50,7 @@ export default function HomeGeneralScreen() {
             </BodyText>
             {form1.eventDate && (
               <BodyText size="medium" style={styles.projectDate}>
-                {new Date(form1.eventDate.toDate()).toLocaleDateString()}
+                {new Date(form1.eventDate instanceof Date ? form1.eventDate : new Date(form1.eventDate)).toLocaleDateString()}
               </BodyText>
             )}
           </Card.Content>

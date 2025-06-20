@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { router, Stack } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
@@ -8,7 +9,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { ProjectFormProvider, useForm1 } from '../../../contexts/Form1EssentialInfoContext';
 import { ProjectProvider, useProjects } from '../../../contexts/ProjectContext';
 
-import { ProjectCard } from '../../../components/cards/ProjectCard';
+import ProjectCard from '../../../components/cards/ProjectCard';
 import { EssentialInfoFormModal } from '../../../components/modals/EssentialInfoForm';
 import { CustomButton } from '../../../components/ui/CustomButton';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -191,7 +192,7 @@ const ProjectsScreen = () => {
                     <Text variant="bodyMedium">
                         This is your project dashboard!
                         {"\n\n"}
-                        - Use the large button in the center or the &apos;+&apos; icon to create your first project.
+                        - Use the large button in the center or the '+' icon to create your first project.
                         {"\n\n"}
                         - Once you have projects, you can tap to select them and then launch them to view their details.
                     </Text>

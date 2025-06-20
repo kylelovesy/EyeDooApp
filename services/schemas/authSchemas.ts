@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { FirestoreTimestampSchema, OptionalFirestoreTimestampSchema } from '../../types/reusableSchemas';
 import { CommonSchemas } from '../utils/validationHelpers';
 
 /**
@@ -92,9 +93,9 @@ export const CreateUserProfileSchema = z.object({
     .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format')
     .optional()
     .or(z.literal('')),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  lastLoginAt: z.date().optional(),
+  createdAt: FirestoreTimestampSchema,
+  updatedAt: FirestoreTimestampSchema,
+  lastLoginAt: OptionalFirestoreTimestampSchema,
   isEmailVerified: z.boolean().default(false),
   isActive: z.boolean().default(true),
   preferences: UserPreferencesSchema.default({}),

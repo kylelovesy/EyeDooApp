@@ -2,16 +2,15 @@ import React from 'react';
 import { View } from 'react-native';
 import { Button, Card, IconButton, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
-// **CHANGED**: Import the new context hook and BaseFormModal
-import { usePersonaForm } from '../../contexts/Form3PersonaContext';
+import { useForm3 } from '../../contexts/Form3PersonaContext';
 import { PersonWithRoleSchema } from '../../types/reusableSchemas';
-import BaseFormModal from '../ui/BaseFormModal';
+import FormModal from '../ui/FormModal';
 
 type PersonWithRole = z.infer<typeof PersonWithRoleSchema>;
 
-// This component now uses the standardized BaseFormModal
+// This component now uses the standardized FormModal
 export const PeopleFormModal: React.FC = () => {
-    const context = usePersonaForm();
+    const context = useForm3();
     const { formData, setFormData } = context;
 
     if (!formData) return null;
@@ -21,7 +20,13 @@ export const PeopleFormModal: React.FC = () => {
     };
 
     const addPerson = () => {
-        const newPerson: PersonWithRole = { name: '', role: ''};
+        const newPerson: PersonWithRole = { 
+            id: Date.now().toString(),
+            name: '', 
+            role: '',
+            relationshipToCouple: undefined,
+            notes: ''
+        };
         updateForm3Data({ immediateFamily: [...(formData.immediateFamily || []), newPerson] });
     };
 
@@ -37,7 +42,7 @@ export const PeopleFormModal: React.FC = () => {
     };
 
     return (
-        <BaseFormModal
+        <FormModal
             title="Edit People & Persona"
             subtitle="Manage key people for your project"
             context={context}
@@ -59,26 +64,132 @@ export const PeopleFormModal: React.FC = () => {
                     onRemove={removePerson} 
                 />
             ))}
-        </BaseFormModal>
+        </FormModal>
     );
 }
 
-// The sub-form for a single person (remains mostly the same)
-const PersonForm: React.FC<{person: PersonWithRole, index: number, onUpdate: (index: number, person: PersonWithRole) => void, onRemove: (index: number) => void}> = ({ person, index, onUpdate, onRemove }) => {
-    // ... your existing PersonWithRoleForm implementation ...
-     return (
+// The sub-form for a single person
+const PersonForm: React.FC<{
+    person: PersonWithRole, 
+    index: number, 
+    onUpdate: (index: number, person: PersonWithRole) => void, 
+    onRemove: (index: number) => void
+}> = ({ person, index, onUpdate, onRemove }) => {
+    return (
         <Card style={{marginHorizontal: 16, marginBottom: 12}}>
             <Card.Content>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                     <Text variant='titleMedium'>Person {index + 1}</Text>
                     <IconButton icon='delete' onPress={() => onRemove(index)} />
                 </View>
-                <TextInput label="Name" value={person.name} onChangeText={text => onUpdate(index, {...person, name: text})} mode='outlined' style={{marginBottom: 8}}/>
-                <TextInput label="Role" value={person.role || ''} onChangeText={text => onUpdate(index, {...person, role: text})} mode='outlined' style={{marginBottom: 8}}/>
+                <TextInput 
+                    label="Name" 
+                    value={person.name} 
+                    onChangeText={text => onUpdate(index, {...person, name: text})} 
+                    mode='outlined' 
+                    style={{marginBottom: 8}}
+                />
+                <TextInput 
+                    label="Role" 
+                    value={person.role || ''} 
+                    onChangeText={text => onUpdate(index, {...person, role: text})} 
+                    mode='outlined' 
+                    style={{marginBottom: 8}}
+                />
+                <TextInput 
+                    label="Notes" 
+                    value={person.notes || ''} 
+                    onChangeText={text => onUpdate(index, {...person, notes: text})} 
+                    mode='outlined' 
+                    style={{marginBottom: 8}}
+                    multiline
+                    numberOfLines={2}
+                />
             </Card.Content>
         </Card>
     )
 };
+// import React from 'react';
+// import { View } from 'react-native';
+// import { Button, Card, IconButton, Text, TextInput } from 'react-native-paper';
+// import { z } from 'zod';
+// // **CHANGED**: Import the new context hook and BaseFormModal
+// import { usePersonaForm } from '../../contexts/Form3PersonaContext';
+// import { PersonWithRoleSchema } from '../../types/reusableSchemas';
+// import BaseFormModal from '../ui/BaseFormModal';
+
+// type PersonWithRole = z.infer<typeof PersonWithRoleSchema>;
+
+// // This component now uses the standardized BaseFormModal
+// export const PeopleFormModal: React.FC = () => {
+//     const context = usePersonaForm();
+//     const { formData, setFormData } = context;
+
+//     if (!formData) return null;
+
+//     const updateForm3Data = (updates: Partial<typeof formData>) => {
+//         setFormData(prev => prev ? { ...prev, ...updates } : null);
+//     };
+
+//     const addPerson = () => {
+//         const newPerson: PersonWithRole = { name: '', role: ''};
+//         updateForm3Data({ immediateFamily: [...(formData.immediateFamily || []), newPerson] });
+//     };
+
+//     const updatePerson = (index: number, updatedPerson: PersonWithRole) => {
+//         const updatedPeople = [...(formData.immediateFamily || [])];
+//         updatedPeople[index] = updatedPerson;
+//         updateForm3Data({ immediateFamily: updatedPeople });
+//     };
+
+//     const removePerson = (index: number) => {
+//         const updatedPeople = (formData.immediateFamily || []).filter((_, i) => i !== index);
+//         updateForm3Data({ immediateFamily: updatedPeople });
+//     };
+
+//     return (
+//         <BaseFormModal
+//             title="Edit People & Persona"
+//             subtitle="Manage key people for your project"
+//             context={context}
+//             saveLabel="Save People"
+//             cancelLabel="Cancel"
+//         >
+//             {/* Add person button */}
+//             <Button mode="contained" onPress={addPerson} icon="plus" style={{marginBottom: 16}}>
+//                 Add Person
+//             </Button>
+            
+//             {/* Map through and render people */}
+//             {(formData.immediateFamily || []).map((person, index) => (
+//                 <PersonForm 
+//                     key={index} 
+//                     person={person} 
+//                     index={index} 
+//                     onUpdate={updatePerson} 
+//                     onRemove={removePerson} 
+//                 />
+//             ))}
+//         </BaseFormModal>
+//     );
+// }
+
+// // The sub-form for a single person (remains mostly the same)
+// const PersonForm: React.FC<{person: PersonWithRole, index: number, onUpdate: (index: number, person: PersonWithRole) => void, onRemove: (index: number) => void}> = ({ person, index, onUpdate, onRemove }) => {
+//     // ... your existing PersonWithRoleForm implementation ...
+//      return (
+//         <Card style={{marginHorizontal: 16, marginBottom: 12}}>
+//             <Card.Content>
+//                 <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+//                     <Text variant='titleMedium'>Person {index + 1}</Text>
+//                     <IconButton icon='delete' onPress={() => onRemove(index)} />
+//                 </View>
+//                 <TextInput label="Name" value={person.name} onChangeText={text => onUpdate(index, {...person, name: text})} mode='outlined' style={{marginBottom: 8}}/>
+//                 <TextInput label="Role" value={person.role || ''} onChangeText={text => onUpdate(index, {...person, role: text})} mode='outlined' style={{marginBottom: 8}}/>
+//             </Card.Content>
+//         </Card>
+//     )
+// };
 
 
 

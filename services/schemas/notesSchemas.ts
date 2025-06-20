@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { FirestoreTimestampSchema, OptionalFirestoreTimestampSchema } from '../../types/reusableSchemas';
 import { CommonSchemas } from '../utils/validationHelpers';
 
 /**
@@ -44,7 +45,7 @@ export const CreateNoteInputSchema = z.object({
     .max(10, 'Maximum 10 tags allowed')
     .default([]),
   isPrivate: z.boolean().default(true),
-  reminderAt: z.date().optional(),
+  reminderAt: OptionalFirestoreTimestampSchema,
   attachments: z.array(z.object({
     name: z.string().min(1, 'Attachment name is required'),
     url: CommonSchemas.url,
@@ -68,7 +69,7 @@ export const UpdateNoteInputSchema = z.object({
     .max(10, 'Maximum 10 tags allowed')
     .optional(),
   isPrivate: z.boolean().optional(),
-  reminderAt: z.date().optional().or(z.null()),
+  reminderAt: OptionalFirestoreTimestampSchema.or(z.null()),
   status: NoteStatusSchema.optional(),
   attachments: z.array(z.object({
     name: z.string().min(1, 'Attachment name is required'),
@@ -92,8 +93,8 @@ export const NotesQuerySchema = z.object({
   status: NoteStatusSchema.default('active'),
   tags: z.array(z.string()).optional(),
   search: z.string().max(100, 'Search query too long').optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
+  startDate: OptionalFirestoreTimestampSchema,
+  endDate: OptionalFirestoreTimestampSchema,
   limit: z.number().min(1).max(100).default(20),
   offset: z.number().min(0).default(0),
   sortBy: z.enum(['createdAt', 'updatedAt', 'title', 'priority']).default('updatedAt'),
@@ -189,15 +190,15 @@ export const NoteSchema = z.object({
   status: NoteStatusSchema,
   tags: z.array(z.string()),
   isPrivate: z.boolean(),
-  reminderAt: z.date().optional(),
+  reminderAt: OptionalFirestoreTimestampSchema,
   attachments: z.array(z.object({
     name: z.string(),
     url: z.string(),
     type: z.string(),
     size: z.number()
   })),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: FirestoreTimestampSchema,
+  updatedAt: FirestoreTimestampSchema,
   version: z.number().default(1), // For versioning
   sharedWith: z.array(z.object({
     email: z.string(),

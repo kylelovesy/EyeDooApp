@@ -2,25 +2,30 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider } from 'react-native-paper'; // Import PaperProvider
+import { enGB, registerTranslation } from 'react-native-paper-dates';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { ProjectProvider } from '../contexts/ProjectContext';
 
 const InitialLayout = () => {
-  const { user, initialized } = useAuth();
+  const { user, loading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
+    useEffect(() => {
+      registerTranslation('en', enGB);
+    }, []);
+
   useEffect(() => {
-    if (!initialized) return;
+    if (loading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
-    if (user && !inAuthGroup) {
+    if (user && inAuthGroup) {
       router.replace('/(app)/projects');
-    } else if (!user) {
+    } else if (!user && !inAuthGroup) {
       router.replace('/(auth)/login');
     }
-  }, [user, initialized, segments, router]);
+  }, [user, loading, segments, router]);
 
   return <Stack screenOptions={{ headerShown: false }} />;
 };

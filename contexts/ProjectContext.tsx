@@ -80,17 +80,23 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
   
   const createProject = useCallback(async (projectInput: CreateProjectInput) => {
+      if (!user) {
+          dispatch({ type: 'SET_ERROR', payload: 'Failed to create project: User not authenticated.' });
+          return;
+      }
       try {
-          return await ProjectService.createProject(projectInput);
+          return await ProjectService.createProject(user.id, projectInput);
       } catch (error) {
+          console.error("EyeDooApp: Failed to create project:", error);
           dispatch({ type: 'SET_ERROR', payload: 'Failed to create project.' });
       }
-  }, []);
+  }, [user]);
 
   const updateProject = useCallback(async (projectId: string, updates: UpdateProjectInput) => {
     try {
         await ProjectService.updateProject(projectId, updates);
     } catch (error) {
+        console.error(`EyeDooApp: Failed to update project ${projectId}:`, error);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to update project.' });
     }
   }, []);
@@ -99,6 +105,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     try {
         await ProjectService.deleteProject(projectId);
     } catch (error) {
+        console.error(`EyeDooApp: Failed to delete project ${projectId}:`, error);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to delete project.' });
     }
   }, []);

@@ -1,26 +1,25 @@
 import React from 'react';
 import { View } from 'react-native';
 import {
-  Button,
-  Card,
-  IconButton,
-  Text,
-  TextInput
+    Button,
+    Card,
+    IconButton,
+    Text,
+    TextInput
 } from 'react-native-paper';
 import { z } from 'zod';
-// **CHANGED**: Import the new context hook and BaseFormModal
-import { useTimelineForm } from '../../contexts/Form2TimelineContext';
+import { useForm2 } from '../../contexts/Form2TimelineContext';
 import { TimelineEventSchema } from '../../types/reusableSchemas';
-import BaseFormModal from '../ui/BaseFormModal';
+import FormModal from '../ui/FormModal';
 
 type TimelineEvent = z.infer<typeof TimelineEventSchema>;
 
-// This component now uses the standardized BaseFormModal
+// This component now uses the standardized FormModal
 export const TimelineFormModal: React.FC = () => {
-    const context = useTimelineForm();
+    const context = useForm2();
     const { formData, setFormData } = context;
 
-    if (!formData) return null; // Don't render if there's no data
+    if (!formData) return null;
 
     const updateForm2Data = (updates: Partial<typeof formData>) => {
         setFormData(prev => prev ? { ...prev, ...updates } : null);
@@ -28,9 +27,16 @@ export const TimelineFormModal: React.FC = () => {
 
     const addTimelineEvent = () => {
         const newEvent: TimelineEvent = {
-            id: Date.now().toString(), time: '09:00', description: '', location: '',
-            notes: '', icon: 'calendar', iconColor: '#6200ee', priority: 5,
-            notification: false, duration: 30,
+            id: Date.now().toString(), 
+            time: '09:00', 
+            description: '', 
+            location: '',
+            notes: '', 
+            icon: 'calendar', 
+            iconColor: '#6200ee', 
+            priority: 5,
+            notification: false, 
+            duration: 30,
         };
         updateForm2Data({ events: [...(formData.events || []), newEvent] });
     };
@@ -48,7 +54,7 @@ export const TimelineFormModal: React.FC = () => {
     };
 
     return (
-        <BaseFormModal
+        <FormModal
             title="Edit Timeline"
             subtitle="Manage your project timeline events"
             context={context}
@@ -70,13 +76,17 @@ export const TimelineFormModal: React.FC = () => {
                     onRemove={removeTimelineEvent} 
                 />
             ))}
-        </BaseFormModal>
+        </FormModal>
     );
 }
 
-// The sub-form for a single event (remains mostly the same)
-const TimelineEventForm: React.FC<{event: TimelineEvent, index: number, onUpdate: (index: number, event: TimelineEvent) => void, onRemove: (index: number) => void}> = ({ event, index, onUpdate, onRemove }) => {
-    // ... your existing TimelineEventForm implementation ...
+// The sub-form for a single event
+const TimelineEventForm: React.FC<{
+    event: TimelineEvent, 
+    index: number, 
+    onUpdate: (index: number, event: TimelineEvent) => void, 
+    onRemove: (index: number) => void
+}> = ({ event, index, onUpdate, onRemove }) => {
     return (
         <Card style={{marginHorizontal: 16, marginBottom: 12}}>
             <Card.Content>
@@ -84,12 +94,133 @@ const TimelineEventForm: React.FC<{event: TimelineEvent, index: number, onUpdate
                     <Text variant='titleMedium'>Event {index + 1}</Text>
                     <IconButton icon='delete' onPress={() => onRemove(index)} />
                 </View>
-                <TextInput label="Description" value={event.description} onChangeText={text => onUpdate(index, {...event, description: text})} mode='outlined' style={{marginBottom: 8}}/>
-                <TextInput label="Time" value={event.time} onChangeText={text => onUpdate(index, {...event, time: text})} mode='outlined' style={{marginBottom: 8}}/>
+                <TextInput 
+                    label="Description" 
+                    value={event.description} 
+                    onChangeText={text => onUpdate(index, {...event, description: text})} 
+                    mode='outlined' 
+                    style={{marginBottom: 8}}
+                />
+                <TextInput 
+                    label="Time" 
+                    value={event.time} 
+                    onChangeText={text => onUpdate(index, {...event, time: text})} 
+                    mode='outlined' 
+                    style={{marginBottom: 8}}
+                />
+                <TextInput 
+                    label="Location" 
+                    value={event.location || ''} 
+                    onChangeText={text => onUpdate(index, {...event, location: text})} 
+                    mode='outlined' 
+                    style={{marginBottom: 8}}
+                />
+                <TextInput 
+                    label="Notes" 
+                    value={event.notes || ''} 
+                    onChangeText={text => onUpdate(index, {...event, notes: text})} 
+                    mode='outlined' 
+                    style={{marginBottom: 8}}
+                    multiline
+                    numberOfLines={2}
+                />
             </Card.Content>
         </Card>
     )
 };
+
+// import React from 'react';
+// import { View } from 'react-native';
+// import {
+//   Button,
+//   Card,
+//   IconButton,
+//   Text,
+//   TextInput
+// } from 'react-native-paper';
+// import { z } from 'zod';
+// // **CHANGED**: Import the new context hook and BaseFormModal
+// import { useTimelineForm } from '../../contexts/Form2TimelineContext';
+// import { TimelineEventSchema } from '../../types/reusableSchemas';
+// import BaseFormModal from '../ui/BaseFormModal';
+
+// type TimelineEvent = z.infer<typeof TimelineEventSchema>;
+
+// // This component now uses the standardized BaseFormModal
+// export const TimelineFormModal: React.FC = () => {
+//     const context = useTimelineForm();
+//     const { formData, setFormData } = context;
+
+//     if (!formData) return null; // Don't render if there's no data
+
+//     const updateForm2Data = (updates: Partial<typeof formData>) => {
+//         setFormData(prev => prev ? { ...prev, ...updates } : null);
+//     };
+
+//     const addTimelineEvent = () => {
+//         const newEvent: TimelineEvent = {
+//             id: Date.now().toString(), time: '09:00', description: '', location: '',
+//             notes: '', icon: 'calendar', iconColor: '#6200ee', priority: 5,
+//             notification: false, duration: 30,
+//         };
+//         updateForm2Data({ events: [...(formData.events || []), newEvent] });
+//     };
+
+//     const updateTimelineEvent = (index: number, updatedEvent: TimelineEvent) => {
+//         const updatedEvents = [...(formData.events || [])];
+//         updatedEvents[index] = updatedEvent;
+//         updatedEvents.sort((a, b) => (a.time || '00:00').localeCompare(b.time || '00:00'));
+//         updateForm2Data({ events: updatedEvents });
+//     };
+
+//     const removeTimelineEvent = (index: number) => {
+//         const updatedEvents = (formData.events || []).filter((_, i) => i !== index);
+//         updateForm2Data({ events: updatedEvents });
+//     };
+
+//     return (
+//         <BaseFormModal
+//             title="Edit Timeline"
+//             subtitle="Manage your project timeline events"
+//             context={context}
+//             saveLabel="Save Timeline"
+//             cancelLabel="Cancel"
+//         >
+//             {/* Add event button */}
+//             <Button mode="contained" onPress={addTimelineEvent} icon="plus" style={{marginBottom: 16}}>
+//                 Add Event
+//             </Button>
+            
+//             {/* Map through and render events */}
+//             {(formData.events || []).map((event, index) => (
+//                 <TimelineEventForm 
+//                     key={index} 
+//                     event={event} 
+//                     index={index} 
+//                     onUpdate={updateTimelineEvent} 
+//                     onRemove={removeTimelineEvent} 
+//                 />
+//             ))}
+//         </BaseFormModal>
+//     );
+// }
+
+// // The sub-form for a single event (remains mostly the same)
+// const TimelineEventForm: React.FC<{event: TimelineEvent, index: number, onUpdate: (index: number, event: TimelineEvent) => void, onRemove: (index: number) => void}> = ({ event, index, onUpdate, onRemove }) => {
+//     // ... your existing TimelineEventForm implementation ...
+//     return (
+//         <Card style={{marginHorizontal: 16, marginBottom: 12}}>
+//             <Card.Content>
+//                 <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+//                     <Text variant='titleMedium'>Event {index + 1}</Text>
+//                     <IconButton icon='delete' onPress={() => onRemove(index)} />
+//                 </View>
+//                 <TextInput label="Description" value={event.description} onChangeText={text => onUpdate(index, {...event, description: text})} mode='outlined' style={{marginBottom: 8}}/>
+//                 <TextInput label="Time" value={event.time} onChangeText={text => onUpdate(index, {...event, time: text})} mode='outlined' style={{marginBottom: 8}}/>
+//             </Card.Content>
+//         </Card>
+//     )
+// };
 
 
 

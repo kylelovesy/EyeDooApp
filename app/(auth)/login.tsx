@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { Divider, TextInput } from 'react-native-paper';
 import { CustomButton } from '../../components/ui/CustomButton';
 import { Screen } from '../../components/ui/Screen';
@@ -206,12 +206,12 @@ export default function LoginScreen() {
             <Divider style={themedStyles.authDivider} />
             
             <View style={commonStyles.authSignupRow}>
-              <Text style={{
-                ...typography.bodyMedium,
-                color: theme.colors.onSurfaceVariant,
-              }}>
+              <BodyText 
+                size="medium" 
+                style={{ color: theme.colors.onSurfaceVariant }}
+              >
                 Don&apos;t have an account?
-              </Text>
+              </BodyText>
               <Link href="/(auth)/register" asChild>
                 <CustomButton
                   title="Sign Up"

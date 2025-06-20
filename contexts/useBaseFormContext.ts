@@ -27,17 +27,18 @@ export interface BaseFormContextType<T> {
   isValid: boolean;
 }
 
-export const useBaseFormContext = <T>(
-  schema: z.ZodSchema<T>,
+export const useBaseFormContext = <S extends z.ZodType<any, any, any>>(
+  schema: S,
   formKey: keyof UpdateProjectInput,
-  initialData: T,
+  initialData: z.infer<S>,
   options?: {
     successMessage?: string;
     createSuccessMessage?: string;
     errorMessage?: string;
   }
-): BaseFormContextType<T> => {
-  // Dependencies
+): BaseFormContextType<z.infer<S>> => {
+  type T = z.infer<S>;
+
   const { updateProject } = useProjects();
   
   // State Management
@@ -83,16 +84,18 @@ export const useBaseFormContext = <T>(
     return formData ? schema.safeParse(formData) : null;
   }, [formData, schema]);
 
-  const errors = useMemo(() => {
-    if (!validationResult || validationResult.success) return null;
-    return validationResult.error.format();
-  }, [validationResult]);
+  // const errors = useMemo(() => {
+  //   if (!validationResult || validationResult.success) return null;
+  //   return validationResult.error.format();
+  // }, [validationResult]);
 
   // Submission
   const handleSubmit = useCallback(async () => {
     if (!formData || !validationResult?.success) {
-      const firstError = errors ? Object.values(errors as z.ZodFormattedError<T, string>)[0] : undefined;
-      const errorMessage = firstError && '_errors' in firstError ? firstError._errors[0] : 'Please check the form for errors.';
+      let errorMessage = 'Please check the form for errors.';
+      if (validationResult && !validationResult.success) {
+        errorMessage = validationResult.error.errors[0]?.message || errorMessage;
+      }
       showSnackbar(errorMessage, 'error');
       return;
     }
@@ -117,7 +120,7 @@ export const useBaseFormContext = <T>(
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, validationResult, projectToUpdate, formKey, updateProject, options, showSnackbar, closeModal, errors]);
+  }, [formData, validationResult, projectToUpdate, formKey, updateProject, options, showSnackbar, closeModal]);
 
   return {
     isModalVisible,

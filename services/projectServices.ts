@@ -31,6 +31,7 @@ export class ProjectService {
    * Helper to parse data against a Zod schema and log detailed errors.
    */
   private static parseData<T extends z.ZodType<any, any>>(schema: T, data: unknown): z.infer<T> {
+    console.log('EyeDooApp: Parsing data:', data);
     const result = schema.safeParse(data);
     if (!result.success) {
       console.error('EyeDooApp: Zod validation error:', JSON.stringify(result.error.flatten(), null, 2));
@@ -43,6 +44,7 @@ export class ProjectService {
    * Converts Firestore timestamps in project data
    */
   private static convertProjectTimestamps(projectData: any): Project {
+    console.log('EyeDooApp: Converting project timestamps:', projectData);
     // Convert top-level timestamps
     const converted = convertTimestampFields(projectData, ['createdAt', 'updatedAt']);
     
@@ -58,6 +60,7 @@ export class ProjectService {
    * Creates a new project document in Firestore.
    */
   static async createProject(userId: string, projectInput: CreateProjectInput): Promise<Project> {
+    console.log('EyeDooApp: Creating project:', projectInput);
     try {
       // Validate the incoming data against the creation schema.
       const validatedData = this.parseData(CreateProjectSchema, projectInput);
@@ -65,14 +68,18 @@ export class ProjectService {
       const projectRef = collection(db, this.COLLECTION_NAME);
 
       // Add server-generated timestamps and userId.
-      const newProjectDoc = {
+      const projectToSave = {
         ...validatedData,
         userId,
+        form1: {
+          ...validatedData.form1,
+          eventDate: validatedData.form1.eventDate,
+        },
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(projectRef, newProjectDoc);
+      const docRef = await addDoc(projectRef, projectToSave);
       const createdDocSnapshot = await getDoc(docRef);
 
       // Parse and convert timestamps in the final document from Firestore
@@ -95,6 +102,7 @@ export class ProjectService {
    * Get a specific project by ID.
    */
   static async getProject(projectId: string): Promise<Project | null> {
+    console.log('EyeDooApp: Getting project:', projectId);
     try {
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       const projectDoc = await getDoc(projectRef);
@@ -123,6 +131,7 @@ export class ProjectService {
    * Get all projects for a user.
    */
   static async getUserProjects(userId: string): Promise<Project[]> {
+    console.log('EyeDooApp: Getting user projects for:', userId);
     try {
       const q = query(
         collection(db, this.COLLECTION_NAME),
@@ -135,7 +144,7 @@ export class ProjectService {
       const projects = querySnapshot.docs.map(doc => {
         try {
           const rawData = { id: doc.id, ...doc.data() };
-          return this.parseData(ProjectSchema, this.convertProjectTimestamps(rawData));
+          return this.parseData(ProjectSchema, rawData);
         } catch (error) {
           console.error(`EyeDooApp: Failed to parse project ${doc.id}:`, error);
           return null;
@@ -157,6 +166,7 @@ export class ProjectService {
     userId: string,
     callback: (projects: Project[]) => void
   ): () => void {
+    console.log('EyeDooApp: Subscribing to user projects for:', userId);
     const q = query(
       collection(db, this.COLLECTION_NAME),
       where('userId', '==', userId),
@@ -164,11 +174,12 @@ export class ProjectService {
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      console.log('EyeDooApp: Received snapshot with:', querySnapshot.docs.length, 'projects');
       const projects = querySnapshot.docs.map(doc => {
         try {
           // Parse each document and convert timestamps
           const rawData = { id: doc.id, ...doc.data() };
-          return this.parseData(ProjectSchema, this.convertProjectTimestamps(rawData));
+          return this.parseData(ProjectSchema, rawData);
         } catch (error) {
           console.error(`EyeDooApp: Failed to parse project ${doc.id}:`, error);
           return null;
@@ -188,6 +199,7 @@ export class ProjectService {
    * Updates an existing project.
    */
   static async updateProject(projectId: string, updates: UpdateProjectInput): Promise<void> {
+    console.log('EyeDooApp: Updating project:', projectId, 'with updates:', updates);
     try {
       const validatedUpdates = this.parseData(UpdateProjectSchema, updates);
 
@@ -212,6 +224,7 @@ export class ProjectService {
    * Deletes a project from Firestore.
    */
   static async deleteProject(projectId: string): Promise<void> {
+    console.log('EyeDooApp: Deleting project:', projectId);
     try {
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       await deleteDoc(projectRef);

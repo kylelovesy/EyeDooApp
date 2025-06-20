@@ -1,6 +1,8 @@
 // UI Components
+export { default as BaseFormModal } from './ui/BaseFormModal';
 export { CustomButton } from './ui/CustomButton';
 export { EmptyState } from './ui/EmptyState';
+export { default as FormModal } from './ui/FormModal';
 export { LoadingState } from './ui/LoadingState';
 export { RepeatableSection } from './ui/RepeatableSection';
 export { Toast, useToast } from './ui/Toast';
