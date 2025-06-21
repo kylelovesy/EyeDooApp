@@ -1,23 +1,69 @@
 // # 4.3 Shots Tab
 // # 4.3.2 Other tab
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+
+import { useRouter } from 'expo-router';
+import { Card } from 'react-native-paper';
+import DashboardAppBar, { NavigationProp, SubPage } from '../../../../components/navigation/DashboardAppbar';
+import { BodyText, HeadlineText } from '../../../../components/ui/Typography';
+import { shotsSubPages } from './_layout';
+
 
 export default function OtherScreen() {
+  const router = useRouter();
+  
+  const navigation: NavigationProp = {
+    goBack: () => router.back(),
+    navigate: (route: string) => router.push(route as any),
+  };
+
+  const customVisibility = (subPage: SubPage, currentId: string): boolean => {
+    if (subPage.id === 'other') {
+      return false;
+    }
+    return subPage.id !== currentId;
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Other Screen</Text>
+    <View style={{ flex: 1 }}>
+      <DashboardAppBar
+        navigation={navigation}
+        title="Other Shots"
+        subPages={shotsSubPages}
+        currentSubPageId="other"
+        onBackPress={() => router.back()}
+        isIconVisible={customVisibility}
+      />
+      <ScrollView style={{ flex: 1, padding: 16 }}>
+        <HeadlineText size="large">Other Photos</HeadlineText>
+        <Card style={{ marginTop: 16 }}>
+          <Card.Content>
+            <BodyText>Other Photos content goes here...</BodyText>
+          </Card.Content>
+        </Card>
+      </ScrollView>
     </View>
   );
 }
+// import React from 'react';
+// import { StyleSheet, Text, View } from 'react-native';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 18,
-  }
-});
+// export default function OtherScreen() {
+//   return (
+//     <View style={styles.container}>
+//       <Text style={styles.text}>Other Screen</Text>
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   text: {
+//     fontSize: 18,
+//   }
+// });

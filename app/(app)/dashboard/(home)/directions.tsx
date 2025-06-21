@@ -1,5 +1,5 @@
 // # 4.1 Home Tab
-// # 4.1.2 Key People tab
+// # 4.1.1 Navigation tab
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 
@@ -10,7 +10,7 @@ import { BodyText, HeadlineText } from '../../../../components/ui/Typography';
 import { homeSubPages } from './_layout';
 
 
-export default function KeyPeopleScreen() {
+export default function DirectionsScreen() {
   const router = useRouter();
   
   const navigation: NavigationProp = {
@@ -22,15 +22,15 @@ export default function KeyPeopleScreen() {
     <View style={{ flex: 1 }}>
       <DashboardAppBar
         navigation={navigation}
-        title="Key People"
+        title="Directions"
         subPages={homeSubPages}
-        currentSubPageId="key-people"
+        currentSubPageId="directions"
       />
       <ScrollView style={{ flex: 1, padding: 16 }}>
-        <HeadlineText size="large">Key People</HeadlineText>
+        <HeadlineText size="large">Directions</HeadlineText>
         <Card style={{ marginTop: 16 }}>
           <Card.Content>
-            <BodyText>Key People content goes here...</BodyText>
+            <BodyText>Directions content goes here...</BodyText>
           </Card.Content>
         </Card>
       </ScrollView>
@@ -39,12 +39,11 @@ export default function KeyPeopleScreen() {
 }
 
 
-
-
+// export default function NavigationScreen() {
 //   const router = useRouter();
-//   const [keyPeople] = React.useState(3); // Example people count
-  
-  
+
+
+//   // Create a navigation-like object for the AppBar
 //   const navigation = {
 //     goBack: () => router.back(),
 //     navigate: (route: string) => router.push(route),
@@ -52,28 +51,23 @@ export default function KeyPeopleScreen() {
 
 //   // Custom visibility logic: hide cart and wishlist when cart is empty
 //   const customVisibility = (subPage: SubPage, currentId: string): boolean => {
-//     if (keyPeople === 0 || subPage.id === 'key-people') {
+//     if (subPage.id === 'navigation') {
 //       return false;
 //     }
 //     return subPage.id !== currentId;
 //   };
+
+
 //   return (
 //     <View style={{ flex: 1 }}>
 //     <DashboardAppBar
 //       navigation={navigation}
-//       title="Key People"
+//       title="Navigation"
 //       subPages={homeSubPages}
-//       currentSubPageId="key-people"
+//       currentSubPageId="navigation"
 //       isIconVisible={customVisibility}
 //     />
-//        <ScrollView style={{ flex: 1, padding: 16 }}>
-//         <HeadlineText size="large">Key People</HeadlineText>
-//         <Card style={{ marginTop: 16 }}>
-//           <Card.Content>
-//             <BodyText>Key People content goes here...</BodyText>
-//           </Card.Content>
-//         </Card>
-//       </ScrollView>
+//       <Text style={styles.text}>Navigation Screen</Text>
 //     </View>
 //   );
 // }

@@ -7,12 +7,7 @@
     "icon": "./assets/icons/icon.png",
     "scheme": "eyedooapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/logo_main.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#66C5CC"
-    },
+    "newArchEnabled": true,    
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -45,10 +40,13 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo_main.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#66C5CC"
+          "backgroundColor": "#F8F9FA",
+          "image": "./assets/images/splash-logo.png",
+          "dark": {
+            "image": "./assets/images/splash-logo.png",
+            "backgroundColor": "#121417"
+          },
+          "imageWidth": 200
         }
       ],
       [
