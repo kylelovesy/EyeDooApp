@@ -1,156 +1,338 @@
-// // __tests__/auth/AuthService.test.ts
-// import { AuthService } from '../../services/authService';
-// import { auth, db } from '../../services/firebase';
+// __tests__/auth/AuthService.test.ts
+import { AuthService } from '../../services/authService';
+import { auth, db, storage } from '../../services/firebase';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  sendPasswordResetEmail,
+  updateProfile as firebaseUpdateProfile,
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+  Timestamp
+} from 'firebase/firestore';
+import { LanguageOption, SubscriptionPlan, WeatherUnit } from '../../types/user';
 
-// // Mock Firebase modules
-// jest.mock('../../services/firebase', () => ({
-//   auth: {
-//     currentUser: null,
-//   },
-//   db: {},
-// }));
+// Mock Firebase modules
+jest.mock('firebase/storage', () => ({
+  getStorage: jest.fn(),
+  ref: jest.fn(),
+  uploadBytes: jest.fn(),
+  getDownloadURL: jest.fn(),
+}));
 
-// jest.mock('firebase/auth', () => ({
-//   createUserWithEmailAndPassword: jest.fn(),
-//   signInWithEmailAndPassword: jest.fn(),
-//   signOut: jest.fn(),
-//   sendPasswordResetEmail: jest.fn(),
-//   updateProfile: jest.fn(),
-//   onAuthStateChanged: jest.fn(),
-// }));
+jest.mock('../../services/firebase', () => ({
+  auth: {
+    currentUser: null,
+  },
+  db: {},
+  storage: {},
+}));
 
-// jest.mock('firebase/firestore', () => ({
-//   doc: jest.fn(),
-//   setDoc: jest.fn(),
-//   getDoc: jest.fn(),
-//   updateDoc: jest.fn(),
-//   serverTimestamp: jest.fn(),
-// }));
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({ currentUser: null })),
+  createUserWithEmailAndPassword: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+  sendPasswordResetEmail: jest.fn(),
+  updateProfile: jest.fn(),
+  onAuthStateChanged: jest.fn(),
+}));
 
-// describe('AuthService', () => {
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//   });
+jest.mock('firebase/firestore', () => ({
+  doc: jest.fn((firestore, path, ...pathSegments) => `${path}/${pathSegments.join('/')}`),
+  setDoc: jest.fn(),
+  getDoc: jest.fn(),
+  updateDoc: jest.fn(),
+  serverTimestamp: jest.fn(() => 'mock-server-timestamp'),
+  Timestamp: {
+    now: jest.fn(() => ({ seconds: Date.now() / 1000, nanoseconds: 0 })),
+    fromDate: jest.fn((date: Date) => ({ seconds: date.getTime() / 1000, nanoseconds: 0 })),
+  }
+}));
 
-//   describe('signUp', () => {
-//     it('should create a new user account successfully', async () => {
-//       const mockUser = {
-//         uid: 'test-uid',
-//         email: 'test@example.com',
-//         displayName: 'Test User',
-//         photoURL: null,
-//       };
+jest.mock('../../services/utils/timestampHelpers', () => ({
+  convertTimestampFields: jest.fn(data => data),
+}));
 
-//       const mockUserCredential = {
-//         user: mockUser,
-//       };
+describe('AuthService', () => {
+  // Mocks for Firebase functions from 'firebase/auth'
+  const mockCreateUserWithEmailAndPassword = createUserWithEmailAndPassword as jest.Mock;
+  const mockSignInWithEmailAndPassword = signInWithEmailAndPassword as jest.Mock;
+  // firebaseSignOut, sendPasswordResetEmail, mockFirebaseUpdateProfile will be scoped or defined later if not top-level
+  const mockFirebaseUpdateProfile = firebaseUpdateProfile as jest.Mock;
 
-//       require('firebase/auth').createUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
-//       require('firebase/auth').updateProfile.mockResolvedValue(undefined);
-//       require('firebase/firestore').setDoc.mockResolvedValue(undefined);
 
-//       const result = await AuthService.signUp('test@example.com', 'password123', 'Test User');
+  // Mocks for Firestore functions from 'firebase/firestore'
+  const mockDocFirestore = doc as jest.Mock;
+  const mockSetDoc = setDoc as jest.Mock;
+  const mockGetDoc = getDoc as jest.Mock;
+  // mockUpdateDoc will be scoped or defined later
+  const mockServerTimestampValue = serverTimestamp as jest.Mock;
 
-//       expect(result).toMatchObject({
-//         id: 'test-uid',
-//         email: 'test@example.com',
-//         displayName: 'Test User',
-//       });
-//     });
 
-//     it('should handle sign up errors correctly', async () => {
-//       const mockError = {
-//         code: 'auth/email-already-in-use',
-//         message: 'Email already in use',
-//       };
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (auth as any).currentUser = null;
+  });
 
-//       require('firebase/auth').createUserWithEmailAndPassword.mockRejectedValue(mockError);
+  // Helper to create a mock Firebase user object
+  const createMockFirebaseUser = (uid: string, email: string, displayName?: string, photoURL?: string, emailVerified: boolean = false): FirebaseUser => ({
+    uid,
+    email: email!,
+    displayName: displayName || null,
+    photoURL: photoURL || null,
+    emailVerified,
+    providerId: 'password',
+    delete: jest.fn(),
+    getIdToken: jest.fn(),
+    getIdTokenResult: jest.fn(),
+    reload: jest.fn(),
+    toJSON: jest.fn(),
+    phoneNumber: null,
+    isAnonymous: false,
+    metadata: {},
+    providerData: [],
+    tenantId: null,
+  } as unknown as FirebaseUser);
 
-//       await expect(AuthService.signUp('test@example.com', 'password123')).rejects.toMatchObject({
-//         code: 'auth/email-already-in-use',
-//         userMessage: 'An account with this email already exists.',
-//       });
-//     });
-//   });
 
-//   describe('signIn', () => {
-//     it('should sign in user successfully', async () => {
-//       const mockUser = {
-//         uid: 'test-uid',
-//         email: 'test@example.com',
-//         displayName: 'Test User',
-//         photoURL: null,
-//       };
+  describe('signUp (registerWithEmail)', () => {
+    it('should create a new user account successfully and store user in Firestore', async () => {
+      const mockFbUser = createMockFirebaseUser('test-uid', 'test@example.com', 'Test User');
+      const mockUserCredential = { user: mockFbUser };
 
-//       const mockUserCredential = {
-//         user: mockUser,
-//       };
+      mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
+      mockFirebaseUpdateProfile.mockResolvedValue(undefined);
+      mockSetDoc.mockResolvedValue(undefined);
 
-//       const mockUserDoc = {
-//         exists: () => true,
-//         data: () => ({
-//           id: 'test-uid',
-//           email: 'test@example.com',
-//           displayName: 'Test User',
-//           createdAt: { toDate: () => new Date() },
-//           updatedAt: { toDate: () => new Date() },
-//         }),
-//       };
+      const result = await AuthService.signUp('test@example.com', 'password123', 'Test User');
 
-//       require('firebase/auth').signInWithEmailAndPassword.mockResolvedValue(mockUserCredential);
-//       require('firebase/firestore').getDoc.mockResolvedValue(mockUserDoc);
+      expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', 'password123');
+      expect(mockFirebaseUpdateProfile).toHaveBeenCalledWith(mockFbUser, { displayName: 'Test User' });
 
-//       const result = await AuthService.signIn('test@example.com', 'password123');
+      // Check how doc is called by the service code
+      // Assuming db is correctly imported and used in AuthService.signUp
+      expect(mockDocFirestore).toHaveBeenCalledWith(db, 'users', 'test-uid');
+      const expectedDocPath = 'users/test-uid'; // Path generated by our mockDocFirestore
 
-//       expect(result).toMatchObject({
-//         id: 'test-uid',
-//         email: 'test@example.com',
-//         displayName: 'Test User',
-//       });
-//     });
+      expect(mockSetDoc).toHaveBeenCalledWith(
+        expectedDocPath,
+        expect.objectContaining({
+          id: 'test-uid',
+          email: 'test@example.com',
+          displayName: 'Test User',
+          preferences: expect.any(Object),
+          subscription: expect.any(Object),
+          createdAt: mockServerTimestampValue(),
+          updatedAt: mockServerTimestampValue(),
+        })
+      );
+      expect(result).toMatchObject({
+        id: 'test-uid',
+        email: 'test@example.com',
+        displayName: 'Test User',
+      });
+    });
 
-//     it('should handle invalid credentials', async () => {
-//       const mockError = {
-//         code: 'auth/wrong-password',
-//         message: 'Wrong password',
-//       };
+    it('should create user without display name if not provided', async () => {
+        const mockFbUser = createMockFirebaseUser('test-uid2', 'test2@example.com');
+        const mockUserCredential = { user: mockFbUser };
 
-//       require('firebase/auth').signInWithEmailAndPassword.mockRejectedValue(mockError);
+        mockCreateUserWithEmailAndPassword.mockResolvedValue(mockUserCredential);
+        mockSetDoc.mockResolvedValue(undefined);
 
-//       await expect(AuthService.signIn('test@example.com', 'wrongpassword')).rejects.toMatchObject({
-//         code: 'auth/wrong-password',
-//         userMessage: 'Incorrect password. Please try again.',
-//       });
-//     });
-//   });
+        const result = await AuthService.signUp('test2@example.com', 'password123');
 
-//   describe('signOut', () => {
-//     it('should sign out user successfully', async () => {
-//       require('firebase/auth').signOut.mockResolvedValue(undefined);
+        expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test2@example.com', 'password123');
+        expect(mockFirebaseUpdateProfile).not.toHaveBeenCalled();
 
-//       await expect(AuthService.signOut()).resolves.toBeUndefined();
-//     });
-//   });
+        expect(mockDocFirestore).toHaveBeenCalledWith(db, 'users', 'test-uid2');
+        const expectedDocPath = 'users/test-uid2';
 
-//   describe('resetPassword', () => {
-//     it('should send password reset email successfully', async () => {
-//       require('firebase/auth').sendPasswordResetEmail.mockResolvedValue(undefined);
+        expect(mockSetDoc).toHaveBeenCalledWith(
+          expectedDocPath,
+          expect.objectContaining({
+            id: 'test-uid2',
+            email: 'test2@example.com',
+            displayName: '',
+          })
+        );
+        expect(result).toMatchObject({
+          id: 'test-uid2',
+          email: 'test2@example.com',
+          displayName: '',
+        });
+      });
 
-//       await expect(AuthService.resetPassword('test@example.com')).resolves.toBeUndefined();
-//     });
+    it('should handle sign up errors correctly', async () => {
+      const mockError = { code: 'auth/email-already-in-use', message: 'Email already in use' };
+      mockCreateUserWithEmailAndPassword.mockRejectedValue(mockError);
 
-//     it('should handle invalid email for password reset', async () => {
-//       const mockError = {
-//         code: 'auth/user-not-found',
-//         message: 'User not found',
-//       };
+      await expect(AuthService.signUp('test@example.com', 'password123')).rejects.toMatchObject({
+        code: 'auth/email-already-in-use',
+        userMessage: 'An account with this email already exists.',
+      });
+    });
+  });
 
-//       require('firebase/auth').sendPasswordResetEmail.mockRejectedValue(mockError);
+  describe('signIn (loginWithEmail)', () => {
+    const mockUpdateDocLocal = updateDoc as jest.Mock; // Local mock for this describe block
 
-//       await expect(AuthService.resetPassword('nonexistent@example.com')).rejects.toMatchObject({
-//         code: 'auth/user-not-found',
-//         userMessage: 'No account found with this email address.',
-//       });
-//     });
-//   });
-// });
+    it('should sign in user successfully and retrieve user data from Firestore', async () => {
+      const mockFbUser = createMockFirebaseUser('test-uid', 'test@example.com', 'Test User');
+      const mockUserCredential = { user: mockFbUser };
+      const mockUserData = {
+        id: 'test-uid',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+        lastLoginAt: Timestamp.fromDate(new Date()),
+        preferences: { notifications: true, darkMode: false, language: LanguageOption.ENGLISH, weatherUnits: WeatherUnit.METRIC, emailMarketing: false, weekStartsOn: 1, },
+        subscription: { plan: SubscriptionPlan.FREE, expiresAt: null, features: [], isActive: true, autoRenew: false, },
+        isEmailVerified: false, isActive: true,
+      };
+      const mockUserDoc = { exists: () => true, data: () => mockUserData };
+
+      mockSignInWithEmailAndPassword.mockResolvedValue(mockUserCredential);
+      mockGetDoc.mockResolvedValue(mockUserDoc);
+      mockUpdateDocLocal.mockResolvedValue(undefined);
+
+      const result = await AuthService.signIn('test@example.com', 'password123');
+
+      expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(auth, 'test@example.com', 'password123');
+
+      expect(mockDocFirestore).toHaveBeenCalledWith(db, 'users', 'test-uid');
+      const expectedDocPath = 'users/test-uid';
+      expect(mockGetDoc).toHaveBeenCalledWith(expectedDocPath);
+
+      expect(mockUpdateDocLocal).toHaveBeenCalledWith(
+        expectedDocPath,
+        { lastLoginAt: mockServerTimestampValue() }
+      );
+      expect(result).toEqual(mockUserData); // Using timestampHelpers mock, so direct compare
+    });
+
+    it('should create Firestore document if user exists in Auth but not Firestore', async () => {
+        const mockFbUser = createMockFirebaseUser('test-uid-no-fs', 'test-no-fs@example.com', 'No FS User', undefined, true);
+        const mockUserCredential = { user: mockFbUser };
+        const mockUserDocNonExistent = { exists: () => false };
+
+        mockSignInWithEmailAndPassword.mockResolvedValue(mockUserCredential);
+        mockGetDoc.mockResolvedValue(mockUserDocNonExistent);
+        mockSetDoc.mockResolvedValue(undefined);
+
+        const result = await AuthService.signIn('test-no-fs@example.com', 'password123');
+
+        expect(mockDocFirestore).toHaveBeenCalledWith(db, 'users', 'test-uid-no-fs');
+        const expectedDocPath = 'users/test-uid-no-fs';
+
+        expect(mockSetDoc).toHaveBeenCalledWith(
+          expectedDocPath,
+          expect.objectContaining({
+            id: 'test-uid-no-fs',
+            email: 'test-no-fs@example.com',
+            displayName: 'No FS User',
+            isEmailVerified: true,
+            createdAt: mockServerTimestampValue(),
+            updatedAt: mockServerTimestampValue(),
+            lastLoginAt: mockServerTimestampValue(),
+          })
+        );
+        expect(result).toMatchObject({
+          id: 'test-uid-no-fs',
+          email: 'test-no-fs@example.com',
+          displayName: 'No FS User',
+        });
+      });
+
+    it('should handle invalid credentials', async () => {
+      const mockError = { code: 'auth/wrong-password', message: 'Wrong password' };
+      mockSignInWithEmailAndPassword.mockRejectedValue(mockError);
+
+      await expect(AuthService.signIn('test@example.com', 'wrongpassword')).rejects.toMatchObject({
+        code: 'auth/wrong-password',
+        userMessage: 'Incorrect password. Please try again.',
+      });
+    });
+  });
+
+  describe('signOut (logout)', () => {
+    const mockFirebaseSignOutLocal = firebaseSignOut as jest.Mock; // Local mock for this describe block
+    it('should sign out user successfully', async () => {
+      mockFirebaseSignOutLocal.mockResolvedValue(undefined);
+      await expect(AuthService.signOut()).resolves.toBeUndefined();
+      expect(mockFirebaseSignOutLocal).toHaveBeenCalledWith(auth);
+    });
+
+    it('should handle sign out errors', async () => {
+        const mockError = { code: 'auth/generic-error', message: 'Generic sign out error' };
+        mockFirebaseSignOutLocal.mockRejectedValue(mockError);
+        await expect(AuthService.signOut()).rejects.toMatchObject({
+            code: 'auth/generic-error',
+            userMessage: 'An unexpected error occurred. Please try again.',
+        });
+    });
+  });
+
+  describe('resetPassword', () => {
+    const mockSendPasswordResetEmailLocal = sendPasswordResetEmail as jest.Mock; // Local mock
+    it('should send password reset email successfully', async () => {
+      mockSendPasswordResetEmailLocal.mockResolvedValue(undefined);
+      await expect(AuthService.resetPassword('test@example.com')).resolves.toBeUndefined();
+      expect(mockSendPasswordResetEmailLocal).toHaveBeenCalledWith(auth, 'test@example.com');
+    });
+
+    it('should handle invalid email for password reset', async () => {
+      const mockError = { code: 'auth/user-not-found', message: 'User not found' };
+      mockSendPasswordResetEmailLocal.mockRejectedValue(mockError);
+      await expect(AuthService.resetPassword('nonexistent@example.com')).rejects.toMatchObject({
+        code: 'auth/user-not-found',
+        userMessage: 'No account found with this email address.',
+      });
+    });
+  });
+
+  describe('updateUserProfile', () => {
+    const mockUpdateDocLocal = updateDoc as jest.Mock; // Local mock
+
+    it('should update user profile in Firestore successfully', async () => {
+      mockUpdateDocLocal.mockResolvedValue(undefined);
+      const updates = { displayName: 'New Name', photoURL: 'new-photo.jpg' };
+
+      await AuthService.updateUserProfile('test-user-id', updates);
+
+      expect(mockDocFirestore).toHaveBeenCalledWith(db, 'users', 'test-user-id');
+      const expectedDocPath = 'users/test-user-id';
+      expect(mockUpdateDocLocal).toHaveBeenCalledWith(
+        expectedDocPath,
+        {
+          displayName: 'New Name',
+          photoURL: 'new-photo.jpg',
+          updatedAt: mockServerTimestampValue(),
+        }
+      );
+    });
+
+    it('should handle errors when updating profile', async () => {
+      const mockError = { code: 'firestore/permission-denied', message: 'Permission denied' };
+      mockUpdateDocLocal.mockRejectedValue(mockError);
+      const updates = { displayName: 'New Name' };
+
+      // Note: The current handleAuthError in AuthService does not have specific cases for Firestore errors like 'firestore/permission-denied'.
+      // It will fall into the default userMessage.
+      await expect(AuthService.updateUserProfile('test-user-id', updates)).rejects.toMatchObject({
+        code: 'firestore/permission-denied',
+        userMessage: 'An unexpected error occurred. Please try again.',
+      });
+    });
+  });
+});

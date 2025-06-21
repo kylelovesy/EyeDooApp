@@ -69,10 +69,7 @@ export default function LoginScreen() {
         { duration: 2000 }
       );
       
-      // Navigate after a brief moment to show the success toast
-      setTimeout(() => {
-        router.replace('/(app)/projects');
-      }, 1000);
+      router.replace('/(app)/projects');
       
     } catch (error: any) {
       // Show error toast instead of Alert
