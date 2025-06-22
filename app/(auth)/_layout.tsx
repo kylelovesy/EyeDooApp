@@ -14,7 +14,7 @@ export default function AuthLayout() {
   return (
     <SafeAreaView style={{ 
         flex: 1, 
-        backgroundColor: theme.colors.background 
+        backgroundColor: theme.colors.surface
         }}>
       <Stack
         screenOptions={{

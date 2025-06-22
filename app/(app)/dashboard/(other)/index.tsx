@@ -2,9 +2,10 @@
 // # 4.4.0 Notes tab (default)
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import DashboardAppBar, { NavigationProp, SubPage } from '../../../../components/navigation/DashboardAppbar';
+import { Screen } from '../../../../components/ui/Screen';
 
 // Define your subpages for dashboard
 const otherSubPages = [
@@ -32,7 +33,7 @@ export default function DashboardOtherScreen() {
     return subPage.id !== currentId;
   };
     return (
-    <View style={{ flex: 1 }}>
+    <Screen contentContainerStyle={{ padding: 0 }}>
       <DashboardAppBar
         navigation={navigation}
         title="Notes"
@@ -49,7 +50,7 @@ export default function DashboardOtherScreen() {
           </Card.Content>
         </Card>
       </ScrollView>
-    </View>
+    </Screen>
   );
 }
 

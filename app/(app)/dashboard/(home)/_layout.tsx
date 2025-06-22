@@ -14,7 +14,7 @@ export default function HomeLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false, // We'll use our custom AppBar instead
+        headerShown: false // We'll use our custom AppBar instead
       }}
     >
       <Stack.Screen name="index" />

@@ -41,6 +41,7 @@ export const useForm2 = (): Form2ContextType => {
 
 // Keep backward compatibility
 export const TimelineFormProvider = Form2Provider;
+export const Form2TimelineProvider = Form2Provider;
 export const useTimelineForm = useForm2;
 
 

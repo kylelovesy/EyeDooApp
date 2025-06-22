@@ -5,8 +5,10 @@ export default function AppLayout() {
   return (
     <FormProviders.All>
       <Stack screenOptions={{ headerShown: false }}>
+        {/* <Stack.Screen name="theming" /> */}
         <Stack.Screen name="projects" />
         <Stack.Screen name="dashboard" />
+        
       </Stack>
     </FormProviders.All>
   );

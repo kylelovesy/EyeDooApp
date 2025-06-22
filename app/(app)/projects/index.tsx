@@ -3,7 +3,6 @@ import { router, Stack } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Button, Dialog, FAB, HelperText, IconButton, Portal, Text, TextInput } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { ProjectFormProvider, useForm1 } from '../../../contexts/Form1EssentialInfoContext';
@@ -14,7 +13,8 @@ import { EssentialInfoFormModal } from '../../../components/modals/EssentialInfo
 import { CustomButton } from '../../../components/ui/CustomButton';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { LoadingState } from '../../../components/ui/LoadingState';
-import { BodyText, HeadlineText } from '../../../components/ui/Typography';
+import { Screen } from '../../../components/ui/Screen';
+import { DisplayText, TitleText } from '../../../components/ui/Typography';
 import { spacing, useAppTheme } from '../../../constants/theme';
 import { Project } from '../../../types/project';
 
@@ -50,7 +50,15 @@ const ProjectsScreen = () => {
   const handleLaunchProject = () => {
     if (!activeProject) return;
     setCurrentProjectById(activeProject.id);
-    router.push('/(app)/dashboard/(home)');
+     // --- CHANGE THIS LINE ---
+    // From:
+    // router.push('/(app)/dashboard/(home)');
+    
+    // To this, which passes the projectId as a parameter:
+    router.push({
+        pathname: '/(app)/dashboard/(home)',
+        params: { projectId: activeProject.id },
+      });
   };
 
   const handleCreateProject = () => {
@@ -106,7 +114,7 @@ const ProjectsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Screen style={styles.safeArea} edges={['top', 'left', 'right']} padding="sm" statusBarStyle="auto" scrollable={true}>
         <Stack.Screen options={{ headerShown: false }} />
         
         <IconButton
@@ -117,8 +125,8 @@ const ProjectsScreen = () => {
         />
 
         <View style={styles.header}>
-            <HeadlineText>My Projects</HeadlineText>
-            <BodyText style={{color: theme.colors.onSurfaceVariant}}>{getStatusText()}</BodyText>
+            <DisplayText size="medium">My Projects</DisplayText>
+            <TitleText size="medium" style={{color: theme.colors.onSurfaceVariant}}>{getStatusText()}</TitleText>
         </View>
 
         {projects.length === 0 ? (
@@ -147,6 +155,7 @@ const ProjectsScreen = () => {
                             project={item}
                             onPress={() => handleProjectPress(item)}
                             isActive={activeProject?.id === item.id}
+                                style={{ marginTop: spacing.md }}
                         />
                     )}
                     keyExtractor={item => item.id}
@@ -202,7 +211,7 @@ const ProjectsScreen = () => {
                 </Dialog.Actions>
             </Dialog>
         </Portal>
-    </SafeAreaView>
+    </Screen>
   );
 };
 
@@ -219,7 +228,7 @@ const styles = StyleSheet.create({
   },
   header: {
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xl, // Increased top padding to make space for sign out button
+      paddingTop: spacing.md,
       paddingBottom: spacing.md,
       borderBottomWidth: 1,
       borderBottomColor: '#e0e0e0',

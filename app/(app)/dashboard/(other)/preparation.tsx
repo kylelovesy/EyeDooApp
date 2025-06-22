@@ -1,11 +1,12 @@
 // # 4.4 Other Tab
 // # 4.4.3 Preparation tab
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 
 import { useRouter } from 'expo-router';
 import { Card } from 'react-native-paper';
 import DashboardAppBar, { NavigationProp, SubPage } from '../../../../components/navigation/DashboardAppbar';
+import { Screen } from '../../../../components/ui/Screen';
 import { BodyText, HeadlineText } from '../../../../components/ui/Typography';
 import { otherSubPages } from './_layout';
 
@@ -27,7 +28,7 @@ export default function PreperationScreen() {
     return subPage.id !== currentId;
   };
   return (
-    <View style={{ flex: 1 }}>
+    <Screen contentContainerStyle={{ padding: 0 }}>
       <DashboardAppBar
         navigation={navigation}
         title="Preparation"
@@ -44,7 +45,7 @@ export default function PreperationScreen() {
           </Card.Content>
         </Card>
       </ScrollView>
-    </View>
+    </Screen>
   );
 }
 // import React from 'react';

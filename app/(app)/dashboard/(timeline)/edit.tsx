@@ -1,11 +1,12 @@
 // # 4.2 Timeline Tab
 // # 4.2.2 Edit/Update tab
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 
 import { useRouter } from 'expo-router';
 import { Card } from 'react-native-paper';
 import DashboardAppBar, { NavigationProp, SubPage } from '../../../../components/navigation/DashboardAppbar';
+import { Screen } from '../../../../components/ui/Screen';
 import { BodyText, HeadlineText } from '../../../../components/ui/Typography';
 import { timelineSubPages } from './_layout';
 
@@ -26,7 +27,7 @@ export default function EditScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <Screen contentContainerStyle={{ padding: 0 }}>
       <DashboardAppBar
         navigation={navigation}
         title="Edit/Update"
@@ -43,7 +44,7 @@ export default function EditScreen() {
           </Card.Content>
         </Card>
       </ScrollView>
-    </View>
+    </Screen>
   );
 }
 // import React from 'react';

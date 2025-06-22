@@ -1,10 +1,19 @@
+import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+// import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { PaperProvider } from 'react-native-paper'; // Import PaperProvider
+// import { PaperProvider } from 'react-native-paper';
 import { enGB, registerTranslation } from 'react-native-paper-dates';
+// import { darkTheme, lightTheme } from '../constants/theme';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { fontAssets } from '../constants/typography';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
-import { ProjectProvider } from '../contexts/ProjectContext';
+import { ThemeProvider } from '../contexts/ThemeContext';
+// import { ThemeProvider } from '../contexts/ThemeContext';
+
+SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
   const { user, loading } = useAuth();
@@ -31,22 +40,51 @@ const InitialLayout = () => {
 };
 
 const RootLayout = () => {
+  const [fontsLoaded] = useFonts(fontAssets);
+  // const colorScheme = useColorScheme();
+  // const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    // Wrap the entire app in GestureHandlerRootView for gesture support
-    <GestureHandlerRootView style={{ flex: 1 }}>
-        {/* **FIXED**: PaperProvider must wrap everything for dropdowns and other components to work correctly */}
-        <PaperProvider>
-            <AuthProvider>
-                <ProjectProvider>
-                    <InitialLayout />
-                </ProjectProvider>
-            </AuthProvider>
-        </PaperProvider>
-    </GestureHandlerRootView>
+   <GestureHandlerRootView style={{ flex: 1 }}>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <InitialLayout />
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
+   </GestureHandlerRootView>
   );
 };
 
 export default RootLayout;
+
+// return (
+//   // Wrap the entire app in GestureHandlerRootView for gesture support
+//   <GestureHandlerRootView style={{ flex: 1 }}>
+//     {/* <ThemeProvider>
+//       <AuthProvider>
+//         <InitialLayout />
+//       </AuthProvider>
+//     </ThemeProvider> */}
+//     <PaperProvider theme={theme}>
+//       <AuthProvider>
+//         <InitialLayout />
+//       </AuthProvider>
+//     </PaperProvider>
+//   </GestureHandlerRootView>
+// );
+
 
 // // # Root layout
 // // Authentication check and global providers

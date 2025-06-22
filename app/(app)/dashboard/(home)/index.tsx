@@ -1,20 +1,78 @@
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, View } from 'react-native';
-import { Card, Text } from 'react-native-paper';
-import DashboardAppBar, { NavigationProp } from '../../../../components/navigation/DashboardAppbar';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Button, Card, Divider, useTheme } from 'react-native-paper';
 
-// Define your subpages for dashboard
+import { PeopleFormModal } from '../../../../components/modals/PeopleForm';
+import { PhotosFormModal } from '../../../../components/modals/PhotosForm';
+import { TimelineFormModal } from '../../../../components/modals/TimelineForm';
+import DashboardAppBar, {
+  NavigationProp,
+} from '../../../../components/navigation/DashboardAppbar';
+import { EmptyState } from '../../../../components/ui/EmptyState';
+import { Screen } from '../../../../components/ui/Screen';
+import {
+  BodyText,
+  HeadlineText,
+  TitleText,
+} from '../../../../components/ui/Typography';
+import { spacing } from '../../../../constants/theme';
+import {
+  useForm2
+} from '../../../../contexts/Form2TimelineContext';
+import {
+  useForm3
+} from '../../../../contexts/Form3PersonaContext';
+import {
+  useForm4Photos
+} from '../../../../contexts/Form4PhotosContext';
+import { useProjects } from '../../../../contexts/ProjectContext';
+import { convertFirestoreTimestamp } from '../../../../services/utils/timestampHelpers';
+
 const homeSubPages = [
-  { id: 'index', title: 'Home', iconName: 'home', route: '/(app)/dashboard/(home)' },
-  { id: 'key-people', title: 'Key People', iconName: 'key', route: '/(app)/dashboard/(home)/key-people' },
-  { id: 'directions', title: 'Directions', iconName: 'directions', route: '/(app)/dashboard/(home)/directions' },
+  {
+    id: 'index',
+    title: 'Home',
+    iconName: 'home',
+    route: '/(app)/dashboard/(home)',
+  },
+  {
+    id: 'key-people',
+    title: 'Key People',
+    iconName: 'key',
+    route: '/(app)/dashboard/(home)/key-people',
+  },
+  {
+    id: 'directions',
+    title: 'Directions',
+    iconName: 'directions',
+    route: '/(app)/dashboard/(home)/directions',
+  },
 ];
 
-export default function DashboardHomeScreen() {
+
+const DashboardHomeScreen = () => {
   const router = useRouter();
-  
-  // Create navigation object that matches the expected interface
+  const theme = useTheme();
+
+  // Get the projectId passed from the projects screen
+  const { projectId } = useLocalSearchParams<{ projectId?: string }>();
+
+  // Get the state and the setter function from the context
+  const { currentProject, setCurrentProjectById } = useProjects();
+
+  const timelineModal = useForm2();
+  const peopleModal = useForm3();
+  const photosModal = useForm4Photos();
+
+// This effect runs when the screen loads or when the projectId parameter changes.
+  // It ensures the correct project is set in the context.
+  useEffect(() => {
+    if (projectId) {
+      setCurrentProjectById(projectId);
+    }
+  }, [projectId, setCurrentProjectById]);
+
   const navigation: NavigationProp = {
     goBack: () => router.back(),
     navigate: (route: string) => router.push(route as any),
@@ -22,328 +80,414 @@ export default function DashboardHomeScreen() {
     replace: (route: string) => router.replace(route as any),
   };
 
+  if (!currentProject) {
+    return (
+      <Screen backgroundColor={theme.colors.background}>
+        <DashboardAppBar
+          navigation={navigation}
+          title="Dashboard"
+          subPages={homeSubPages}
+          currentSubPageId="index"
+        />
+        <EmptyState
+          title="No Project Selected"
+          description="Please select a project from the projects screen to view the dashboard."
+        />
+      </Screen>
+    );
+  }
+
+  const { form1, form2, form3, form4 } = currentProject;
+
+  const getProgressStatus = () => {
+    return {
+      timeline: form2?.events && form2.events.length > 0,
+      people: form3?.immediateFamily && form3.immediateFamily.length > 0,
+      photos: form4?.groupShots && form4.groupShots.length > 0,
+    };
+  };
+  const progress = getProgressStatus();
+
   return (
-    <View style={{ flex: 1 }}>
+    <Screen style={styles.safeArea} padding="sm" statusBarStyle="auto" scrollable={true}>
+    {/* <Screen backgroundColor={theme.colors.background}> */}
       <DashboardAppBar
         navigation={navigation}
         title="Dashboard"
         subPages={homeSubPages}
         currentSubPageId="index"
+        style={{ padding: 8 }}
       />
-      <ScrollView style={{ flex: 1, padding: 16 }}>
-        <Text variant="headlineMedium">Dashboard Overview</Text>
-        <Card style={{ marginTop: 16 }}>
+      {/* <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}> */}
+        <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
           <Card.Content>
-            <Text>Dashboard content goes here...</Text>
+            <HeadlineText>{form1.projectName}</HeadlineText>
+            <BodyText>
+              {form1.personA.firstName} & {form1.personB.firstName}
+            </BodyText>
+            {form1.eventDate && (
+              <BodyText>
+                {convertFirestoreTimestamp(
+                  form1.eventDate
+                ).toLocaleDateString()}
+              </BodyText>
+            )}
           </Card.Content>
         </Card>
-      </ScrollView>
-    </View>
+
+        <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+          <Card.Title title="Quick Actions" />
+          <Card.Content>
+            <View style={styles.actionItem}>
+              <View style={styles.actionText}>
+                <TitleText>Timeline</TitleText>
+                <BodyText>
+                  {progress.timeline
+                    ? `${form2?.events?.length || 0} events`
+                    : 'Not started'}
+                </BodyText>
+              </View>
+              <Button
+                mode="contained"
+                onPress={() => timelineModal.openModal(currentProject)}
+                style={{ backgroundColor: theme.colors.primary }}
+              >
+                {progress.timeline ? 'Edit' : 'Setup'}
+              </Button>
+            </View>
+            <Divider style={styles.divider} />
+            <View style={styles.actionItem}>
+              <View style={styles.actionText}>
+                <TitleText>Key People</TitleText>
+                <BodyText>
+                  {progress.people
+                    ? `${form3?.immediateFamily?.length || 0} people`
+                    : 'Not started'}
+                </BodyText>
+              </View>
+              <Button
+                mode="contained"
+                onPress={() => peopleModal.openModal(currentProject)}
+                style={{ backgroundColor: theme.colors.primary }}
+              >
+                {progress.people ? 'Edit' : 'Add'}
+              </Button>
+            </View>
+            <Divider style={styles.divider} />
+            <View style={styles.actionItem}>
+              <View style={styles.actionText}>
+                <TitleText>Photo Requirements</TitleText>
+                <BodyText>
+                  {progress.photos
+                    ? `${form4?.groupShots?.length || 0} group shots`
+                    : 'Not started'}
+                </BodyText>
+              </View>
+              <Button
+                mode="contained"
+                onPress={() => photosModal.openModal(currentProject)}
+                style={{ backgroundColor: theme.colors.primary }}
+              >
+                {progress.photos ? 'Edit' : 'Add'}
+              </Button>
+            </View>
+          </Card.Content>
+        </Card>
+      {/* </ScrollView> */}
+      <TimelineFormModal />
+      <PeopleFormModal />
+      <PhotosFormModal />
+    </Screen>
   );
-}
+};
+
+const styles = StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: '#fcfcff',
+    },
+    signOutButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 1,
+    },
+    header: {
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0',
+    },
+    centeredContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: spacing.lg,
+    },
+    createProjectButton: {
+        marginTop: spacing.xl,
+        width: '80%',
+    },
+    list: {
+      paddingBottom: 100,
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: spacing.md,
+        backgroundColor: '#fcfcff',
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0'
+    },
+    fab: {
+      position: 'absolute',
+      margin: 16,
+      right: 0,
+    },
+  // });
+  
+  container: {
+    flex: 1,
+    padding: spacing.md,
+  },
+  card: {
+    marginBottom: spacing.md,
+  },
+  actionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  actionText: {
+    flex: 1,
+  },
+  divider: {
+    marginVertical: spacing.xs,
+  },
+});
+
+export default DashboardHomeScreen;
+
+// import { useRouter } from 'expo-router';
 // import React from 'react';
 // import { ScrollView, StyleSheet, View } from 'react-native';
-// import { Card, Divider, FAB, Text } from 'react-native-paper';
-// import { usePeopleModal, usePhotosModal, useTimelineModal } from '../../../../components/FormModals';
-// import { CustomButton } from '../../../../components/ui/CustomButton';
-// import { BodyText, HeadlineText, TitleText } from '../../../../components/ui/Typography';
-// import { spacing, useAppTheme } from '../../../../constants/theme';
+// import { Button, Card, Divider } from 'react-native-paper';
+
+// import { PeopleFormModal } from '../../../../components/modals/PeopleForm';
+// import { PhotosFormModal } from '../../../../components/modals/PhotosForm';
+// import { TimelineFormModal } from '../../../../components/modals/TimelineForm';
+// import DashboardAppBar, {
+//   NavigationProp,
+// } from '../../../../components/navigation/DashboardAppbar';
+// import { EmptyState } from '../../../../components/ui/EmptyState';
+// import { Screen } from '../../../../components/ui/Screen';
+// import {
+//   BodyText,
+//   HeadlineText,
+//   TitleText,
+// } from '../../../../components/ui/Typography';
+// import { spacing } from '../../../../constants/theme';
+// import {
+//   Form2TimelineProvider,
+//   useForm2,
+// } from '../../../../contexts/Form2TimelineContext';
+// import {
+//   Form3PersonaProvider,
+//   useForm3,
+// } from '../../../../contexts/Form3PersonaContext';
+// import {
+//   Form4PhotosProvider,
+//   useForm4Photos,
+// } from '../../../../contexts/Form4PhotosContext';
 // import { useProjects } from '../../../../contexts/ProjectContext';
+// import { convertFirestoreTimestamp } from '../../../../services/utils/timestampHelpers';
 
-// import React from 'react';
-// import { ScrollView, View } from 'react-native';
-// import { Card } from 'react-native-paper';
+// const homeSubPages = [
+//   {
+//     id: 'index',
+//     title: 'Home',
+//     iconName: 'home',
+//     route: '/(app)/dashboard/(home)',
+//   },
+//   {
+//     id: 'key-people',
+//     title: 'Key People',
+//     iconName: 'key',
+//     route: '/(app)/dashboard/(home)/key-people',
+//   },
+//   {
+//     id: 'directions',
+//     title: 'Directions',
+//     iconName: 'directions',
+//     route: '/(app)/dashboard/(home)/directions',
+//   },
+// ];
 
-// import { usePathname, useRouter } from 'expo-router';
-// import DashboardAppBar, { SubPage } from '../../../../components/navigation/DashboardAppbar';
-// import { BodyText, HeadlineText } from '../../../../components/ui/Typography';
-// import { homeSubPages } from './_layout';
+// const DashboardHomeScreenWrapper = () => (
+//   <Form2TimelineProvider>
+//     <Form3PersonaProvider>
+//       <Form4PhotosProvider>
+//         <DashboardHomeScreen />
+//       </Form4PhotosProvider>
+//     </Form3PersonaProvider>
+//   </Form2TimelineProvider>
+// );
 
-
-// export default function HomeGeneralScreen() {
+// const DashboardHomeScreen = () => {
 //   const router = useRouter();
-//   const pathname = usePathname();
-  
-//   // Create a navigation-like object for the AppBar
-//   const navigation = {
-//     goBack: () => router.back(),
-//     navigate: (route: string) => router.push(route),
-//   };
-//    // Custom visibility logic: hide cart and wishlist when cart is empty
-//    const customVisibility = (subPage: SubPage, currentId: string): boolean => {
-//     if ( subPage.id === 'home') {
-//       return false;
-//     }
-//     return subPage.id !== currentId;
-//   };
-
-//   return (
-//     <View style={{ flex: 1 }}>
-//       <DashboardAppBar
-//         navigation={navigation}
-//         title="Home"
-//         subPages={homeSubPages}
-//         currentSubPageId="home"
-//         isIconVisible={customVisibility}
-//       />
-//       <ScrollView style={{ flex: 1, padding: 16 }}>
-//       <HeadlineText size="large">Home</HeadlineText>
-//         <Card style={{ marginTop: 16 }}>
-//           <Card.Content>
-//             <BodyText>Home content goes here...</BodyText>
-//           </Card.Content>
-//         </Card>
-//       </ScrollView>
-//     </View>
-//   );
-// }
-//   const theme = useAppTheme();
-//   const styles = createThemedStyles(theme);
-  
-//   // Get current project and functions
 //   const { currentProject } = useProjects();
-  
-//   // Get modal controls using the standardized hooks
-//   const timelineModal = useTimelineModal();
-//   const peopleModal = usePeopleModal();
-//   const photosModal = usePhotosModal();
+
+//   const timelineModal = useForm2();
+//   const peopleModal = useForm3();
+//   const photosModal = useForm4Photos();
+
+//   const navigation: NavigationProp = {
+//     goBack: () => router.back(),
+//     navigate: (route: string) => router.push(route as any),
+//     push: (route: string) => router.push(route as any),
+//     replace: (route: string) => router.replace(route as any),
+//   };
 
 //   if (!currentProject) {
 //     return (
-//       <View style={styles.container}>
-//         <View style={styles.emptyState}>
-//           <HeadlineText size="medium" style={styles.emptyTitle}>
-//             No Project Selected
-//           </HeadlineText>
-//           <BodyText size="large" style={styles.emptySubtitle}>
-//             Please select a project from the projects screen to view the dashboard.
-//           </BodyText>
-//         </View>
-//       </View>
+//       <Screen>
+//         <DashboardAppBar
+//           navigation={navigation}
+//           title="Dashboard"
+//           subPages={homeSubPages}
+//           currentSubPageId="index"
+//         />
+//         <EmptyState
+//           title="No Project Selected"
+//           description="Please select a project from the projects screen to view the dashboard."
+//         />
+//       </Screen>
 //     );
 //   }
 
 //   const { form1, form2, form3, form4 } = currentProject;
 
+//   const getProgressStatus = () => {
+//     return {
+//       timeline: form2?.events && form2.events.length > 0,
+//       people: form3?.immediateFamily && form3.immediateFamily.length > 0,
+//       photos: form4?.groupShots && form4.groupShots.length > 0,
+//     };
+//   };
+//   const progress = getProgressStatus();
+
 //   return (
-//     <View style={styles.container}>
-//       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-//         {/* Project Header */}
-//         <Card style={styles.headerCard}>
+//     <Screen>
+//       <DashboardAppBar
+//         navigation={navigation}
+//         title="Dashboard"
+//         subPages={homeSubPages}
+//         currentSubPageId="index"
+//       />
+//       <ScrollView style={styles.container}>
+//         <Card style={styles.card}>
 //           <Card.Content>
-//             <HeadlineText size="large" style={styles.projectTitle}>
+//             <HeadlineText>{form1.projectName}</HeadlineText>
+//             <BodyText>
 //               {form1.personA.firstName} & {form1.personB.firstName}
-//             </HeadlineText>
-//             <BodyText size="large" style={styles.projectSubtitle}>
-//               {form1.projectType} • {form1.projectStatus}
 //             </BodyText>
 //             {form1.eventDate && (
-//               <BodyText size="medium" style={styles.projectDate}>
-//                 {new Date(form1.eventDate instanceof Date ? form1.eventDate : new Date(form1.eventDate)).toLocaleDateString()}
+//               <BodyText>
+//                 {convertFirestoreTimestamp(
+//                   form1.eventDate
+//                 ).toLocaleDateString()}
 //               </BodyText>
 //             )}
 //           </Card.Content>
 //         </Card>
 
-//         {/* Quick Actions */}
-//         <Card style={styles.actionsCard}>
+//         <Card style={styles.card}>
+//           <Card.Title title="Quick Actions" />
 //           <Card.Content>
-//             <TitleText size="large" style={styles.sectionTitle}>Quick Actions</TitleText>
-//             <Divider style={styles.divider} />
-            
-//             <View style={styles.actionGrid}>
-//               <CustomButton
-//                 title="Edit Timeline"
-//                 variant="outline"
-//                 size="medium"
+//             <View style={styles.actionItem}>
+//               <View style={styles.actionText}>
+//                 <TitleText>Timeline</TitleText>
+//                 <BodyText>
+//                   {progress.timeline
+//                     ? `${form2?.events?.length || 0} events`
+//                     : 'Not started'}
+//                 </BodyText>
+//               </View>
+//               <Button
+//                 mode="contained"
 //                 onPress={() => timelineModal.openModal(currentProject)}
-//                 icon="clock"
-//                 style={styles.actionButton}
-//               />
-              
-//               <CustomButton
-//                 title="Manage People"
-//                 variant="outline"
-//                 size="medium"
-//                 onPress={() => peopleModal.openModal(currentProject)}
-//                 icon="account-group"
-//                 style={styles.actionButton}
-//               />
-              
-//               <CustomButton
-//                 title="Photo Requirements"
-//                 variant="outline"
-//                 size="medium"
-//                 onPress={() => photosModal.openModal(currentProject)}
-//                 icon="camera"
-//                 style={styles.actionButton}
-//               />
+//               >
+//                 {progress.timeline ? 'Edit' : 'Setup'}
+//               </Button>
 //             </View>
-//           </Card.Content>
-//         </Card>
-
-//         {/* Project Overview */}
-//         <Card style={styles.overviewCard}>
-//           <Card.Content>
-//             <TitleText size="large" style={styles.sectionTitle}>Project Overview</TitleText>
 //             <Divider style={styles.divider} />
-            
-//             <View style={styles.statRow}>
-//               <View style={styles.statItem}>
-//                 <Text variant="titleLarge" style={styles.statNumber}>
-//                   {form2.events?.length || 0}
-//                 </Text>
-//                 <Text variant="bodyMedium" style={styles.statLabel}>
-//                   Timeline Events
-//                 </Text>
+//             <View style={styles.actionItem}>
+//               <View style={styles.actionText}>
+//                 <TitleText>Key People</TitleText>
+//                 <BodyText>
+//                   {progress.people
+//                     ? `${form3?.immediateFamily?.length || 0} people`
+//                     : 'Not started'}
+//                 </BodyText>
 //               </View>
-              
-//               <View style={styles.statItem}>
-//                 <Text variant="titleLarge" style={styles.statNumber}>
-//                   {(form3.immediateFamily?.length || 0) + 
-//                    (form3.extendedFamily?.length || 0) + 
-//                    (form3.weddingParty?.length || 0)}
-//                 </Text>
-//                 <Text variant="bodyMedium" style={styles.statLabel}>
-//                   People
-//                 </Text>
+//               <Button
+//                 mode="contained"
+//                 onPress={() => peopleModal.openModal(currentProject)}
+//               >
+//                 {progress.people ? 'Edit' : 'Add'}
+//               </Button>
+//             </View>
+//             <Divider style={styles.divider} />
+//             <View style={styles.actionItem}>
+//               <View style={styles.actionText}>
+//                 <TitleText>Photo Requirements</TitleText>
+//                 <BodyText>
+//                   {progress.photos
+//                     ? `${form4?.groupShots?.length || 0} group shots`
+//                     : 'Not started'}
+//                 </BodyText>
 //               </View>
-              
-//               <View style={styles.statItem}>
-//                 <Text variant="titleLarge" style={styles.statNumber}>
-//                   {(form4.groupShots?.length || 0) + 
-//                    (form4.coupleShots?.length || 0)}
-//                 </Text>
-//                 <Text variant="bodyMedium" style={styles.statLabel}>
-//                   Photo Requirements
-//                 </Text>
-//               </View>
+//               <Button
+//                 mode="contained"
+//                 onPress={() => photosModal.openModal(currentProject)}
+//               >
+//                 {progress.photos ? 'Edit' : 'Add'}
+//               </Button>
 //             </View>
 //           </Card.Content>
 //         </Card>
-
-//         {/* Notes Section */}
-//         {form1.notes && (
-//           <Card style={styles.notesCard}>
-//             <Card.Content>
-//               <TitleText size="large" style={styles.sectionTitle}>Project Notes</TitleText>
-//               <Divider style={styles.divider} />
-//               <BodyText size="medium" style={styles.notesText}>
-//                 {form1.notes}
-//               </BodyText>
-//             </Card.Content>
-//           </Card>
-//         )}
 //       </ScrollView>
-
-//       {/* Floating Action Button for quick timeline edit */}
-//       <FAB
-//         style={styles.fab}
-//         size="medium"
-//         icon="clock"
-//         onPress={() => timelineModal.openModal(currentProject)}
-//         label="Timeline"
-//       />
-//     </View>
+//       <TimelineFormModal />
+//       <PeopleFormModal />
+//       <PhotosFormModal />
+//     </Screen>
 //   );
-// }
+// };
 
-// const createThemedStyles = (theme: any) =>
-//   StyleSheet.create({
-//     container: {
-//       flex: 1,
-//       backgroundColor: theme.colors.background,
-//     },
-//     scrollView: {
-//       flex: 1,
-//       padding: spacing.md,
-//     },
-//     emptyState: {
-//       flex: 1,
-//       justifyContent: 'center',
-//       alignItems: 'center',
-//       padding: spacing.xl,
-//     },
-//     emptyTitle: {
-//       color: theme.colors.onSurface,
-//       marginBottom: spacing.sm,
-//       textAlign: 'center',
-//     },
-//     emptySubtitle: {
-//       color: theme.colors.onSurfaceVariant,
-//       textAlign: 'center',
-//     },
-//     headerCard: {
-//       marginBottom: spacing.md,
-//       backgroundColor: theme.colors.primaryContainer,
-//     },
-//     projectTitle: {
-//       color: theme.colors.onPrimaryContainer,
-//       marginBottom: spacing.xs,
-//     },
-//     projectSubtitle: {
-//       color: theme.colors.onPrimaryContainer,
-//       opacity: 0.8,
-//       marginBottom: spacing.xs,
-//     },
-//     projectDate: {
-//       color: theme.colors.onPrimaryContainer,
-//       opacity: 0.7,
-//     },
-//     actionsCard: {
-//       marginBottom: spacing.md,
-//       backgroundColor: theme.colors.surface,
-//     },
-//     overviewCard: {
-//       marginBottom: spacing.md,
-//       backgroundColor: theme.colors.surface,
-//     },
-//     notesCard: {
-//       marginBottom: spacing.xl,
-//       backgroundColor: theme.colors.surface,
-//     },
-//     sectionTitle: {
-//       color: theme.colors.onSurface,
-//       marginBottom: spacing.sm,
-//     },
-//     divider: {
-//       marginBottom: spacing.md,
-//       backgroundColor: theme.colors.outline,
-//     },
-//     actionGrid: {
-//       flexDirection: 'row',
-//       flexWrap: 'wrap',
-//       gap: spacing.sm,
-//       justifyContent: 'space-between',
-//     },
-//     actionButton: {
-//       flex: 1,
-//       minWidth: '30%',
-//     },
-//     statRow: {
-//       flexDirection: 'row',
-//       justifyContent: 'space-around',
-//     },
-//     statItem: {
-//       alignItems: 'center',
-//     },
-//     statNumber: {
-//       color: theme.colors.primary,
-//       fontWeight: 'bold',
-//     },
-//     statLabel: {
-//       color: theme.colors.onSurfaceVariant,
-//       textAlign: 'center',
-//     },
-//     notesText: {
-//       color: theme.colors.onSurface,
-//       lineHeight: 20,
-//     },
-//     fab: {
-//       position: 'absolute',
-//       margin: spacing.md,
-//       right: 0,
-//       bottom: 0,
-//       backgroundColor: theme.colors.primary,
-//     },
-//   });
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     padding: spacing.md,
+//   },
+//   card: {
+//     marginBottom: spacing.md,
+//   },
+//   actionItem: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     paddingVertical: spacing.sm,
+//   },
+//   actionText: {
+//     flex: 1,
+//   },
+//   divider: {
+//     marginVertical: spacing.xs,
+//   },
+// });
+
+// export default DashboardHomeScreenWrapper;

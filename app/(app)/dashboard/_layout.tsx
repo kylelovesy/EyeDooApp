@@ -23,6 +23,25 @@ export default function DashboardLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: theme.colors.background,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.outline,
+          height: 85,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarLabelStyle: {
+          ...typography.bodyMedium,
+          color: theme.colors.onSurfaceVariant,
+        },
+      }}
+    >
+      {/* <Tabs
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
@@ -40,7 +59,7 @@ export default function DashboardLayout() {
             color: theme.colors.onSurfaceVariant,
           },
         }}
-      >
+      > */}
         <Tabs.Screen
           name="(home)"
           options={{

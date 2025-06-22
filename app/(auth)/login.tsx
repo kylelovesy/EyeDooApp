@@ -7,13 +7,12 @@ import { Screen } from '../../components/ui/Screen';
 import { Toast, useToast } from '../../components/ui/Toast';
 import { BodyText, HeadlineText } from '../../components/ui/Typography';
 import { commonStyles, createThemedStyles } from '../../constants/styles';
-import { useAppTheme } from '../../constants/theme';
-import { typography } from '../../constants/typography';
+import { spacing, useAppTheme } from '../../constants/theme';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginScreen() {
   const theme = useAppTheme();
-  const themedStyles = createThemedStyles(theme);
+  const styles = useStyles(theme);
   const { signIn } = useAuth();
   const { toastProps, showError, showSuccess } = useToast();
   
@@ -90,7 +89,7 @@ export default function LoginScreen() {
     <Screen 
       scrollable 
       padding="lg"
-      style={themedStyles.container}
+      // style={themedStyles.container}
     >
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -99,29 +98,17 @@ export default function LoginScreen() {
         <View style={commonStyles.authContainer}>
           {/* Header Section */}
           <View style={commonStyles.authHeader}>
-            <HeadlineText 
-              size="large" 
-              style={[
-                commonStyles.textCenter,
-                { 
-                  ...typography.headlineLarge,
-                  color: theme.colors.onBackground,
-                  marginBottom: 8,
-                }
-              ]}
+          <HeadlineText
+              size="large"
+              textAlign="center"
+              style={{ color: theme.colors.onBackground, marginBottom: spacing.sm }}
             >
               Welcome Back
             </HeadlineText>
-            <BodyText 
-              size="large" 
-              style={[
-                commonStyles.textCenter,
-                {
-                  ...typography.bodyLarge,
-                  color: theme.colors.onSurfaceVariant,
-                  opacity: 0.8,
-                }
-              ]}
+            <BodyText
+              size="large"
+              textAlign="center"
+              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}
             >
               Sign in to your EyeDooApp account
             </BodyText>
@@ -183,7 +170,7 @@ export default function LoginScreen() {
             <CustomButton
               title="Sign In"
               variant="primary"
-              size="large"
+              size="medium"
               fullWidth
               onPress={handleLogin}
               loading={loading}
@@ -198,12 +185,12 @@ export default function LoginScreen() {
               <CustomButton
                 title="Forgot Password?"
                 variant="text"
-                size="medium"
+                size="small"
                 testID="forgot-password-link"
               />
             </Link>
             
-            <Divider style={themedStyles.authDivider} />
+            <Divider style={styles.authDivider} />
             
             <View style={commonStyles.authSignupRow}>
               <BodyText 
@@ -216,7 +203,7 @@ export default function LoginScreen() {
                 <CustomButton
                   title="Sign Up"
                   variant="text"
-                  size="medium"
+                  size="small"
                   testID="signup-link"
                 />
               </Link>
@@ -230,3 +217,13 @@ export default function LoginScreen() {
     </Screen>
   );
 }
+
+const useStyles = (theme: any) => {
+  const themedStyles = createThemedStyles(theme);
+  return {
+    ...themedStyles,
+    contentContainer: {
+      ...commonStyles.authContainer,
+    },
+  };
+};

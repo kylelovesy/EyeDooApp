@@ -50,4 +50,5 @@ export const useForm3 = (): Form3ContextType => {
 
 // Keep backward compatibility
 export const PersonaFormProvider = Form3Provider;
+export const Form3PersonaProvider = Form3Provider;
 export const usePersonaForm = useForm3;
