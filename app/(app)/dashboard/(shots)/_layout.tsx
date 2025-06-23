@@ -6,9 +6,9 @@ import { SubPage } from '../../../../components/navigation/DashboardAppbar';
 
 // Define subpages for the home tab
 export const shotsSubPages: SubPage[] = [
-  { id: 'index', title: 'Groups Shots', iconName: 'photo-camera', route: '/shots' },
-  { id: 'requested', title: 'Requested Shots', iconName: 'photograph', route: '/shots/requested' },
-  { id: 'other', title: 'Other Shots', iconName: 'photo-library', route: '/shots/other' },
+  { id: 'index', title: 'Group Shots', iconName: 'camera-iris', route: '/(app)/dashboard/(shots)' },
+  { id: 'requested', title: 'Requested Shots', iconName: 'camera-account', route: '/(app)/dashboard/(shots)/requested' },
+  { id: 'other', title: 'Other Shots', iconName: 'camera-plus', route: '/(app)/dashboard/(shots)/other' },
 ];
 
 export default function ShotsLayout() {
@@ -16,6 +16,7 @@ export default function ShotsLayout() {
     <Stack
       screenOptions={{
         headerShown: false, // We'll use our custom AppBar instead
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="index" />
@@ -24,16 +25,3 @@ export default function ShotsLayout() {
     </Stack>
   );
 }
-
-// import React from 'react';
-// import { ThemedMaterialTopTabs } from '../../../../components/navigation/ThemedMaterialTopTabs';
-
-// const shotsScreens = [
-//   { name: 'index', options: { title: 'Groups' } },
-//   { name: 'requested', options: { title: 'Requested' } },
-//   { name: 'other', options: { title: 'Other' } },
-// ];
-
-// export default function ShotsLayout() {
-//   return <ThemedMaterialTopTabs screens={shotsScreens} />;
-// }

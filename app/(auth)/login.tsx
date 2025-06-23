@@ -87,8 +87,17 @@ export default function LoginScreen() {
 
   return (
     <Screen 
-      scrollable 
+      scrollable={false} 
       padding="lg"
+      safeArea={true}
+      paddingTop={spacing.md}  
+      edges={['bottom']}
+      // padding={undefined} // No padding for AppBar positioning
+      backgroundColor={theme.colors.background}
+      statusBarStyle="auto"
+      // scrollable={true}
+      // contentContainerStyle={styles.scrollContent}
+      testID="login-screen"
       // style={themedStyles.container}
     >
       <KeyboardAvoidingView 
@@ -101,14 +110,14 @@ export default function LoginScreen() {
           <HeadlineText
               size="large"
               textAlign="center"
-              style={{ color: theme.colors.onBackground, marginBottom: spacing.sm }}
+              style={{ color: theme.colors.onBackground, marginBottom: spacing.md }}
             >
               Welcome Back
             </HeadlineText>
             <BodyText
               size="large"
               textAlign="center"
-              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}
+              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8, marginBottom: spacing.sm }}
             >
               Sign in to your EyeDooApp account
             </BodyText>
@@ -131,6 +140,7 @@ export default function LoginScreen() {
               testID="login-email-input"
               style={{
                 backgroundColor: theme.colors.surface,
+                marginBottom: spacing.sm,
               }}
               theme={theme}
               outlineColor={theme.colors.outline}
@@ -159,6 +169,7 @@ export default function LoginScreen() {
               testID="login-password-input"
               style={{
                 backgroundColor: theme.colors.surface,
+                marginBottom: spacing.sm,
               }}
               theme={theme}
               outlineColor={theme.colors.outline}
@@ -185,7 +196,7 @@ export default function LoginScreen() {
               <CustomButton
                 title="Forgot Password?"
                 variant="text"
-                size="small"
+                size="large"
                 testID="forgot-password-link"
               />
             </Link>
@@ -203,7 +214,7 @@ export default function LoginScreen() {
                 <CustomButton
                   title="Sign Up"
                   variant="text"
-                  size="small"
+                  size="large"
                   testID="signup-link"
                 />
               </Link>

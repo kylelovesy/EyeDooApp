@@ -5,16 +5,17 @@ import { SubPage } from '../../../../components/navigation/DashboardAppbar';
 
 // Define subpages for the home tab
 export const homeSubPages: SubPage[] = [
-  { id: 'index', title: 'Home', iconName: 'home', route: '/home' },
-  { id: 'directions', title: 'Directions', iconName: 'directions', route: '/home/directions' },
-  { id: 'key-people', title: 'Key People', iconName: 'key', route: '/home/key-people' },
+  { id: 'index', title: 'Home', iconName: 'home', route: '/(app)/dashboard/(home)' },
+  { id: 'directions', title: 'Directions', iconName: 'directions-fork', route: '/(app)/dashboard/(home)/directions' },
+  { id: 'key-people', title: 'Key People', iconName: 'account-key', route: '/(app)/dashboard/(home)/key-people' },
 ];
 
 export default function HomeLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false // We'll use our custom AppBar instead
+        headerShown: false, // We'll use our custom AppBar instead
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="index" />

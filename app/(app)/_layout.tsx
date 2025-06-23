@@ -1,15 +1,39 @@
 import { Stack } from 'expo-router';
 import { FormProviders } from '../../contexts/ProviderWrappers';
 
+// export default function AppLayout() {
+//   const theme = useTheme();
+//   return (
+//     <FormProviders.All>
+//       <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+//         <Stack 
+//         screenOptions={{ 
+//           headerShown: false,
+//           animation: 'slide_from_right',
+//         }}>
+//           {/* <Stack.Screen name="theming" /> */}
+//           <Stack.Screen name="projects" />
+//           <Stack.Screen name="dashboard" />          
+//         </Stack>
+//       </SafeAreaView>
+//     </FormProviders.All>
+//   );
+// }
 export default function AppLayout() {
+  // const theme = useTheme();
   return (
     <FormProviders.All>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="theming" /> */}
-        <Stack.Screen name="projects" />
-        <Stack.Screen name="dashboard" />
-        
-      </Stack>
+      {/* <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}> */}
+        <Stack 
+        screenOptions={{ 
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}>
+          {/* <Stack.Screen name="theming" /> */}
+          <Stack.Screen name="projects" />
+          <Stack.Screen name="dashboard" />          
+        </Stack>
+      {/* </SafeAreaView> */}
     </FormProviders.All>
   );
 }

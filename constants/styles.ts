@@ -295,10 +295,11 @@ export const commonStyles = StyleSheet.create({
   /** Auth screen container with constrained width */
   authContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     maxWidth: 400,
     alignSelf: 'center',
     width: '100%',
+    // padding: spacing.md,
   },
   
   /** Auth form header section */
@@ -326,7 +327,82 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
+
+  // ===================
+  // PROJECTS SPECIFIC STYLES
+  // ===================
+  
+  /** Projects screen container with constrained width */
+  projectsContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
+    // padding: spacing.md,
+  },
+
+  /** Projects list header section */
+  projectsListHeader: {
+    alignItems: 'center',
+    marginBottom: spacing.xxl,
+  },
+  projectsList: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    maxWidth: 400,
+    alignSelf: 'center',
+    marginTop: spacing.sm,
+    width: '100%',
+  },
+
+  projectsFAB: {
+    position: 'absolute',
+    margin: spacing.md,
+    right: spacing.md,
+  },
+
+  projectsSignoutBtn :{
+    position: 'absolute',
+    top: spacing.xs,
+    right: spacing.xs,
+    zIndex: 1,
+  },
+
+  projectsFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: spacing.sm,
+    // borderTopWidth: 1,
+    // borderTopColor: '#e0e0e0'
+},
+
+
+  
+  /** Projects form header section */
+  // projectsHeader: {
+  //   alignItems: 'center',
+  //   marginBottom: spacing.xxl,
+  // },
+  
+  /** Projects links container */
+  // projectsLinks: {
+  //   alignItems: 'center',
+  //   marginTop: spacing.lg,
+  //   gap: spacing.md,
+  // },
+  
+  /** Projects divider with spacing */
+  // projectsDivider: {
+  //   width: '100%',
+  //   marginVertical: spacing.sm,
+  // },
+  
+
 });
+
 
 /**
  * Helper function to create theme-aware styles

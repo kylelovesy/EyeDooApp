@@ -10,9 +10,9 @@ import { Screen } from '../../../../components/ui/Screen';
 
 // Define your subpages for dashboard
 const shotsSubPages = [
-  { id: 'index', title: 'Groups Shots', iconName: 'photo-camera', route: '/shots' },
-  { id: 'requested', title: 'Requested Shots', iconName: 'photograph', route: '/shots/requested' },
-  { id: 'other', title: 'Other Shots', iconName: 'photo-library', route: '/shots/other' },
+  { id: 'index', title: 'Group Shots', iconName: 'camera-iris', route: '/(app)/dashboard/(shots)' },
+  { id: 'requested', title: 'Requested Shots', iconName: 'camera-account', route: '/(app)/dashboard/(shots)/requested' },
+  { id: 'other', title: 'Other Shots', iconName: 'camera-plus', route: '/(app)/dashboard/(shots)/other' },
 ];
 
 export default function ShotsGroupsScreen() {

@@ -31,7 +31,7 @@ export class ProjectService {
    * Helper to parse data against a Zod schema and log detailed errors.
    */
   private static parseData<T extends z.ZodType<any, any>>(schema: T, data: unknown): z.infer<T> {
-    console.log('EyeDooApp: Parsing data:', data);
+    // console.log('EyeDooApp: Parsing data:', data);
     const result = schema.safeParse(data);
     if (!result.success) {
       console.error('EyeDooApp: Zod validation error:', JSON.stringify(result.error.flatten(), null, 2));
@@ -44,7 +44,7 @@ export class ProjectService {
    * Converts Firestore timestamps in project data
    */
   private static convertProjectTimestamps(projectData: any): Project {
-    console.log('EyeDooApp: Converting project timestamps:', projectData);
+    // console.log('EyeDooApp: Converting project timestamps:', projectData);
     // Convert top-level timestamps
     const converted = convertTimestampFields(projectData, ['createdAt', 'updatedAt']);
     
@@ -60,7 +60,7 @@ export class ProjectService {
    * Creates a new project document in Firestore.
    */
   static async createProject(userId: string, projectInput: CreateProjectInput): Promise<Project> {
-    console.log('EyeDooApp: Creating project:', projectInput);
+    // console.log('EyeDooApp: Creating project:', projectInput);
     try {
       // Validate the incoming data against the creation schema.
       const validatedData = this.parseData(CreateProjectSchema, projectInput);
@@ -119,7 +119,7 @@ export class ProjectService {
       
       const project = this.parseData(ProjectSchema, this.convertProjectTimestamps(rawData));
 
-      console.log('EyeDooApp: Project retrieved successfully:', projectId);
+      // console.log('EyeDooApp: Project retrieved successfully:', projectId);
       return project;
     } catch (error) {
       console.error(`EyeDooApp: Get project error for ID ${projectId}:`, error);
@@ -174,7 +174,7 @@ export class ProjectService {
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log('EyeDooApp: Received snapshot with:', querySnapshot.docs.length, 'projects');
+      // console.log('EyeDooApp: Received snapshot with:', querySnapshot.docs.length, 'projects');
       const projects = querySnapshot.docs.map(doc => {
         try {
           // Parse each document and convert timestamps

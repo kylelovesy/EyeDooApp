@@ -88,7 +88,20 @@ export default function SignUpScreen() {
   };
 
   return (
-    <Screen scrollable padding="lg">
+    <Screen 
+      scrollable={false} 
+      padding="lg"
+      safeArea={true}
+      paddingTop={spacing.md}  
+      edges={['bottom']}
+      // padding={undefined} // No padding for AppBar positioning
+      backgroundColor={theme.colors.background}
+      statusBarStyle="auto"
+      // scrollable={true}
+      // contentContainerStyle={styles.scrollContent}
+      testID="register-screen"
+      // style={themedStyles.container}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -99,14 +112,14 @@ export default function SignUpScreen() {
             <HeadlineText
               size="large"
               textAlign="center"
-              style={{ color: theme.colors.onBackground, marginBottom: spacing.sm }}
+              style={{ color: theme.colors.onBackground, marginBottom: spacing.md }}
             >
               Create Account
             </HeadlineText>
             <BodyText
               size="large"
               textAlign="center"
-              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}
+              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8, marginBottom: spacing.sm }}
             >
               Join EyeDooApp to streamline your wedding photography workflow
             </BodyText>
@@ -126,6 +139,7 @@ export default function SignUpScreen() {
               left={<TextInput.Icon icon="account" />}
               testID="signup-name-input"
               theme={theme}
+              style={{ marginBottom: spacing.sm }}
             />
 
             <TextInput
@@ -142,6 +156,7 @@ export default function SignUpScreen() {
               error={formData.email.length > 0 && !formData.email.includes('@')}
               testID="signup-email-input"
               theme={theme}
+              style={{ marginBottom: spacing.sm }}
             />
             
             <TextInput
@@ -163,6 +178,7 @@ export default function SignUpScreen() {
               error={formData.password.length > 0 && formData.password.length < 6}
               testID="signup-password-input"
               theme={theme}
+              style={{ marginBottom: spacing.sm }}
             />
 
             <TextInput
@@ -187,12 +203,13 @@ export default function SignUpScreen() {
               }
               testID="signup-confirm-password-input"
               theme={theme}
+              style={{ marginBottom: spacing.sm }}
             />
 
             <CustomButton
               title="Create Account"
               variant="primary"
-              size="large"
+              size="medium"
               fullWidth
               onPress={handleSignUp}
               loading={loading}
@@ -213,7 +230,7 @@ export default function SignUpScreen() {
                 <CustomButton
                   title="Sign In"
                   variant="text"
-                  size="medium"
+                  size="large"
                   testID="login-link"
                 />
               </Link>

@@ -1,20 +1,21 @@
 /* eslint-disable react/no-unescaped-entities */
-import { router, Stack } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { Button, Dialog, FAB, HelperText, IconButton, Portal, Text, TextInput } from 'react-native-paper';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { ProjectFormProvider, useForm1 } from '../../../contexts/Form1EssentialInfoContext';
 import { ProjectProvider, useProjects } from '../../../contexts/ProjectContext';
 
+import { commonStyles, createThemedStyles } from '@/constants/styles';
 import ProjectCard from '../../../components/cards/ProjectCard';
 import { EssentialInfoFormModal } from '../../../components/modals/EssentialInfoForm';
 import { CustomButton } from '../../../components/ui/CustomButton';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { Screen } from '../../../components/ui/Screen';
-import { DisplayText, TitleText } from '../../../components/ui/Typography';
+import { BodyText, HeadlineText } from '../../../components/ui/Typography';
 import { spacing, useAppTheme } from '../../../constants/theme';
 import { Project } from '../../../types/project';
 
@@ -29,7 +30,8 @@ const ProjectsScreenWrapper = () => (
 
 const ProjectsScreen = () => {
   const theme = useAppTheme();
-  
+  const styles = useStyles(theme);
+
   // State for managing UI
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -114,70 +116,105 @@ const ProjectsScreen = () => {
   }
 
   return (
-    <Screen style={styles.safeArea} edges={['top', 'left', 'right']} padding="sm" statusBarStyle="auto" scrollable={true}>
-        <Stack.Screen options={{ headerShown: false }} />
-        
-        <IconButton
-            icon="logout"
-            size={24}
-            onPress={signOut}
-            style={styles.signOutButton}
-        />
-
-        <View style={styles.header}>
-            <DisplayText size="medium">My Projects</DisplayText>
-            <TitleText size="medium" style={{color: theme.colors.onSurfaceVariant}}>{getStatusText()}</TitleText>
-        </View>
-
-        {projects.length === 0 ? (
-            <View style={styles.centeredContent}>
-                 <EmptyState
-                    title="Welcome!"
-                    description="It looks like you don't have any projects yet."
-                    onAction={handleCreateProject}
-                 />
-                 <Button 
-                    mode="contained" 
-                    onPress={handleCreateProject} 
-                    style={styles.createProjectButton}
-                    contentStyle={{paddingVertical: 8}}
-                    labelStyle={{fontSize: 18}}
-                >
-                    Create Your First Project
-                </Button>
-            </View>
-        ) : (
-            <>
-                <FlatList
-                    data={projects}
-                    renderItem={({ item }) => (
-                        <ProjectCard
-                            project={item}
-                            onPress={() => handleProjectPress(item)}
-                            isActive={activeProject?.id === item.id}
-                                style={{ marginTop: spacing.md }}
-                        />
-                    )}
-                    keyExtractor={item => item.id}
-                    contentContainerStyle={styles.list}
+    <Screen 
+        scrollable={false} 
+        padding="md"
+        safeArea={false}
+        paddingTop={spacing.sm}  
+        edges={['top']}
+        backgroundColor={theme.colors.background}
+        statusBarStyle="auto"
+        testID="projects-screen"
+    >
+        {/* <Stack.Screen options={{ headerShown: false }} /> */}
+        <View style={styles.contentContainer}>
+            {/* <View style={commonStyles.projectsListHeader}> */}
+                <IconButton
+                    icon="logout"
+                    size={24}
+                    onPress={signOut}
+                    style={commonStyles.projectsSignoutBtn}
                 />
-                <View style={styles.footer}>
-                    <CustomButton 
-                        title="Launch Project" 
-                        onPress={handleLaunchProject}
-                        disabled={!activeProject}
+                <HeadlineText
+                    size="large"
+                    textAlign="center"
+                    style={{ color: theme.colors.onBackground, marginBottom: spacing.md }}
+                >
+                My Projects
+                </HeadlineText>
+                <BodyText
+                size="large"
+                textAlign="center"
+                style={{ color: theme.colors.onSurfaceVariant, marginBottom: spacing.sm }}
+                >
+                {getStatusText()}
+                </BodyText>
+            {/* </View> */}
+            {projects.length === 0 ? (
+                <View style={commonStyles.centerContent}>
+                    <EmptyState
+                        title="Welcome!"
+                        description="It looks like you don't have any projects yet."
+                        onAction={handleCreateProject}
                     />
+                     <CustomButton
+                        title="Create Your First Project"
+                        variant="primary"
+                        size="large"
+                        fullWidth
+                        onPress={handleCreateProject}
+                        // loading={loading}
+                        // disabled={loading}
+                        testID="create-project-button"
+                    />
+                    {/* <CustomButton 
+                        title="Create Your First Project"
+                        onPress={handleCreateProject} 
+
+                        // style={styles.createProjectButton}
+                        // contentStyle={{paddingVertical: 8}}
+                        // labelStyle={{fontSize: 18}}
+                    >
+                        Create Your First Project
+                    </CustomButton> */}
                 </View>
-            </>
-        )}
+            ) : (
+                <View style={commonStyles.projectsList}>
+                    <FlatList
+                        data={projects}
+                        renderItem={({ item }) => (
+                            <ProjectCard
+                                project={item}
+                                onPress={() => handleProjectPress(item)}
+                                isActive={activeProject?.id === item.id}
+                                    style={{ marginTop: spacing.md }}
+                            />
+                        )}
+                        keyExtractor={item => item.id}
+                        contentContainerStyle={commonStyles.marginBottomMd}
+                    />                    
+                </View>
+            )}          
+        </View> 
+        <View style={commonStyles.projectsFooter}>
+            <CustomButton 
+                title="Launch Project" 
+                onPress={handleLaunchProject}
+                disabled={!activeProject}
+                variant="primary"
+                size="medium"
+                fullWidth
+                testID="launch-project-button"
+            />
+        </View>
+        
         
         <FAB
-            style={[styles.fab, { bottom: projects.length > 0 ? 80 : 16 }, activeProject ? { backgroundColor: theme.colors.errorContainer } : {}]}
+            style={[commonStyles.projectsFAB, { bottom: projects.length > 0 ? 80 : 16 }, activeProject ? { backgroundColor: theme.colors.errorContainer } : {}]}
             color={activeProject ? theme.colors.onErrorContainer : theme.colors.onPrimaryContainer}
             icon={mainFabIcon}
             onPress={mainFabAction}
         />
-
         {/* Standardized Modal - managed by context */}
         <EssentialInfoFormModal />
 
@@ -211,56 +248,18 @@ const ProjectsScreen = () => {
                 </Dialog.Actions>
             </Dialog>
         </Portal>
+        
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fcfcff',
-  },
-  signOutButton: {
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      zIndex: 1,
-  },
-  header: {
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.md,
-      paddingBottom: spacing.md,
-      borderBottomWidth: 1,
-      borderBottomColor: '#e0e0e0',
-  },
-  centeredContent: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: spacing.lg,
-  },
-  createProjectButton: {
-      marginTop: spacing.xl,
-      width: '80%',
-  },
-  list: {
-    paddingBottom: 100,
-  },
-  footer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      padding: spacing.md,
-      backgroundColor: '#fcfcff',
-      borderTopWidth: 1,
-      borderTopColor: '#e0e0e0'
-  },
-  fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 0,
-  },
-});
+const useStyles = (theme: any) => {
+    const themedStyles = createThemedStyles(theme);
+    return {
+      ...themedStyles,
+      contentContainer: {
+        ...commonStyles.projectsContainer,
+      },
+    };
+  };
 
 export default ProjectsScreenWrapper;

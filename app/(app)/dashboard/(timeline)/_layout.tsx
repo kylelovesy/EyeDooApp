@@ -6,9 +6,9 @@ import { SubPage } from '../../../../components/navigation/DashboardAppbar';
 
 // Define subpages for the home tab
 export const timelineSubPages: SubPage[] = [
-  { id: 'index', title: 'General', iconName: 'timeline-clock', route: '/timeline' },
-  { id: 'notifications', title: 'Notifications', iconName: 'notifications-circle', route: '/timeline/notifications' },
-  { id: 'edit', title: 'Edit/Update', iconName: 'pencil-circle', route: '/timeline/edit' },
+  { id: 'index', title: 'Timeline', iconName: 'timeline-clock-outline', route: '/(app)/dashboard/(timeline)' },
+  { id: 'notifications', title: 'Notifications', iconName: 'bell-outline', route: '/(app)/dashboard/(timeline)/notifications' },
+  { id: 'edit', title: 'Update', iconName: 'clock-edit-outline', route: '/(app)/dashboard/(timeline)/edit' },
 ];
 
 export default function TimelineLayout() {
@@ -16,6 +16,7 @@ export default function TimelineLayout() {
     <Stack
       screenOptions={{
         headerShown: false, // We'll use our custom AppBar instead
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="index" />
@@ -24,16 +25,3 @@ export default function TimelineLayout() {
     </Stack>
   );
 }
-
-// import React from 'react';
-// import { ThemedMaterialTopTabs } from '../../../../components/navigation/ThemedMaterialTopTabs';
-
-// const timelineScreens = [
-//   { name: 'index', options: { title: 'General' } },
-//   { name: 'notifications', options: { title: 'Notifications' } },
-//   { name: 'edit', options: { title: 'Edit/Update' } },
-// ];
-
-// export default function TimelineLayout() {
-//   return <ThemedMaterialTopTabs screens={timelineScreens} />;
-// }

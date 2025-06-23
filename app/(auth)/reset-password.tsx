@@ -62,7 +62,16 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <Screen scrollable padding="lg">
+    <Screen 
+      scrollable={false} 
+      padding="lg"
+      safeArea={true}
+      paddingTop={spacing.md}  
+      edges={['bottom']}
+      backgroundColor={theme.colors.background}
+      statusBarStyle="auto"
+      testID="reset-password-screen"
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -73,14 +82,14 @@ export default function ForgotPasswordScreen() {
             <HeadlineText
               size="large"
               textAlign="center"
-              style={{ color: theme.colors.onBackground, marginBottom: spacing.sm }}
+              style={{ color: theme.colors.onBackground, marginBottom: spacing.md }}
             >
               Reset Password
             </HeadlineText>
             <BodyText
               size="large"
               textAlign="center"
-              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}
+              style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8}}
             >
               Enter your email address and we&apos;ll send you instructions to
               reset your password
@@ -103,17 +112,19 @@ export default function ForgotPasswordScreen() {
               error={email.length > 0 && !email.includes('@')}
               testID="forgot-password-email-input"
               theme={theme}
+              style={{ marginBottom: spacing.sm }}
             />
 
             <CustomButton
               title={emailSent ? "Email Sent" : "Send Reset Email"}
               variant="primary"
-              size="large"
+              size="medium"
               fullWidth
               onPress={handleResetPassword}
               loading={loading}
               disabled={loading || emailSent}
               testID="forgot-password-submit-button"
+              style={{ marginBottom: spacing.sm }}
             />
           </View>
 
@@ -123,7 +134,7 @@ export default function ForgotPasswordScreen() {
               <CustomButton
                 title="Back to Sign In"
                 variant="text"
-                size="medium"
+                size="large"
                 testID="back-to-login-link"
               />
             </Link>

@@ -9,10 +9,10 @@ import { Screen } from '../../../../components/ui/Screen';
 
 // Define your subpages for dashboard
 const otherSubPages = [
-  { id: 'index', title: 'Notes', iconName: 'sticky-note', route: '/(app)/dashboard/(other)' },
-  { id: 'tags', title: 'Tags', iconName: 'tag', route: '/(app)/dashboard/(other)/tags' },
-  { id: 'vendors', title: 'Vendors', iconName: 'contact-card', route: '/(app)/dashboard/(other)/vendors' },
-  { id: 'preparation', title: 'Preparation', iconName: 'bag', route: '/(app)/dashboard/(other)/preparation' },
+  { id: 'index', title: 'Notes', iconName: 'note-plus', route: '/(app)/dashboard/(other)' },
+  { id: 'tags', title: 'Tags', iconName: 'tag-faces', route: '/(app)/dashboard/(other)/tags' },
+  { id: 'vendors', title: 'Vendors', iconName: 'card-account-details', route: '/(app)/dashboard/(other)/vendors' },
+  { id: 'preparation', title: 'Preparation', iconName: 'bag-personal', route: '/(app)/dashboard/(other)/preparation' },
 ];
 
 export default function DashboardOtherScreen() {

@@ -6,10 +6,10 @@ import { SubPage } from '../../../../components/navigation/DashboardAppbar';
 
 // Define subpages for the home tab
 export const otherSubPages: SubPage[] = [
-  { id: 'index', title: 'Notes', iconName: 'sticky-note', route: '/other' },
-  { id: 'tags', title: 'Tags', iconName: 'tag', route: '/other/tags' },
-  { id: 'vendors', title: 'Vendors', iconName: 'contact-card', route: '/other/vendors' },
-  { id: 'preparation', title: 'Preparation', iconName: 'bag', route: '/other/preparation' },
+  { id: 'index', title: 'Notes', iconName: 'note-plus', route: '/(app)/dashboard/(other)' },
+  { id: 'tags', title: 'Tags', iconName: 'tag-faces', route: '/(app)/dashboard/(other)/tags' },
+  { id: 'vendors', title: 'Vendors', iconName: 'card-account-details', route: '/(app)/dashboard/(other)/vendors' },
+  { id: 'preparation', title: 'Preparation', iconName: 'bag-personal', route: '/(app)/dashboard/(other)/preparation' },
 ];
 
 export default function OtherLayout() {
@@ -17,6 +17,7 @@ export default function OtherLayout() {
     <Stack
       screenOptions={{
         headerShown: false, // We'll use our custom AppBar instead
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="index" />
@@ -26,16 +27,3 @@ export default function OtherLayout() {
     </Stack>
   );
 }
-// import React from 'react';
-// import { ThemedMaterialTopTabs } from '../../../../components/navigation/ThemedMaterialTopTabs';
-
-// const otherScreens = [
-//   { name: 'index', options: { title: 'Notes' } },
-//   { name: 'tags', options: { title: 'Tags' } },
-//   { name: 'vendors', options: { title: 'Vendors' } },
-//   { name: 'preparation', options: { title: 'Preparation' } },
-// ];
-
-// export default function OtherLayout() {
-//   return <ThemedMaterialTopTabs screens={otherScreens} />;
-// }

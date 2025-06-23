@@ -2,15 +2,16 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-// import { useColorScheme } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // import { PaperProvider } from 'react-native-paper';
 import { enGB, registerTranslation } from 'react-native-paper-dates';
-// import { darkTheme, lightTheme } from '../constants/theme';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { darkTheme, lightTheme } from '../constants/theme';
 import { fontAssets } from '../constants/typography';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
-import { ThemeProvider } from '../contexts/ThemeContext';
+// import { ThemeProvider } from '../contexts/ThemeContext';
+import { PaperProvider } from 'react-native-paper';
 // import { ThemeProvider } from '../contexts/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
@@ -41,8 +42,8 @@ const InitialLayout = () => {
 
 const RootLayout = () => {
   const [fontsLoaded] = useFonts(fontAssets);
-  // const colorScheme = useColorScheme();
-  // const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
   useEffect(() => {
     if (fontsLoaded) {
@@ -57,11 +58,11 @@ const RootLayout = () => {
   return (
    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider>
-      <ThemeProvider>
+      <PaperProvider theme={theme}>      
         <AuthProvider>
           <InitialLayout />
         </AuthProvider>
-      </ThemeProvider>
+      </PaperProvider>
     </SafeAreaProvider>
    </GestureHandlerRootView>
   );

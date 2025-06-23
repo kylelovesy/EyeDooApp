@@ -11,9 +11,9 @@ import { Screen } from '../../../../components/ui/Screen';
 // Define your subpages for dashboard
 const settingsSubPages = [
   { id: 'index', title: 'Account', iconName: 'account-circle', route: '/(app)/dashboard/(settings)' },
-  { id: 'calendar', title: 'Calendar', iconName: 'calendar', route: '/(app)/dashboard/(settings)/calendar' },
-  { id: 'edit-project', title: 'Edit Project', iconName: 'project', route: '/(app)/dashboard/(settings)/edit-project' },
-  { id: 'settings', title: 'Settings', iconName: 'account-cog', route: '/(app)/dashboard/(settings)/settings' },
+  { id: 'calendar', title: 'Calendar', iconName: 'calendar-clock', route: '/(app)/dashboard/(settings)/calendar' },
+  { id: 'edit-project', title: 'Edit Project', iconName: 'folder-swap', route: '/(app)/dashboard/(settings)/edit-project' },
+  { id: 'settings', title: 'Settings', iconName: 'cog', route: '/(app)/dashboard/(settings)/settings' },
 ];
 
 export default function DashboardSettingsScreen() {

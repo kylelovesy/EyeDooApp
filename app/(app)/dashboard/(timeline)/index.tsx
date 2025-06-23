@@ -10,9 +10,9 @@ import { Screen } from '../../../../components/ui/Screen';
 
 // Define your subpages for dashboard
 const timelineSubPages = [
-  { id: 'index', title: 'General', iconName: 'timeline-clock', route: '/timeline' },
-  { id: 'notifications', title: 'Notifications', iconName: 'notifications-circle', route: '/timeline/notifications' },
-  { id: 'edit', title: 'Edit/Update', iconName: 'pencil-circle', route: '/timeline/edit' },
+  { id: 'index', title: 'Timeline', iconName: 'timeline-clock-outline', route: '/(app)/dashboard/(timeline)' },
+  { id: 'notifications', title: 'Notifications', iconName: 'bell-outline', route: '/(app)/dashboard/(timeline)/notifications' },
+  { id: 'edit', title: 'Update', iconName: 'clock-edit-outline', route: '/(app)/dashboard/(timeline)/edit' },
 ];
 
 export default function TimelineGeneralScreen() {
