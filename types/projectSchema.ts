@@ -40,15 +40,15 @@ export const CreateProjectSchema = ProjectSchema.omit({
  * Used for updating an EXISTING project. All fields are optional
  * and allows for deep partial updates (e.g., updating only form1.name).
  */
-// export const UpdateProjectSchema = z.object({
-//   userId: z.string().optional(),
-//   form1: form1EssentialInfoSchema.partial().optional(),
-//   form2: form2TimelineSchema.partial().optional(),
-//   form3: form3PeopleSchema.partial().optional(),
-//   form4: form4PhotosSchema.partial().optional(),
-// }).partial();
+export const UpdateProjectSchema = z.object({
+  userId: z.string().optional(),
+  form1: form1EssentialInfoSchema.partial().optional(),
+  form2: form2TimelineSchema.optional(),
+  form3: form3PeopleSchema.optional(),
+  form4: form4PhotosSchema.optional(),
+}).partial();
 
-// // Export types for use throughout the application
-// export type Project = z.infer<typeof ProjectSchema>;
-// export type CreateProject = z.infer<typeof CreateProjectSchema>;
-// export type UpdateProject = z.infer<typeof UpdateProjectSchema>;
+// Export types for use throughout the application
+export type Project = z.infer<typeof ProjectSchema>;
+export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
+export type UpdateProjectInput = z.infer<typeof UpdateProjectSchema>;

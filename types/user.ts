@@ -128,7 +128,13 @@ export const UserSubscriptionSchema = z.object({
     .describe('Stripe payment method ID'),
 });
 
-
+// === CHECKLIST ITEM SCHEMA ===
+export const ChecklistItemSchema = z.object({
+  label: z.string().min(3, "Label must be at least 3 characters long."),
+  category: z.enum(['NightBefore', 'MorningOf']),
+  isChecked: z.boolean().default(false),
+  isPredefined: z.boolean().default(false),
+});
 // === MAIN USER SCHEMA ===
 export const UserSchema = z.object({
   // Core identity fields

@@ -6,12 +6,12 @@ import {
   HelperText,
   IconButton,
   List,
-  Text,
   TextInput
 } from 'react-native-paper';
 import { DatePickerInput } from 'react-native-paper-dates';
 import { z } from 'zod';
-import { typography } from '../../constants/typography';
+import { commonStyles, createThemedStyles } from '../../constants/styles';
+import { spacing, useAppTheme } from '../../constants/theme';
 import { useForm1 } from '../../contexts/Form1EssentialInfoContext';
 import {
   EVENT_STYLES,
@@ -28,7 +28,7 @@ import {
 import { LocationInfoSchema, PersonInfoSchema } from '../../types/reusableSchemas';
 import CustomDropdown from '../ui/CustomDropdown';
 import FormModal from '../ui/FormModal';
-import { LabelText } from '../ui/Typography';
+import { LabelText, TitleText } from '../ui/Typography';
 
 type PersonInfo = z.infer<typeof PersonInfoSchema>;
 type LocationInfo = z.infer<typeof LocationInfoSchema>;
@@ -54,12 +54,22 @@ export const EssentialInfoFormModal: React.FC = () => {
 };
 
 const LocationForm: React.FC<{location: LocationInfo, index: number, onUpdate: (l: LocationInfo) => void, onRemove: () => void}> = ({ location, index, onUpdate, onRemove }) => {
+    const theme = useAppTheme();
+    const styles = useStyles(theme);
+    
     return(
         <Card style={styles.subCard}>
             <Card.Content>
                 <View style={styles.cardHeader}>
-                    <Text variant='titleMedium'>Location {index + 1}</Text>
-                    <IconButton icon="delete" size={20} onPress={onRemove} />
+                    <TitleText size="medium" color={theme.colors.onSurface}>
+                        Location {index + 1}
+                    </TitleText>
+                    <IconButton 
+                        icon="delete" 
+                        size={20} 
+                        onPress={onRemove}
+                        iconColor={theme.colors.onSurfaceVariant}
+                    />
                 </View>
                 <CustomDropdown
                   placeholder={location.locationType || 'Select a Type'}
@@ -67,30 +77,96 @@ const LocationForm: React.FC<{location: LocationInfo, index: number, onUpdate: (
                   onSelect={(selectedItem) => onUpdate({ ...location, locationType: selectedItem.value as LocationType })}
                 />
                 
-                 <TextInput label="Address" value={location.locationAddress || ''} onChangeText={(text) => onUpdate({ ...location, locationAddress: text })} mode="outlined" style={styles.input} />
-                 <TextInput label="Postcode" value={location.locationPostcode || ''} onChangeText={(text) => onUpdate({ ...location, locationPostcode: text })} mode="outlined" style={styles.input} />
-                 <TextInput label="Contact Person" value={location.locationContactPerson || ''} onChangeText={(text) => onUpdate({ ...location, locationContactPerson: text })} mode="outlined" style={styles.input} />
-                 <TextInput label="Contact Phone" value={location.locationContactPhone || ''} onChangeText={(text) => onUpdate({ ...location, locationContactPhone: text || undefined })} mode="outlined" style={styles.input} keyboardType='phone-pad'/>
+                 <TextInput 
+                    label="Address" 
+                    value={location.locationAddress || ''} 
+                    onChangeText={(text) => onUpdate({ ...location, locationAddress: text })} 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                    theme={theme}
+                />
+                 <TextInput 
+                    label="Postcode" 
+                    value={location.locationPostcode || ''} 
+                    onChangeText={(text) => onUpdate({ ...location, locationPostcode: text })} 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                    theme={theme}
+                />
+                 <TextInput 
+                    label="Contact Person" 
+                    value={location.locationContactPerson || ''} 
+                    onChangeText={(text) => onUpdate({ ...location, locationContactPerson: text })} 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                    theme={theme}
+                />
+                 <TextInput 
+                    label="Contact Phone" 
+                    value={location.locationContactPhone || ''} 
+                    onChangeText={(text) => onUpdate({ ...location, locationContactPhone: text || undefined })} 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                    keyboardType='phone-pad'
+                    theme={theme}
+                />
             </Card.Content>
         </Card>
     );
 };
 
 const PersonForm: React.FC<{person: PersonInfo, title: string, onUpdate: (p: PersonInfo) => void, errors?: z.ZodFormattedError<PersonInfo> | null}> = ({ person, title, onUpdate, errors }) => {
+    const theme = useAppTheme();
+    const styles = useStyles(theme);
+    
     return (
-        <View style={styles.subCardContent}>
+        <View style={styles.accordionContent}>
             <CustomDropdown
                 placeholder={person.preferredPronouns || 'Select a Pronoun'}
                 data={PRONOUNS.map(o => ({ label: o, value: o }))}
                 onSelect={(selectedItem) => onUpdate({ ...person, preferredPronouns: selectedItem.value as Pronoun })}
               />
            
-            <TextInput label="First Name *" value={person.firstName} onChangeText={(text) => onUpdate({ ...person, firstName: text })} mode="outlined" style={styles.input} error={!!errors?.firstName} />
+            <TextInput 
+                label="First Name *" 
+                value={person.firstName} 
+                onChangeText={(text) => onUpdate({ ...person, firstName: text })} 
+                mode="outlined" 
+                style={commonStyles.input}
+                error={!!errors?.firstName}
+                theme={theme}
+            />
             {errors?.firstName && <HelperText type="error">{errors.firstName._errors[0]}</HelperText>}
-            <TextInput label="Surname" value={person.surname || ''} onChangeText={(text) => onUpdate({ ...person, surname: text || undefined })} mode="outlined" style={styles.input} />
-            <TextInput label="Contact Email *" value={person.contactEmail} onChangeText={(text) => onUpdate({ ...person, contactEmail: text })} mode="outlined" style={styles.input} keyboardType="email-address" autoCapitalize="none" error={!!errors?.contactEmail} />
+            <TextInput 
+                label="Surname" 
+                value={person.surname || ''} 
+                onChangeText={(text) => onUpdate({ ...person, surname: text || undefined })} 
+                mode="outlined" 
+                style={commonStyles.input}
+                theme={theme}
+            />
+            <TextInput 
+                label="Contact Email *" 
+                value={person.contactEmail} 
+                onChangeText={(text) => onUpdate({ ...person, contactEmail: text })} 
+                mode="outlined" 
+                style={commonStyles.input}
+                keyboardType="email-address" 
+                autoCapitalize="none" 
+                error={!!errors?.contactEmail}
+                theme={theme}
+            />
             {errors?.contactEmail && <HelperText type="error">{errors.contactEmail._errors[0]}</HelperText>}
-            <TextInput label="Contact Phone" value={person.contactPhone || ''} onChangeText={(text) => onUpdate({ ...person, contactPhone: text || undefined })} mode="outlined" style={styles.input} keyboardType="phone-pad" error={!!errors?.contactPhone} />
+            <TextInput 
+                label="Contact Phone" 
+                value={person.contactPhone || ''} 
+                onChangeText={(text) => onUpdate({ ...person, contactPhone: text || undefined })} 
+                mode="outlined" 
+                style={commonStyles.input}
+                keyboardType="phone-pad" 
+                error={!!errors?.contactPhone}
+                theme={theme}
+            />
             {errors?.contactPhone && <HelperText type="error">{errors.contactPhone._errors[0]}</HelperText>}
         </View>
     );
@@ -99,6 +175,8 @@ const PersonForm: React.FC<{person: PersonInfo, title: string, onUpdate: (p: Per
 const EssentialInfoFormFields: React.FC = () => {
   const { formData, setFormData, errors, isValid } = useForm1();
   const [expandedAccordions, setExpandedAccordions] = useState<Set<string>>(new Set());
+  const theme = useAppTheme();
+  const styles = useStyles(theme);
 
   // Debug logging
   useEffect(() => {
@@ -151,19 +229,14 @@ const EssentialInfoFormFields: React.FC = () => {
     });
   };
 
-  // Use Zod validation errors to determine accordion state - now works for both expanded and collapsed
-const getAccordionStyle = (accordionId: string, hasErrors: boolean) => {
-  const isExpanded = expandedAccordions.has(accordionId);
-  
-  console.log(`Accordion ${accordionId}:`, { isExpanded, hasErrors });
-  
-  // Return array of styles directly
-  if (hasErrors) {
-    return [styles.accordion, styles.accordionInvalid]; // Red tint when has errors
-  } else {
-    return [styles.accordion, styles.accordionValid]; // Green tint when no errors
-  }
-};
+  // Use theme colors for validation styling
+  const getAccordionStyle = (accordionId: string, hasErrors: boolean) => {
+    if (hasErrors) {
+      return [styles.accordion, styles.accordionInvalid];
+    } else {
+      return [styles.accordion, styles.accordionValid];
+    }
+  };
 
   // Check validation state for each accordion
   const additionalDetailsHasErrors = !!errors?.sharedEmail;
@@ -173,11 +246,27 @@ const getAccordionStyle = (accordionId: string, hasErrors: boolean) => {
 
   return (
     <>
-        <Card style={styles.card}>
-            <Card.Content>
-                 <TextInput label="Project Name *" value={formData.projectName} onChangeText={(text) => updateFormData({ projectName: text })} mode="outlined" style={styles.input} error={!!errors?.projectName} />
+        <Card style={[commonStyles.card, styles.card]}>
+            <Card.Content style={commonStyles.cardContent}>
+                 <TextInput 
+                    label="Project Name *" 
+                    value={formData.projectName} 
+                    onChangeText={(text) => updateFormData({ projectName: text })} 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                    error={!!errors?.projectName}
+                    theme={theme}
+                />
                 {errors?.projectName && <HelperText type="error">{errors.projectName._errors[0]}</HelperText>}
-                <DatePickerInput locale="en" label="Event Date" value={eventDateAsDate} onChange={handleDateChange} inputMode="start" mode="outlined" style={styles.input} />
+                <DatePickerInput 
+                    locale="en" 
+                    label="Event Date" 
+                    value={eventDateAsDate} 
+                    onChange={handleDateChange} 
+                    inputMode="start" 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                />
             </Card.Content>
         </Card>
         
@@ -190,7 +279,9 @@ const getAccordionStyle = (accordionId: string, hasErrors: boolean) => {
           >
             <View style={styles.accordionContent}>
               {/* --- Project Type Dropdown --- */}
-              <LabelText style={typography.labelSmall}>Project Type</LabelText>
+              <LabelText size="small" color={theme.colors.onSurfaceVariant} style={{ marginBottom: spacing.xs }}>
+                Project Type
+              </LabelText>
               <CustomDropdown
                 placeholder={formData.projectType || 'Select a Type'}
                 data={PROJECT_TYPES.map(o => ({ label: o, value: o }))}
@@ -198,7 +289,9 @@ const getAccordionStyle = (accordionId: string, hasErrors: boolean) => {
               />
 
               {/* --- Project Status Dropdown --- */}
-              <LabelText style={typography.labelSmall}>Project Status</LabelText>
+              <LabelText size="small" color={theme.colors.onSurfaceVariant} style={{ marginBottom: spacing.xs }}>
+                Project Status
+              </LabelText>
               <CustomDropdown
                 placeholder={formData.projectStatus || 'Select a Status'}
                 data={PROJECT_STATUS.map(o => ({ label: o, value: o }))}
@@ -206,16 +299,37 @@ const getAccordionStyle = (accordionId: string, hasErrors: boolean) => {
               />
 
               {/* --- Event Style Dropdown --- */}
-              <LabelText style={typography.labelSmall}>Event Style</LabelText>
+              <LabelText size="small" color={theme.colors.onSurfaceVariant} style={{ marginBottom: spacing.xs }}>
+                Event Style
+              </LabelText>
               <CustomDropdown
                 placeholder={formData.eventStyle || 'Select a Style'}
                 data={EVENT_STYLES.map(o => ({ label: o, value: o }))}
                 onSelect={(selectedItem) => updateFormData({ eventStyle: selectedItem.value as EventStyle })}
               />
              
-                <TextInput label="Shared Email" value={formData.sharedEmail || ''} onChangeText={(t) => updateFormData({ sharedEmail: t || undefined })} mode="outlined" style={styles.input} keyboardType="email-address" autoCapitalize="none" error={!!errors?.sharedEmail} />
+                <TextInput 
+                    label="Shared Email" 
+                    value={formData.sharedEmail || ''} 
+                    onChangeText={(t) => updateFormData({ sharedEmail: t || undefined })} 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                    keyboardType="email-address" 
+                    autoCapitalize="none" 
+                    error={!!errors?.sharedEmail}
+                    theme={theme}
+                />
                 {errors?.sharedEmail && <HelperText type="error">{errors.sharedEmail._errors[0]}</HelperText>}
-                <TextInput label="Notes" value={formData.notes || ''} onChangeText={(t) => updateFormData({ notes: t || undefined })} mode="outlined" multiline numberOfLines={3} style={styles.input} />
+                <TextInput 
+                    label="Notes" 
+                    value={formData.notes || ''} 
+                    onChangeText={(t) => updateFormData({ notes: t || undefined })} 
+                    mode="outlined" 
+                    multiline 
+                    numberOfLines={3} 
+                    style={commonStyles.input}
+                    theme={theme}
+                />
             </View>
           </List.Accordion>
 
@@ -244,58 +358,65 @@ const getAccordionStyle = (accordionId: string, hasErrors: boolean) => {
             onPress={() => handleAccordionToggle('locations')}
           >
             <View style={styles.accordionContent}>
-                <Button mode="contained-tonal" onPress={addLocation} icon="plus" style={{marginBottom: 16}}> Add Location </Button>
+                <Button 
+                    mode="contained-tonal" 
+                    onPress={addLocation} 
+                    icon="plus" 
+                    style={{ marginBottom: spacing.md }}
+                    theme={theme}
+                > 
+                    Add Location 
+                </Button>
                 {(formData.locations || []).map((location, index) => (
                   <LocationForm key={index} location={location} index={index} onUpdate={(l) => updateLocation(index, l)} onRemove={() => removeLocation(index)} />
                 ))}
             </View>
           </List.Accordion>
         </List.AccordionGroup>
-
-        {/* Debug info - remove this after debugging */}
-        {/* <Card style={{marginTop: 16, backgroundColor: '#f0f0f0'}}>
-          <Card.Content>
-            <Text variant="titleSmall">Debug Info:</Text>
-            <Text>Form Valid: {isValid ? 'Yes' : 'No'}</Text>
-            <Text>Project Name: {formData.projectName || 'Empty'}</Text>
-            <Text>Event Date: {eventDateAsDate ? 'Set' : 'Not Set'}</Text>
-            <Text>Person A Name: {formData.personA.firstName || 'Empty'}</Text>
-            <Text>Person A Email: {formData.personA.contactEmail || 'Empty'}</Text>
-            <Text>Person B Name: {formData.personB.firstName || 'Empty'}</Text>
-            <Text>Person B Email: {formData.personB.contactEmail || 'Empty'}</Text>
-            <Text>Locations: {(formData.locations || []).length}</Text>
-            <Text>Errors: {errors ? Object.keys(errors).filter(key => key !== '_errors').join(', ') : 'None'}</Text>
-          </Card.Content>
-        </Card> */}
     </>
   );
 };
 
-const styles = StyleSheet.create({
-  card: { marginBottom: 16 },
-  subCard: { backgroundColor: '#fff', marginBottom: 12, borderRadius: 8, borderWidth: 1, borderColor: '#e0e0e0'},
-  subCardContent: { padding: 12 },
-  accordion: { 
-    backgroundColor: '#ffffff', 
-    borderColor: '#e0e0e0', 
-    borderWidth: 1, 
-    marginBottom: 8, 
-    borderRadius: 8 
-  },
-  accordionValid: {
-    backgroundColor: '#f0f9f0', // Light green background
-    borderColor: '#4caf50',     // Green border
-    borderWidth: 2,
-  },
-  accordionInvalid: {
-    backgroundColor: '#fef8f8', // Light red background
-    borderColor: '#f44336',     // Red border
-    borderWidth: 2,
-  },
-  accordionContent: { padding: 12 },
-  input: { marginBottom: 8 },
-  cardHeader: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const },
-});
+const useStyles = (theme: any) => {
+  const themedStyles = createThemedStyles(theme);
+  return StyleSheet.create({
+    ...themedStyles,
+    subCard: { 
+      backgroundColor: theme.colors.surface, 
+      marginBottom: spacing.sm, 
+      borderRadius: 8, 
+      borderWidth: 1, 
+      borderColor: theme.colors.outline,
+      elevation: 2,
+    },
+    accordion: { 
+      backgroundColor: theme.colors.surface, 
+      borderColor: theme.colors.outline, 
+      borderWidth: 1, 
+      marginBottom: spacing.xs, 
+      borderRadius: 8 
+    },
+    accordionValid: {
+      backgroundColor: theme.colors.surfaceVariant,
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+    },
+    accordionInvalid: {
+      backgroundColor: theme.colors.errorContainer,
+      borderColor: theme.colors.error,
+      borderWidth: 2,
+    },
+    accordionContent: { 
+      padding: spacing.sm 
+    },
+    cardHeader: { 
+      flexDirection: 'row' as const, 
+      justifyContent: 'space-between' as const, 
+      alignItems: 'center' as const,
+      marginBottom: spacing.sm,
+    },
+  });
+};
 
 export default EssentialInfoFormModal;
 

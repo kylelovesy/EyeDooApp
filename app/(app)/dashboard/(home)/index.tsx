@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Card, Divider, useTheme } from 'react-native-paper';
 
+import NextTimelineEventCard from '@/components/cards/NextTimelineEventCard';
 import { PeopleFormModal } from '../../../../components/modals/PeopleForm';
 import { PhotosFormModal } from '../../../../components/modals/PhotosForm';
 import { TimelineFormModal } from '../../../../components/modals/TimelineForm';
@@ -200,6 +201,9 @@ const DashboardHomeScreen = () => {
             </View>
           </Card.Content>
         </Card>
+        <NextTimelineEventCard
+          events={currentProject?.form2?.events || []}
+        /> 
       </View>
       {/* </View> */}
       <TimelineFormModal />
