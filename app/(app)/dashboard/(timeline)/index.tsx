@@ -86,6 +86,7 @@ export default function TimelineGeneralScreen() {
     { id: 17, time: '11:00 PM', title: 'Carriages', description: 'Guests depart', priority: 'low', notification: 'none', notes: 'Taxis arranged', location: 'Venue entrance', icon: 'carriage', iconColor: 'grey', status: 'upcoming' }
   ];
 
+  
   return (
     <Screen 
       scrollable={false}
@@ -145,26 +146,7 @@ export default function TimelineGeneralScreen() {
         ))}
       </View>
     </ScrollView>
-      {/* <HeadlineText>Timeline Overview</HeadlineText>
-      <BodyText>Timeline content goes here...</BodyText>
-      <BodyText>{currentProject?.form2?.events.length}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].description}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].time}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].priority}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].notification}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].duration}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].notes}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].location}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].icon}</BodyText>
-      <BodyText>{currentProject?.form2?.events[0].iconColor}</BodyText>
-      <ScrollView style={{ flex: 1, padding: 16 }}>
-        <Text variant="headlineMedium">Timeline Overview</Text>
-        <Card style={{ marginTop: 16 }}>
-          <Card.Content>
-            <Text>Timeline content goes here...</Text>
-          </Card.Content>
-        </Card>
-      </ScrollView> */}
+    
     </Screen>
   );
 }
