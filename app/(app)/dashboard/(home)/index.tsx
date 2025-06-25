@@ -1,4 +1,5 @@
-// import { useLocalSearchParams, useRouter } from 'expo-router';
+// # 4.1 Home Tab
+// # 4.1.0 Home tab
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';

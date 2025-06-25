@@ -250,22 +250,22 @@ export enum CandidShotCategory {
   OTHER = 'Other',
 }
 
-// === VENDOR ENUMS ===
-export enum VendorTypes {
-  OFFICIANT = 'Officiant',
-  WEDDING_PLANNER = 'Wedding Planner',
-  PHOTOGRAPHER = 'Photographer',
-  VIDEOGRAPHER = 'Videographer',
-  DJ = 'DJ',
-  BAND = 'Band',
-  FLORIST = 'Florist',
-  CATERER = 'Caterer',
-  VENUE = 'Venue',
-  MAKEUP_ARTIST = 'Makeup Artist',
-  HAIR_STYLIST = 'Hair Stylist',
-  TRANSPORTATION = 'Transportation',
-  OTHER = 'Other',
-}
+// // === VENDOR ENUMS ===
+// export enum VendorTypes {
+//   OFFICIANT = 'Officiant',
+//   WEDDING_PLANNER = 'Wedding Planner',
+//   PHOTOGRAPHER = 'Photographer',
+//   VIDEOGRAPHER = 'Videographer',
+//   DJ = 'DJ',
+//   BAND = 'Band',
+//   FLORIST = 'Florist',
+//   CATERER = 'Caterer',
+//   VENUE = 'Venue',
+//   MAKEUP_ARTIST = 'Makeup Artist',
+//   HAIR_STYLIST = 'Hair Stylist',
+//   TRANSPORTATION = 'Transportation',
+//   OTHER = 'Other',
+// }
 
 export const PROJECT_STATUS = Object.values(ProjectStatus);
 export const PROJECT_TYPES = Object.values(ProjectType);
@@ -281,7 +281,7 @@ export const IMPORTANCE_LEVELS = Object.values(ImportanceLevel);
 export const GROUP_SHOT_CATEGORIES = Object.values(GroupShotCategory);
 export const COUPLE_SHOT_CATEGORIES = Object.values(CoupleShotCategory);
 export const CANDID_SHOT_CATEGORIES = Object.values(CandidShotCategory);
-export const VENDOR_TYPES = Object.values(VendorTypes);
+// export const VENDOR_TYPES = Object.values(VendorTypes);
 export const NOTIFICATION_TYPE = Object.values(NotificationType);
 
 // TypeScript enums automatically create both the enum and its type, so no additional type aliases needed

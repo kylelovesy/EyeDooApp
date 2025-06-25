@@ -7,7 +7,7 @@
     "icon": "./assets/icons/icon.png",
     "scheme": "eyedooapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,    
+    "newArchEnabled": true,
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -61,7 +61,8 @@
           ]
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-barcode-scanner"
     ],
     "experiments": {
       "typedRoutes": true

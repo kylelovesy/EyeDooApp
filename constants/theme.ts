@@ -42,6 +42,7 @@ const eyeDooAppLightColors = {
     level4: '#E3E5E8',
     level5: '#DADCE0',
   },
+  backdrop: 'rgba(0, 0, 0, 0.4)',
 };
 
 const eyeDooAppDarkColors = {
@@ -82,6 +83,7 @@ const eyeDooAppDarkColors = {
     level4: '#282D34',
     level5: '#2B3038',
   },
+  backdrop: 'rgba(0, 0, 0, 0.6)',
 };
 
 export const lightTheme = {

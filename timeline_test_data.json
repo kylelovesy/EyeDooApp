@@ -1,0 +1,162 @@
+[
+  {
+    "id": "event_001",
+    "time": "2025-01-22T10:00:00.000Z",
+    "eventType": "BridalPrep",
+    "description": "Bride and bridal party getting ready - hair, makeup, and dress",
+    "location": "Bridal Suite at The Grand Hotel",
+    "priority": "high",
+    "notification": "Notification",
+    "duration": 180
+  },
+  {
+    "id": "event_002", 
+    "time": "2025-01-22T11:20:00.000Z",
+    "eventType": "GroomPrep",
+    "description": "Groom and groomsmen getting ready - suits and final preparations",
+    "location": "Groom Suite at The Grand Hotel",
+    "priority": "medium",
+    "notification": "Notification",
+    "duration": 90
+  },
+  {
+    "id": "event_003",
+    "time": "2025-01-22T11:50:00.000Z",
+    "eventType": "GuestsArrive",
+    "description": "Wedding guests begin arriving at the ceremony venue",
+    "location": "St. Mary's Chapel",
+    "priority": "medium",
+    "notification": "Notification",
+    "duration": 30
+  },
+  {
+    "id": "event_004",
+    "time": "2025-01-22T12:00:00.000Z",
+    "eventType": "CeremonyBegins",
+    "description": "Wedding ceremony starts - processional, vows, ring exchange",
+    "location": "St. Mary's Chapel",
+    "priority": "critical",
+    "notification": "Sound",
+    "duration": 45
+  },
+  {
+    "id": "event_005",
+    "time": "2025-01-22T12:45:00.000Z",
+    "eventType": "ConfettiAndMingling",
+    "description": "Confetti toss and congratulations from guests",
+    "location": "Chapel Grounds",
+    "priority": "medium",
+    "notification": "Notification",
+    "duration": 30
+  },
+  {
+    "id": "event_006",
+    "time": "2025-01-22T13:15:00.000Z",
+    "eventType": "GroupPhotos",
+    "description": "Family group photos and wedding party shots",
+    "location": "Chapel Gardens",
+    "priority": "high",
+    "notification": "Notification",
+    "duration": 60
+  },
+  {
+    "id": "event_007",
+    "time": "2025-01-22T14:15:00.000Z",
+    "eventType": "CouplePortraits",
+    "description": "Private couple portrait session - golden hour shots",
+    "location": "Nearby Rose Garden",
+    "priority": "high",
+    "notification": "Notification",
+    "duration": 45
+  },
+  {
+    "id": "event_008",
+    "time": "2025-01-22T15:00:00.000Z",
+    "eventType": "ReceptionDrinks",
+    "description": "Cocktail hour with canapés and welcome drinks",
+    "location": "Reception Venue Terrace",
+    "priority": "medium",
+    "notification": "Notification",
+    "duration": 90
+  },
+  {
+    "id": "event_009",
+    "time": "2025-01-22T16:30:00.000Z",
+    "eventType": "WeddingBreakfast",
+    "description": "Seated dinner service with multiple courses",
+    "location": "Main Reception Hall",
+    "priority": "high",
+    "notification": "Notification",
+    "duration": 120
+  },
+  {
+    "id": "event_010",
+    "time": "2025-01-22T18:30:00.000Z",
+    "eventType": "Speeches",
+    "description": "Wedding speeches - father of bride, groom, best man",
+    "location": "Main Reception Hall", 
+    "priority": "high",
+    "notification": "Sound",
+    "duration": 45
+  },
+  {
+    "id": "event_011",
+    "time": "2025-01-22T19:30:00.000Z",
+    "eventType": "EveningGuestsArrive",
+    "description": "Evening guests arrive for the party",
+    "location": "Reception Venue Entrance",
+    "priority": "medium",
+    "notification": "Notification",
+    "duration": 30
+  },
+  {
+    "id": "event_012",
+    "time": "2025-01-22T20:00:00.000Z",
+    "eventType": "CakeCutting",
+    "description": "Wedding cake cutting ceremony",
+    "location": "Main Reception Hall",
+    "priority": "high",
+    "notification": "Sound",
+    "duration": 15
+  },
+  {
+    "id": "event_013",
+    "time": "2025-01-22T20:15:00.000Z",
+    "eventType": "FirstDance",
+    "description": "Couple's first dance followed by parent dances",
+    "location": "Dance Floor",
+    "priority": "critical",
+    "notification": "Sound",
+    "duration": 20
+  },
+  {
+    "id": "event_014",
+    "time": "2025-01-22T20:35:00.000Z",
+    "eventType": "EveningEntertainment",
+    "description": "DJ starts evening entertainment and dancing",
+    "location": "Dance Floor",
+    "priority": "medium",
+    "notification": "Sound",
+    "duration": 180
+  },
+  {
+    "id": "event_015",
+    "time": "2025-01-22T22:35:00.000Z",
+    "eventType": "EveningBuffet",
+    "description": "Evening buffet service with light bites",
+    "location": "Buffet Area", 
+    "priority": "low",
+    "notification": "None",
+    "duration": 60
+  },
+  {
+    "id": "event_016",
+    "time": "2025-01-23T00:35:00.000Z",
+    "eventType": "Carriages",
+    "description": "End of celebration - guests depart",
+    "location": "Reception Venue",
+    "priority": "low", 
+    "notification": "None",
+    "duration": 30
+  }
+] 
