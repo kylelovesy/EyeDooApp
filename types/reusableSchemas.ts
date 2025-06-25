@@ -15,6 +15,87 @@ import {
  * Reusable Zod schemas for consistent validation across the application
  */
 
+// === TIMESTAMP HANDLING ===
+
+/**
+ * Standardized application timestamp schema
+ * Accepts multiple input types but always outputs JavaScript Date objects
+ * This solves the Firestore Timestamp vs Date inconsistency across the app
+ */
+export const FirestoreTimestampSchema = z.preprocess(
+  (val) => {
+    // Handle Firestore Timestamp objects
+    if (val && typeof val === 'object' && 'toDate' in val && typeof val.toDate === 'function') {
+      return val.toDate();
+    }
+    
+    // Handle Firebase Timestamp objects
+    if (val instanceof Date) {
+      return val;
+    }
+    
+    // Handle ISO string dates
+    if (typeof val === 'string') {
+      const date = new Date(val);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    // Handle number timestamps
+    if (typeof val === 'number') {
+      return new Date(val);
+    }
+    
+    // Invalid/null values or empty objects
+    if (val === null || val === undefined || (typeof val === 'object' && Object.keys(val).length === 0)) {
+      return undefined;
+    }
+    
+    // Log warning for unhandled types
+    console.warn('EyeDooApp: Unhandled timestamp type:', typeof val, val);
+    return val;
+  },
+  z.date({
+    errorMap: () => ({ message: 'Invalid date format' })
+  })
+);
+
+/**
+ * Optional timestamp schema - same preprocessing but allows null/undefined
+ */
+export const OptionalFirestoreTimestampSchema = z.preprocess(
+  (val) => {
+    if (val === null || val === undefined || (typeof val === 'object' && Object.keys(val).length === 0)) {
+      return undefined;
+    }
+    
+    // Use same preprocessing as FirestoreTimestampSchema
+    if (val && typeof val === 'object' && 'toDate' in val && typeof val.toDate === 'function') {
+      return val.toDate();
+    }
+    
+    if (val instanceof Date) {
+      return val;
+    }
+    
+    if (typeof val === 'string') {
+      const date = new Date(val);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    if (typeof val === 'number') {
+      return new Date(val);
+    }
+    
+    console.warn('EyeDooApp: Unhandled timestamp type:', typeof val, val);
+    return val;
+  },
+  z.date().optional()
+);
+
 // === VALIDATION HELPERS ===
 
 /**
@@ -127,59 +208,27 @@ export const LocationInfoSchema = z.object({
     .describe('Additional notes about this location'),
 });
 
-/**
- * Timeline event schema
- * Used for scheduling and event planning
- */
-export const TimelineEventSchema = z.object({
-  id: z.string().optional(),
-  
-  time: TimeFormatSchema
-    .describe('Time of the event'),
-  
-  description: z.string()
-    .min(2, 'Description must be at least 2 characters')
-    .max(100, 'Description must be under 100 characters')
-    .describe('Description of the event'),
-  
-  location: z.string()
-    .max(100, 'Location must be under 100 characters')
-    .optional()
-    .describe('Location of the event'),
-  
-  notes: z.string()
-    .max(200, 'Notes must be under 200 characters')
-    .optional()
-    .describe('Additional notes about this event'),
-  
-  icon: z.string()
-    .optional()
-    .default('calendar')
-    .describe('Icon for the event'),
-  
-  iconColor: z.string()
-    .optional()
-    .describe('Hex color string for the icon'),
-  
-  priority: z.number()
-    .min(1)
-    .max(5)
-    .optional()
-    .default(1)
-    .describe('Priority of the event (1-5)'),
-  
-  notification: z.boolean()
-    .optional()
-    .default(false)
-    .describe('Whether to send notifications for this event'),
-  
-  duration: z.number()
-    .min(5)
-    .max(1440) // Max 24 hours in minutes
-    .optional()
-    .default(30)
-    .describe('Duration of the event in minutes')
-});
+// /**
+//  * Timeline event schema
+//  * Used for scheduling and event planning
+//  */
+// export const TimelineEventSchema = z.object({
+//   id: z.string().optional(),  
+//   time: FirestoreTimestampSchema.describe('Time of the event'),
+//   eventType: z.nativeEnum(TimelineEventType).describe('Type of event'),
+//   description: z.string().max(100, 'Description must be under 100 characters').optional().describe('Description of the event'),
+//     location: z.string()
+//     .max(100, 'Location must be under 100 characters')
+//     .optional()
+//     .describe('Location of the event'),  
+//   priority: z.nativeEnum(ImportanceLevel)
+//     .default(ImportanceLevel.MEDIUM)
+//     .describe('Importance level of the event'),  
+//   notification: z.nativeEnum(NotificationType)
+//     .default(NotificationType.NONE)
+//     .describe('Notification type for the event'),
+//   duration: z.number().positive().optional().describe('Duration of the event in minutes')
+// });
 
 /**
  * Person with role schema
@@ -333,85 +382,5 @@ export const PhotoRequestSchema = z.object({
     .describe('Importance level of this request')
 });
 
-// === TIMESTAMP HANDLING ===
-
-/**
- * Standardized application timestamp schema
- * Accepts multiple input types but always outputs JavaScript Date objects
- * This solves the Firestore Timestamp vs Date inconsistency across the app
- */
-export const FirestoreTimestampSchema = z.preprocess(
-  (val) => {
-    // Handle Firestore Timestamp objects
-    if (val && typeof val === 'object' && 'toDate' in val && typeof val.toDate === 'function') {
-      return val.toDate();
-    }
-    
-    // Handle Firebase Timestamp objects
-    if (val instanceof Date) {
-      return val;
-    }
-    
-    // Handle ISO string dates
-    if (typeof val === 'string') {
-      const date = new Date(val);
-      if (!isNaN(date.getTime())) {
-        return date;
-      }
-    }
-    
-    // Handle number timestamps
-    if (typeof val === 'number') {
-      return new Date(val);
-    }
-    
-    // Invalid/null values or empty objects
-    if (val === null || val === undefined || (typeof val === 'object' && Object.keys(val).length === 0)) {
-      return undefined;
-    }
-    
-    // Log warning for unhandled types
-    console.warn('EyeDooApp: Unhandled timestamp type:', typeof val, val);
-    return val;
-  },
-  z.date({
-    errorMap: () => ({ message: 'Invalid date format' })
-  })
-);
-
-/**
- * Optional timestamp schema - same preprocessing but allows null/undefined
- */
-export const OptionalFirestoreTimestampSchema = z.preprocess(
-  (val) => {
-    if (val === null || val === undefined || (typeof val === 'object' && Object.keys(val).length === 0)) {
-      return undefined;
-    }
-    
-    // Use same preprocessing as FirestoreTimestampSchema
-    if (val && typeof val === 'object' && 'toDate' in val && typeof val.toDate === 'function') {
-      return val.toDate();
-    }
-    
-    if (val instanceof Date) {
-      return val;
-    }
-    
-    if (typeof val === 'string') {
-      const date = new Date(val);
-      if (!isNaN(date.getTime())) {
-        return date;
-      }
-    }
-    
-    if (typeof val === 'number') {
-      return new Date(val);
-    }
-    
-    console.warn('EyeDooApp: Unhandled timestamp type:', typeof val, val);
-    return val;
-  },
-  z.date().optional()
-);
 
 

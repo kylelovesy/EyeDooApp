@@ -108,35 +108,38 @@ export enum LocationType {
 /**
  * Timeline event type enum
  */
-export enum TimelineEventType {
-  BRIDAL_PREPARATION = 'Bridal Preparation',
-  GROOM_PREPARATION = 'Groom Preparation',
-  BRIDE_ARRIVAL = 'Bride Arrival',
-  GROOM_ARRIVAL = 'Groom Arrival',
-  CEREMONY = 'Ceremony',
-  RECEPTION = 'Reception',
-  COCKTAIL_HOUR = 'Cocktail Hour',
-  DINNER = 'Dinner',
-  DANCING = 'Dancing',
-  SPEECHES = 'Speeches',
-  CAKE_CUTTING = 'Cake Cutting',
-  FIRST_DANCE = 'First Dance',
-  PHOTO_SESSION = 'Photo Session',
-  OTHER = 'Other',
-}
+// export enum TimelineEventType {
+//   BRIDAL_PREP = 'Bridal Prep',
+//   GROOM_PREP = 'Groom Prep',
+//   GUESTS_ARRIVE = 'Guests Arrive',
+//   CEREMONY_BEGINS = 'Ceremony Begins',
+//   CONFETTI_AND_MINGLING = 'Confetti and Mingling',
+//   RECEPTION_DRINKS = 'Reception Drinks',
+//   GROUP_PHOTOS = 'Group Photos',
+//   COUPLE_PORTRAITS = 'Couple Portraits',
+//   WEDDING_BREAKFAST = 'Wedding Breakfast',
+//   SPEECHES = 'Speeches',
+//   EVENING_GUESTS_ARRIVE = 'Evening Guests Arrive',
+//   CAKE_CUTTING = 'Cake Cutting',
+//   FIRST_DANCE = 'First Dance',
+//   EVENING_ENTERTAINMENT = 'Evening Entertainment',
+//   EVENING_BUFFET = 'Evening Buffet',
+//   CARRIAGES = 'Carriages',
+//   OTHER = 'Other',
+// }
 
 /**
  * Timeline event icon enum
  */
-export enum TimelineEventIcon {
-  CHURCH = 'Church',
-  RECEPTION = 'Reception',
-  CALENDAR = 'Calendar',
-  CAMERA = 'Camera',
-  MUSIC = 'Music',
-  HEART = 'Heart',
-  OTHER = 'Other',
-}
+// export enum TimelineEventIcon {
+//   CHURCH = 'Church',
+//   RECEPTION = 'Reception',
+//   CALENDAR = 'Calendar',
+//   CAMERA = 'Camera',
+//   MUSIC = 'Music',
+//   HEART = 'Heart',
+//   OTHER = 'Other',
+// }
 
 // === PHOTO ENUMS ===
 
@@ -160,6 +163,17 @@ export enum ImportanceLevel {
   MEDIUM = 'medium',
   HIGH = 'high',
   CRITICAL = 'critical',
+}
+
+/**
+ * Notification type enum
+ */
+export enum NotificationType {
+  NONE = 'None',
+  NOTIFICATION = 'Notification',
+  VIBRATION = 'Vibration',
+  SOUND = 'Sound',
+  OTHER = 'Other',
 }
 
 // === GROUP SHOT CATEGORIES ===
@@ -236,6 +250,22 @@ export enum CandidShotCategory {
   OTHER = 'Other',
 }
 
+// === VENDOR ENUMS ===
+export enum VendorTypes {
+  OFFICIANT = 'Officiant',
+  WEDDING_PLANNER = 'Wedding Planner',
+  PHOTOGRAPHER = 'Photographer',
+  VIDEOGRAPHER = 'Videographer',
+  DJ = 'DJ',
+  BAND = 'Band',
+  FLORIST = 'Florist',
+  CATERER = 'Caterer',
+  VENUE = 'Venue',
+  MAKEUP_ARTIST = 'Makeup Artist',
+  HAIR_STYLIST = 'Hair Stylist',
+  TRANSPORTATION = 'Transportation',
+  OTHER = 'Other',
+}
 
 export const PROJECT_STATUS = Object.values(ProjectStatus);
 export const PROJECT_TYPES = Object.values(ProjectType);
@@ -244,12 +274,14 @@ export const PRONOUNS = Object.values(Pronoun);
 export const RELATIONSHIP_TO_COUPLE = Object.values(RelationshipToCouple);
 export const CONTACT_TYPES = Object.values(ContactType);
 export const LOCATION_TYPES = Object.values(LocationType);
-export const TIMELINE_EVENT_TYPES = Object.values(TimelineEventType);
-export const TIMELINE_EVENT_ICONS = Object.values(TimelineEventIcon);
+// export const TIMELINE_EVENT_TYPES = Object.values(TimelineEventType);
+// export const TIMELINE_EVENT_ICONS = Object.values(TimelineEventIcon);
 export const PHOTO_REQUEST_TYPES = Object.values(PhotoRequestType);
 export const IMPORTANCE_LEVELS = Object.values(ImportanceLevel);
 export const GROUP_SHOT_CATEGORIES = Object.values(GroupShotCategory);
 export const COUPLE_SHOT_CATEGORIES = Object.values(CoupleShotCategory);
 export const CANDID_SHOT_CATEGORIES = Object.values(CandidShotCategory);
+export const VENDOR_TYPES = Object.values(VendorTypes);
+export const NOTIFICATION_TYPE = Object.values(NotificationType);
 
 // TypeScript enums automatically create both the enum and its type, so no additional type aliases needed

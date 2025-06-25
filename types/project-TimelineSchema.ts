@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TimelineEventSchema } from "./reusableSchemas";
+import { TimelineEventSchema } from "./timeline";
 
 /**
  * Form 2: Timeline Schema

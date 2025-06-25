@@ -8,17 +8,14 @@ import {
     TextInput
 } from 'react-native-paper';
 import { TimePickerModal } from 'react-native-paper-dates';
-import { z } from 'zod';
 import { commonStyles, createThemedStyles } from '../../constants/styles';
 import { spacing, useAppTheme } from '../../constants/theme';
 import { useForm2 } from '../../contexts/Form2TimelineContext';
-import { TimelineEventType } from '../../types/enum';
-import { TimelineEventSchema } from '../../types/reusableSchemas';
+import { ImportanceLevel, NotificationType } from '../../types/enum';
+import { EventType, TimelineEvent } from '../../types/timeline';
 import CustomDropdown from '../ui/CustomDropdown';
 import FormModal from '../ui/FormModal';
 import { TitleText } from '../ui/Typography';
-
-type TimelineEvent = z.infer<typeof TimelineEventSchema>;
 
 // This component now uses the standardized FormModal
 export const TimelineFormModal: React.FC = () => {
@@ -36,14 +33,12 @@ export const TimelineFormModal: React.FC = () => {
     const addTimelineEvent = () => {
         const newEvent: TimelineEvent = {
             id: Date.now().toString(), 
-            time: '09:00', 
-            description: '', 
+            time: new Date(), 
+            eventType: 'Other', 
+            description: '',
             location: '',
-            notes: '', 
-            icon: 'calendar', 
-            iconColor: theme.colors.primary, 
-            priority: 5,
-            notification: false, 
+            priority: ImportanceLevel.MEDIUM,
+            notification: NotificationType.NONE, 
             duration: 30,
         };
         updateForm2Data({ events: [...(formData.events || []), newEvent] });
@@ -52,7 +47,7 @@ export const TimelineFormModal: React.FC = () => {
     const updateTimelineEvent = (index: number, updatedEvent: TimelineEvent) => {
         const updatedEvents = [...(formData.events || [])];
         updatedEvents[index] = updatedEvent;
-        updatedEvents.sort((a, b) => (a.time || '00:00').localeCompare(b.time || '00:00'));
+        updatedEvents.sort((a, b) => a.time.getTime() - b.time.getTime());
         updateForm2Data({ events: updatedEvents });
     };
 
@@ -113,19 +108,22 @@ const TimelineEventAccordion: React.FC<{
 
     // Create accordion title from event data
     const getAccordionTitle = () => {
-        if (event.description && event.time) {
-            return `${event.time} - ${event.description}`;
-        } else if (event.description) {
-            return event.description;
-        } else if (event.time) {
-            return `${event.time} - New Event`;
+        const timeStr = event.time?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+        const eventDescription = event.description || event.eventType;
+        
+        if (eventDescription && timeStr) {
+            return `${timeStr} - ${eventDescription}`;
+        } else if (eventDescription) {
+            return eventDescription;
+        } else if (timeStr) {
+            return `${timeStr} - New Event`;
         } else {
             return `Event ${index + 1}`;
         }
     };
 
     // Check if event has validation errors (missing required fields)
-    const hasErrors = !event.description || !event.time;
+    const hasErrors = !event.eventType || !event.time;
 
     // Get accordion style based on validation state
     const getAccordionStyle = () => {
@@ -136,25 +134,20 @@ const TimelineEventAccordion: React.FC<{
         }
     };
 
-    // Parse time string to hours and minutes for TimePicker
-    const parseTime = (timeString: string) => {
-        if (!timeString || !timeString.match(/^\d{2}:\d{2}$/)) {
+    // Parse Date to hours and minutes for TimePicker
+    const parseTime = (date: Date) => {
+        if (!date || !(date instanceof Date)) {
             return { hours: 9, minutes: 0 };
         }
-        const [hours, minutes] = timeString.split(':').map(Number);
-        return { hours, minutes };
-    };
-
-    // Format time from hours and minutes to string
-    const formatTime = (hours: number, minutes: number) => {
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        return { hours: date.getHours(), minutes: date.getMinutes() };
     };
 
     const { hours, minutes } = parseTime(event.time);
 
     const onTimeConfirm = ({ hours, minutes }: { hours: number; minutes: number }) => {
-        const timeString = formatTime(hours, minutes);
-        onUpdate(index, { ...event, time: timeString });
+        const newDate = new Date();
+        newDate.setHours(hours, minutes, 0, 0);
+        onUpdate(index, { ...event, time: newDate });
         setShowTimePicker(false);
     };
 
@@ -184,7 +177,7 @@ const TimelineEventAccordion: React.FC<{
                     style={commonStyles.input}
                     contentStyle={styles.timeButton}
                 >
-                    Time: {event.time || '00:00'}
+                    Time: {event.time ? event.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : '00:00'}
                 </Button>
 
                 <TimePickerModal
@@ -201,9 +194,37 @@ const TimelineEventAccordion: React.FC<{
                 
                 {/* Event Type Dropdown */}
                 <CustomDropdown
-                    placeholder={event.description || 'Select Event Type'}
-                    data={Object.values(TimelineEventType).map(type => ({ label: type as string, value: type as string }))}
-                    onSelect={(selectedItem) => onUpdate(index, { ...event, description: selectedItem.value })}
+                    placeholder={event.eventType || 'Select Event Type'}
+                    data={[
+                        { label: 'Bridal Prep', value: 'BridalPrep' },
+                        { label: 'Groom Prep', value: 'GroomPrep' },
+                        { label: 'Guests Arrive', value: 'GuestsArrive' },
+                        { label: 'Ceremony Begins', value: 'CeremonyBegins' },
+                        { label: 'Confetti and Mingling', value: 'ConfettiAndMingling' },
+                        { label: 'Reception Drinks', value: 'ReceptionDrinks' },
+                        { label: 'Group Photos', value: 'GroupPhotos' },
+                        { label: 'Couple Portraits', value: 'CouplePortraits' },
+                        { label: 'Wedding Breakfast', value: 'WeddingBreakfast' },
+                        { label: 'Speeches', value: 'Speeches' },
+                        { label: 'Evening Guests Arrive', value: 'EveningGuestsArrive' },
+                        { label: 'Cake Cutting', value: 'CakeCutting' },
+                        { label: 'First Dance', value: 'FirstDance' },
+                        { label: 'Evening Entertainment', value: 'EveningEntertainment' },
+                        { label: 'Evening Buffet', value: 'EveningBuffet' },
+                        { label: 'Carriages', value: 'Carriages' },
+                        { label: 'Other', value: 'Other' }
+                    ]}
+                    onSelect={(selectedItem) => onUpdate(index, { ...event, eventType: selectedItem.value as EventType })}
+                />
+                
+                {/* Description Input */}
+                <TextInput 
+                    label="Description (Optional)" 
+                    value={event.description || ''} 
+                    onChangeText={text => onUpdate(index, {...event, description: text})} 
+                    mode="outlined" 
+                    style={commonStyles.input}
+                    theme={theme}
                 />
                 
                 <TextInput 
@@ -212,17 +233,6 @@ const TimelineEventAccordion: React.FC<{
                     onChangeText={text => onUpdate(index, {...event, location: text})} 
                     mode="outlined" 
                     style={commonStyles.input}
-                    theme={theme}
-                />
-                
-                <TextInput 
-                    label="Notes" 
-                    value={event.notes || ''} 
-                    onChangeText={text => onUpdate(index, {...event, notes: text})} 
-                    mode="outlined" 
-                    style={commonStyles.input}
-                    multiline
-                    numberOfLines={2}
                     theme={theme}
                 />
             </View>

@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, IconButton, ProgressBar, Text } from 'react-native-paper';
-import { z } from 'zod';
 import { timelineUtils } from '../../services/timelineService';
-import { TimelineEventSchema } from '../../types/reusableSchemas';
-
-type TimelineEvent = z.infer<typeof TimelineEventSchema>;
+import { TimelineEvent } from '../../types/timeline';
 
 interface NextEventCardProps {
   events: TimelineEvent[];
@@ -32,15 +29,14 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
   const [currentEvent, setCurrentEvent] = useState<TimelineEvent | null>(null);
 
   // Calculate time remaining until next event
-  const calculateTimeRemaining = (eventTime: string, currentTime: Date): TimeRemaining => {
+  const calculateTimeRemaining = (eventTime: Date, currentTime: Date): TimeRemaining => {
     const now = currentTime;
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
-    // Parse event time (HH:MM format)
-    const [hours, minutes] = eventTime.split(':').map(Number);
-    const eventDateTime = new Date(today.getTime() + (hours * 60 + minutes) * 60 * 1000);
+    // Set event to today's date with the event's time
+    const todayEvent = new Date(now);
+    todayEvent.setHours(eventTime.getHours(), eventTime.getMinutes(), 0, 0);
     
-    const diffMs = eventDateTime.getTime() - now.getTime();
+    const diffMs = todayEvent.getTime() - now.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     
     const isOverdue = diffMs < 0;
@@ -68,8 +64,7 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
 
     for (let i = 0; i < sortedEvents.length; i++) {
       const event = sortedEvents[i];
-      const [hours, minutes] = event.time.split(':').map(Number);
-      const eventTimeMinutes = hours * 60 + minutes;
+      const eventTimeMinutes = event.time.getHours() * 60 + event.time.getMinutes();
       const eventEndMinutes = eventTimeMinutes + (event.duration || 30);
 
       // Check if current time is within this event
@@ -90,8 +85,7 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
     // If no current event found, but we have events, the next one is the first upcoming
     if (!currentEvent && !nextEvent && sortedEvents.length > 0) {
       const firstEvent = sortedEvents[0];
-      const [hours, minutes] = firstEvent.time.split(':').map(Number);
-      const firstEventTimeMinutes = hours * 60 + minutes;
+      const firstEventTimeMinutes = firstEvent.time.getHours() * 60 + firstEvent.time.getMinutes();
       
       if (currentTimeMinutes < firstEventTimeMinutes) {
         nextEvent = firstEvent;
@@ -144,12 +138,35 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
   const calculateCurrentEventProgress = (event: TimelineEvent, currentTime: Date): number => {
     const now = currentTime;
     const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
-    const [hours, minutes] = event.time.split(':').map(Number);
-    const eventStartMinutes = hours * 60 + minutes;
+    const eventStartMinutes = event.time.getHours() * 60 + event.time.getMinutes();
     const eventDuration = event.duration || 30;
     
     const elapsed = currentTimeMinutes - eventStartMinutes;
     return Math.max(0, Math.min(1, elapsed / eventDuration));
+  };
+
+  // Helper function to format time
+  const formatTime = (date: Date): string => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  };
+
+  // Helper function to calculate end time
+  const calculateEndTime = (startTime: Date, duration: number = 30): Date => {
+    const endTime = new Date(startTime);
+    endTime.setMinutes(endTime.getMinutes() + duration);
+    return endTime;
+  };
+
+  // Helper function to get event display info
+  const getEventDisplayInfo = (event: TimelineEvent) => {
+    const { icon, description: defaultDescription } = timelineUtils.getEventTypeDetails(event.eventType);
+    const displayName = event.description || defaultDescription;
+    
+    return {
+      icon,
+      displayName,
+      IconComponent: () => icon // Since icons are SVG imports, we'll use a fallback
+    };
   };
 
   if (events.length === 0) {
@@ -168,16 +185,17 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
   // Show current event if there is one
   if (currentEvent) {
     const progress = calculateCurrentEventProgress(currentEvent, new Date());
-    const endTime = timelineUtils.calculateEndTime(currentEvent.time, currentEvent.duration);
-    const timeRange = `${timelineUtils.formatTime12Hour(currentEvent.time)} - ${timelineUtils.formatTime12Hour(endTime)}`;
+    const endTime = calculateEndTime(currentEvent.time, currentEvent.duration);
+    const timeRange = `${formatTime(currentEvent.time)} - ${formatTime(endTime)}`;
+    const { displayName } = getEventDisplayInfo(currentEvent);
 
     return (
       <Card style={[styles.card, styles.currentEventCard, style]} onPress={() => onEventPress?.(currentEvent)}>
         <Card.Content style={styles.content}>
           <View style={styles.header}>
-            <View style={[styles.iconContainer, { backgroundColor: currentEvent.iconColor || '#6200ee' }]}>
+            <View style={[styles.iconContainer, { backgroundColor: '#4caf50' }]}>
               <IconButton
-                icon={currentEvent.icon || 'calendar'}
+                icon="play-circle"
                 iconColor="white"
                 size={20}
                 style={styles.icon}
@@ -188,7 +206,7 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
                 HAPPENING NOW
               </Text>
               <Text variant="titleMedium" style={styles.eventTitle} numberOfLines={2}>
-                {currentEvent.description}
+                {displayName}
               </Text>
               <Text variant="bodySmall" style={styles.eventTime}>
                 {timeRange}
@@ -218,16 +236,17 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
 
   // Show next event
   if (nextEvent && timeRemaining) {
-    const endTime = timelineUtils.calculateEndTime(nextEvent.time, nextEvent.duration);
-    const timeRange = `${timelineUtils.formatTime12Hour(nextEvent.time)} - ${timelineUtils.formatTime12Hour(endTime)}`;
+    const endTime = calculateEndTime(nextEvent.time, nextEvent.duration);
+    const timeRange = `${formatTime(nextEvent.time)} - ${formatTime(endTime)}`;
+    const { displayName } = getEventDisplayInfo(nextEvent);
 
     return (
       <Card style={[styles.card, style]} onPress={() => onEventPress?.(nextEvent)}>
         <Card.Content style={styles.content}>
           <View style={styles.header}>
-            <View style={[styles.iconContainer, { backgroundColor: nextEvent.iconColor || '#6200ee' }]}>
+            <View style={[styles.iconContainer, { backgroundColor: '#6200ee' }]}>
               <IconButton
-                icon={nextEvent.icon || 'calendar'}
+                icon="clock-outline"
                 iconColor="white"
                 size={20}
                 style={styles.icon}
@@ -238,7 +257,7 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
                 NEXT EVENT
               </Text>
               <Text variant="titleMedium" style={styles.eventTitle} numberOfLines={2}>
-                {nextEvent.description}
+                {displayName}
               </Text>
               <Text variant="bodySmall" style={styles.eventTime}>
                 {timeRange}
