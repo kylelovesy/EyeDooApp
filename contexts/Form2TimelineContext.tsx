@@ -66,48 +66,4 @@ export const TimelineFormProvider = Form2Provider;
 export const Form2TimelineProvider = Form2Provider;
 export const useTimelineForm = useForm2;
 
-// import React, { createContext, ReactNode, useContext } from 'react';
-// import { z } from 'zod';
-// import { form2TimelineSchema } from '../types/project-TimelineSchema';
-// import { BaseFormContextType, useBaseFormContext } from './useBaseFormContext';
 
-// type Form2Data = z.infer<typeof form2TimelineSchema>;
-
-// const initialForm2Data: Form2Data = {
-//   events: []
-// };
-
-// type Form2ContextType = BaseFormContextType<Form2Data>;
-
-// const Form2Context = createContext<Form2ContextType | undefined>(undefined);
-
-// export const Form2Provider = ({ children }: { children: ReactNode }) => {
-//   const context = useBaseFormContext(
-//     form2TimelineSchema,
-//     'form2',
-//     initialForm2Data,
-//     {
-//       successMessage: 'Timeline updated successfully!',
-//       errorMessage: 'Failed to update timeline. Please try again.'
-//     }
-//   );
-
-//   return (
-//     <Form2Context.Provider value={context}>
-//       {children}
-//     </Form2Context.Provider>
-//   );
-// };
-
-// export const useForm2 = (): Form2ContextType => {
-//   const context = useContext(Form2Context);
-//   if (context === undefined) {
-//     throw new Error('useForm2 must be used within a Form2Provider');
-//   }
-//   return context;
-// };
-
-// // Keep backward compatibility
-// export const TimelineFormProvider = Form2Provider;
-// export const Form2TimelineProvider = Form2Provider;
-// export const useTimelineForm = useForm2;

@@ -1,4 +1,4 @@
-// src/components/views/EnhancedTimelineView.tsx
+// // src/components/views/EnhancedTimelineView.tsx
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from 'react-native-paper';

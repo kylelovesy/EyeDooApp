@@ -1,272 +1,331 @@
-// timelineService.ts
+import { v4 as uuidv4 } from 'uuid';
+import { EventType } from '../constants/eventTypes';
+import { TTimelineEventForm } from '../types/timeline';
 
-import {
-  doc,
-  FirestoreError,
-  getDoc,
-  onSnapshot,
-  Timestamp,
-  updateDoc
-} from 'firebase/firestore';
-import { z } from 'zod';
-import { form2TimelineSchema } from '../types/project-TimelineSchema';
-// Import new types and mappings from timeline.ts
-import { EVENT_TYPE_DETAILS, EventType, TimelineEvent, TimelineEventSchema } from '../types/timeline';
-import { db } from './firebase'; // Adjust path as needed
+// This file is now responsible for all direct communication with Firestore. 
+// It handles data conversion (e.g., JS Date to Firestore Timestamp) and contains all the async logic for database operations.
 
-// Define and export EventStatus type
-export type EventStatus = 'completed' | 'current' | 'upcoming';
+// Mock service - replace with actual API calls
+export class TimelineService {
+  private static savedEvents: TTimelineEventForm[] = [];
 
-// Re-export types for convenience
-export { EventType, TimelineEvent };
-
-// This type is inferred from your project-TimelineSchema file
-type TimelineData = z.infer<typeof form2TimelineSchema>;
-
-export interface TimelineService {
-  getProjectTimeline: (projectId: string) => Promise<TimelineData>;
-  saveProjectTimeline: (projectId: string, timelineData: TimelineData) => Promise<void>;
-  updateTimelineEvent: (projectId: string, eventId: string, eventData: TimelineEvent) => Promise<void>;
-  deleteTimelineEvent: (projectId: string, eventId: string) => Promise<void>;
-  addTimelineEvent: (projectId: string, eventData: TimelineEvent) => Promise<string>;
-  subscribeToTimeline: (projectId: string, callback: (timeline: TimelineData) => void) => () => void;
-}
-
-class FirestoreTimelineService implements TimelineService {
-  private readonly COLLECTION_NAME = 'projects';
-
-  async getProjectTimeline(projectId: string): Promise<TimelineData> {
-    try {
-      const projectRef = doc(db, this.COLLECTION_NAME, projectId);
-      const projectSnap = await getDoc(projectRef);
-
-      if (!projectSnap.exists()) {
-        throw new Error('Project not found');
-      }
-
-      const projectData = projectSnap.data();
-      const timelineData = projectData.form2 || { events: [] };
-
-      const validatedData = form2TimelineSchema.parse(timelineData);
-      return validatedData;
-    } catch (error) {
-      console.error('Error getting project timeline:', error);
-      if (error instanceof z.ZodError) {
-        console.error('Timeline data validation failed:', error.errors);
-        return { events: [] };
-      }
-      throw error;
-    }
-  }
-
-  async saveProjectTimeline(projectId: string, timelineData: TimelineData): Promise<void> {
-    try {
-      const validatedData = form2TimelineSchema.parse(timelineData);
-      const projectRef = doc(db, this.COLLECTION_NAME, projectId);
-
-      await updateDoc(projectRef, {
-        'form2': validatedData,
-        'updatedAt': Timestamp.now()
-      });
-
-      console.log('Timeline saved successfully');
-    } catch (error) {
-      console.error('Error saving timeline:', error);
-      throw error;
-    }
-  }
-
-  async updateTimelineEvent(projectId: string, eventId: string, eventData: TimelineEvent): Promise<void> {
-    try {
-      const validatedEvent = TimelineEventSchema.parse(eventData);
-      const currentTimeline = await this.getProjectTimeline(projectId);
-
-      const eventIndex = currentTimeline.events.findIndex(event => event.id === eventId);
-      if (eventIndex === -1) {
-        throw new Error('Event not found');
-      }
-
-      currentTimeline.events[eventIndex] = validatedEvent;
-      // Use the updated sorting utility
-      currentTimeline.events = timelineUtils.sortEventsByTime(currentTimeline.events);
-
-      await this.saveProjectTimeline(projectId, currentTimeline);
-    } catch (error) {
-      console.error('Error updating timeline event:', error);
-      throw error;
-    }
-  }
-
-  async deleteTimelineEvent(projectId: string, eventId: string): Promise<void> {
-    try {
-      const currentTimeline = await this.getProjectTimeline(projectId);
-      currentTimeline.events = currentTimeline.events.filter(event => event.id !== eventId);
-      await this.saveProjectTimeline(projectId, currentTimeline);
-    } catch (error) {
-      console.error('Error deleting timeline event:', error);
-      throw error;
-    }
-  }
-
-  async addTimelineEvent(projectId: string, eventData: TimelineEvent): Promise<string> {
-    try {
-      // Use the utility function to generate a more robust ID
-      const eventId = eventData.id || timelineUtils.generateEventId();
-      const eventWithId = { ...eventData, id: eventId };
-      const validatedEvent = TimelineEventSchema.parse(eventWithId);
-
-      const currentTimeline = await this.getProjectTimeline(projectId);
-      currentTimeline.events.push(validatedEvent);
-      // Use the updated sorting utility
-      currentTimeline.events = timelineUtils.sortEventsByTime(currentTimeline.events);
-
-      await this.saveProjectTimeline(projectId, currentTimeline);
-      return eventId;
-    } catch (error) {
-      console.error('Error adding timeline event:', error);
-      throw error;
-    }
-  }
-
-  subscribeToTimeline(projectId: string, callback: (timeline: TimelineData) => void): () => void {
-    const projectRef = doc(db, this.COLLECTION_NAME, projectId);
-
-    const unsubscribe = onSnapshot(
-      projectRef,
-      (doc) => {
-        if (doc.exists()) {
-          const projectData = doc.data();
-          const timelineData = projectData.form2 || { events: [] };
-
-          try {
-            const validatedData = form2TimelineSchema.parse(timelineData);
-            callback(validatedData);
-          } catch (error) {
-            console.error('Timeline data validation failed:', error);
-            callback({ events: [] });
-          }
-        } else {
-          callback({ events: [] });
-        }
+  static getTestData(projectDate: Date): TTimelineEventForm[] {
+    return [
+      {
+        eventId: uuidv4(),
+        eventType: 'CEREMONY' as EventType,
+        time: new Date(projectDate.getFullYear(), projectDate.getMonth(), projectDate.getDate(), 14, 0),
+        details: 'Wedding ceremony with family and friends at St. Mary\'s Church',
+        notification: 'Push',
+        status: 'Draft',
       },
-      (error: FirestoreError) => {
-        console.error('Timeline subscription error:', error);
-        callback({ events: [] });
-      }
-    );
+      {
+        eventId: uuidv4(),
+        eventType: 'FIRSTDANCE' as EventType,
+        time: new Date(projectDate.getFullYear(), projectDate.getMonth(), projectDate.getDate(), 19, 30),
+        details: 'First dance as married couple in Reception Hall',
+        notification: 'None',
+        status: 'Draft',
+      },
+      {
+        eventId: uuidv4(),
+        eventType: 'CAKECUTTING' as EventType,
+        time: new Date(projectDate.getFullYear(), projectDate.getMonth(), projectDate.getDate(), 21, 0),
+        details: 'Cake cutting ceremony',
+        notification: 'Push',
+        status: 'Draft',
+      },
+      {
+        eventId: uuidv4(),
+        eventType: 'COUPLEPHOTOS' as EventType,
+        time: new Date(projectDate.getFullYear(), projectDate.getMonth(), projectDate.getDate(), 15, 30),
+        details: 'Couple portraits after ceremony in Garden Area',
+        notification: 'None',
+        status: 'Draft',
+      },
+      {
+        eventId: uuidv4(),
+        eventType: 'SPEECHES' as EventType,
+        time: new Date(projectDate.getFullYear(), projectDate.getMonth(), projectDate.getDate(), 20, 0),
+        details: 'Best man and maid of honor speeches',
+        notification: 'Push',
+        status: 'Draft',
+      },
+    ];
+  }
 
-    return unsubscribe;
+  static async saveEvent(event: TTimelineEventForm): Promise<TTimelineEventForm> {
+    // Mock API call
+    this.savedEvents.push(event);
+    return event;
+  }
+
+  static async getEvents(): Promise<TTimelineEventForm[]> {
+    // Mock API call
+    return [...this.savedEvents];
+  }
+
+  static async deleteEvent(eventId: string): Promise<boolean> {
+    // Mock API call
+    const index = this.savedEvents.findIndex(e => e.eventId === eventId);
+    if (index !== -1) {
+      this.savedEvents.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 }
 
-export const timelineService = new FirestoreTimelineService();
+// // timelineService.ts
 
-export const useTimelineService = () => {
-  return timelineService;
-};
+// import {
+//   doc,
+//   FirestoreError,
+//   getDoc,
+//   onSnapshot,
+//   Timestamp,
+//   updateDoc
+// } from 'firebase/firestore';
+// import { z } from 'zod';
+// import { form2TimelineSchema } from '../types/project-TimelineSchema';
+// // Import new types and mappings from timeline.ts
+// import { EVENT_TYPE_DETAILS, EventType, TimelineEvent, TimelineEventSchema } from '../types/timeline';
+// import { db } from './firebase'; // Adjust path as needed
 
-// --- UPDATED UTILITY FUNCTIONS ---
-export const timelineUtils = {
-  /**
-   * Sorts events chronologically using Firestore Timestamps.
-   */
-  sortEventsByTime: (events: TimelineEvent[]): TimelineEvent[] => {
-    return [...events].sort((a, b) => {
-      // Compare seconds first, then nanoseconds for more precision
-      // return a.time.seconds - b.time.seconds || a.time.nanoseconds - b.time.nanoseconds;
-      return a.time.getTime() - b.time.getTime();
-    });
-  },
+// // Define and export EventStatus type
+// export type EventStatus = 'completed' | 'current' | 'upcoming';
 
-  validateTimelineData: (data: unknown): TimelineData => {
-    return form2TimelineSchema.parse(data);
-  },
+// // Re-export types for convenience
+// export { EventType, TimelineEvent };
 
-  validateEvent: (data: unknown): TimelineEvent => {
-    return TimelineEventSchema.parse(data);
-  },
+// // This type is inferred from your project-TimelineSchema file
+// type TimelineData = z.infer<typeof form2TimelineSchema>;
 
-  generateEventId: (): string => {
-    return `event_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  },
+// export interface TimelineService {
+//   getProjectTimeline: (projectId: string) => Promise<TimelineData>;
+//   saveProjectTimeline: (projectId: string, timelineData: TimelineData) => Promise<void>;
+//   updateTimelineEvent: (projectId: string, eventId: string, eventData: TimelineEvent) => Promise<void>;
+//   deleteTimelineEvent: (projectId: string, eventId: string) => Promise<void>;
+//   addTimelineEvent: (projectId: string, eventData: TimelineEvent) => Promise<string>;
+//   subscribeToTimeline: (projectId: string, callback: (timeline: TimelineData) => void) => () => void;
+// }
 
-  /**
-   * Calculates an event's end time.
-   * @param startTime - The event's start time as a Firestore Timestamp.
-   * @param duration - The duration in minutes.
-   * @returns The end time as a new Firestore Timestamp.
-   */
-  calculateEndTime: (startTime: Timestamp, duration: number = 30): Timestamp => {
-    const startDate = startTime.toDate();
-    const endDate = new Date(startDate.getTime() + duration * 60000); // 60000 ms in a minute
-    return Timestamp.fromDate(endDate);
-  },
+// class FirestoreTimelineService implements TimelineService {
+//   private readonly COLLECTION_NAME = 'projects';
 
-  /**
-   * Formats a Firestore Timestamp into a 12-hour time string (e.g., "2:30 PM").
-   * @param timestamp - The Firestore Timestamp to format.
-   * @returns The formatted time string.
-   */
-  formatTime12Hour: (timestamp: Timestamp): string => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate();
-    // Using Intl.DateTimeFormat for robust, locale-aware time formatting
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    }).format(date);
-  },
+//   async getProjectTimeline(projectId: string): Promise<TimelineData> {
+//     try {
+//       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
+//       const projectSnap = await getDoc(projectRef);
 
-  /**
-   * Retrieves the mapped details (icon and description) for a given event type.
-   * @param eventType - The type of the event.
-   * @returns An object with the icon and default description.
-   */
-  getEventTypeDetails: (eventType: EventType): { icon: any; description: string } => {
-    return EVENT_TYPE_DETAILS[eventType] || EVENT_TYPE_DETAILS['Other'];
-  },
+//       if (!projectSnap.exists()) {
+//         throw new Error('Project not found');
+//       }
 
-  /**
-   * Determines the status of an event based on current time.
-   * @param event - The timeline event.
-   * @param now - The current date/time.
-   * @returns The event status.
-   */
-  getEventStatus: (event: TimelineEvent, now: Date): EventStatus => {
-    const eventTime = (event.time instanceof Timestamp) ? event.time.toDate() : new Date(event.time);
-    const eventEndTime = new Date(eventTime.getTime() + (event.duration || 30) * 60000);
+//       const projectData = projectSnap.data();
+//       const timelineData = projectData.form2 || { events: [] };
+
+//       const validatedData = form2TimelineSchema.parse(timelineData);
+//       return validatedData;
+//     } catch (error) {
+//       console.error('Error getting project timeline:', error);
+//       if (error instanceof z.ZodError) {
+//         console.error('Timeline data validation failed:', error.errors);
+//         return { events: [] };
+//       }
+//       throw error;
+//     }
+//   }
+
+//   async saveProjectTimeline(projectId: string, timelineData: TimelineData): Promise<void> {
+//     try {
+//       const validatedData = form2TimelineSchema.parse(timelineData);
+//       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
+
+//       await updateDoc(projectRef, {
+//         'form2': validatedData,
+//         'updatedAt': Timestamp.now()
+//       });
+
+//       console.log('Timeline saved successfully');
+//     } catch (error) {
+//       console.error('Error saving timeline:', error);
+//       throw error;
+//     }
+//   }
+
+//   async updateTimelineEvent(projectId: string, eventId: string, eventData: TimelineEvent): Promise<void> {
+//     try {
+//       const validatedEvent = TimelineEventSchema.parse(eventData);
+//       const currentTimeline = await this.getProjectTimeline(projectId);
+
+//       const eventIndex = currentTimeline.events.findIndex(event => event.id === eventId);
+//       if (eventIndex === -1) {
+//         throw new Error('Event not found');
+//       }
+
+//       currentTimeline.events[eventIndex] = validatedEvent;
+//       // Use the updated sorting utility
+//       currentTimeline.events = timelineUtils.sortEventsByTime(currentTimeline.events);
+
+//       await this.saveProjectTimeline(projectId, currentTimeline);
+//     } catch (error) {
+//       console.error('Error updating timeline event:', error);
+//       throw error;
+//     }
+//   }
+
+//   async deleteTimelineEvent(projectId: string, eventId: string): Promise<void> {
+//     try {
+//       const currentTimeline = await this.getProjectTimeline(projectId);
+//       currentTimeline.events = currentTimeline.events.filter(event => event.id !== eventId);
+//       await this.saveProjectTimeline(projectId, currentTimeline);
+//     } catch (error) {
+//       console.error('Error deleting timeline event:', error);
+//       throw error;
+//     }
+//   }
+
+//   async addTimelineEvent(projectId: string, eventData: TimelineEvent): Promise<string> {
+//     try {
+//       // Use the utility function to generate a more robust ID
+//       const eventId = eventData.id || timelineUtils.generateEventId();
+//       const eventWithId = { ...eventData, id: eventId };
+//       const validatedEvent = TimelineEventSchema.parse(eventWithId);
+
+//       const currentTimeline = await this.getProjectTimeline(projectId);
+//       currentTimeline.events.push(validatedEvent);
+//       // Use the updated sorting utility
+//       currentTimeline.events = timelineUtils.sortEventsByTime(currentTimeline.events);
+
+//       await this.saveProjectTimeline(projectId, currentTimeline);
+//       return eventId;
+//     } catch (error) {
+//       console.error('Error adding timeline event:', error);
+//       throw error;
+//     }
+//   }
+
+//   subscribeToTimeline(projectId: string, callback: (timeline: TimelineData) => void): () => void {
+//     const projectRef = doc(db, this.COLLECTION_NAME, projectId);
+
+//     const unsubscribe = onSnapshot(
+//       projectRef,
+//       (doc) => {
+//         if (doc.exists()) {
+//           const projectData = doc.data();
+//           const timelineData = projectData.form2 || { events: [] };
+
+//           try {
+//             const validatedData = form2TimelineSchema.parse(timelineData);
+//             callback(validatedData);
+//           } catch (error) {
+//             console.error('Timeline data validation failed:', error);
+//             callback({ events: [] });
+//           }
+//         } else {
+//           callback({ events: [] });
+//         }
+//       },
+//       (error: FirestoreError) => {
+//         console.error('Timeline subscription error:', error);
+//         callback({ events: [] });
+//       }
+//     );
+
+//     return unsubscribe;
+//   }
+// }
+
+// export const timelineService = new FirestoreTimelineService();
+
+// export const useTimelineService = () => {
+//   return timelineService;
+// };
+
+// // --- UPDATED UTILITY FUNCTIONS ---
+// export const timelineUtils = {
+//   /**
+//    * Sorts events chronologically using Firestore Timestamps.
+//    */
+//   sortEventsByTime: (events: TimelineEvent[]): TimelineEvent[] => {
+//     return [...events].sort((a, b) => {
+//       // Compare seconds first, then nanoseconds for more precision
+//       // return a.time.seconds - b.time.seconds || a.time.nanoseconds - b.time.nanoseconds;
+//       return a.time.getTime() - b.time.getTime();
+//     });
+//   },
+
+//   validateTimelineData: (data: unknown): TimelineData => {
+//     return form2TimelineSchema.parse(data);
+//   },
+
+//   validateEvent: (data: unknown): TimelineEvent => {
+//     return TimelineEventSchema.parse(data);
+//   },
+
+//   generateEventId: (): string => {
+//     return `event_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+//   },
+
+//   /**
+//    * Calculates an event's end time.
+//    * @param startTime - The event's start time as a Firestore Timestamp.
+//    * @param duration - The duration in minutes.
+//    * @returns The end time as a new Firestore Timestamp.
+//    */
+//   calculateEndTime: (startTime: Timestamp, duration: number = 30): Timestamp => {
+//     const startDate = startTime.toDate();
+//     const endDate = new Date(startDate.getTime() + duration * 60000); // 60000 ms in a minute
+//     return Timestamp.fromDate(endDate);
+//   },
+
+//   /**
+//    * Formats a Firestore Timestamp into a 12-hour time string (e.g., "2:30 PM").
+//    * @param timestamp - The Firestore Timestamp to format.
+//    * @returns The formatted time string.
+//    */
+//   formatTime12Hour: (timestamp: Timestamp): string => {
+//     if (!timestamp) return '';
+//     const date = timestamp.toDate();
+//     // Using Intl.DateTimeFormat for robust, locale-aware time formatting
+//     return new Intl.DateTimeFormat('en-US', {
+//       hour: 'numeric',
+//       minute: '2-digit',
+//       hour12: true,
+//     }).format(date);
+//   },
+
+//   /**
+//    * Retrieves the mapped details (icon and description) for a given event type.
+//    * @param eventType - The type of the event.
+//    * @returns An object with the icon and default description.
+//    */
+//   getEventTypeDetails: (eventType: EventType): { icon: any; description: string } => {
+//     return EVENT_TYPE_DETAILS[eventType] || EVENT_TYPE_DETAILS['Other'];
+//   },
+
+//   /**
+//    * Determines the status of an event based on current time.
+//    * @param event - The timeline event.
+//    * @param now - The current date/time.
+//    * @returns The event status.
+//    */
+//   getEventStatus: (event: TimelineEvent, now: Date): EventStatus => {
+//     const eventTime = (event.time instanceof Timestamp) ? event.time.toDate() : new Date(event.time);
+//     const eventEndTime = new Date(eventTime.getTime() + (event.duration || 30) * 60000);
     
-    if (now >= eventEndTime) {
-      return 'completed';
-    } else if (now >= eventTime) {
-      return 'current';
-    } else {
-      return 'upcoming';
-    }
-  },
+//     if (now >= eventEndTime) {
+//       return 'completed';
+//     } else if (now >= eventTime) {
+//       return 'current';
+//     } else {
+//       return 'upcoming';
+//     }
+//   },
+// };
 
-  /**
-   * Calculates the progress percentage for a current event.
-   * @param event - The timeline event.
-   * @param now - The current date/time.
-   * @returns The progress percentage (0-100).
-   */
-  calculateEventProgress: (event: TimelineEvent, now: Date): number => {
-    const eventTime = (event.time instanceof Timestamp) ? event.time.toDate() : new Date(event.time);
-    const eventEndTime = new Date(eventTime.getTime() + (event.duration || 30) * 60000);
-    
-    if (now <= eventTime) return 0;
-    if (now >= eventEndTime) return 100;
-    
-    const totalDuration = eventEndTime.getTime() - eventTime.getTime();
-    const elapsed = now.getTime() - eventTime.getTime();
-    
-    return Math.round((elapsed / totalDuration) * 100);
-  },
-};
-
-export default timelineService;
+// export default timelineService;
 
 
 // import {

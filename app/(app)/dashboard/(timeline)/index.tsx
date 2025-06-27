@@ -1,4 +1,4 @@
-// app/(app)/dashboard/(timeline)/index.tsx
+// // app/(app)/dashboard/(timeline)/index.tsx
 import { BodyText, HeadlineText } from '@/components/ui/Typography';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -8,7 +8,6 @@ import { EnhancedDataImportModal } from '../../../../components/import/EnhancedD
 import DashboardAppBar, { NavigationProp, SubPage } from '../../../../components/navigation/DashboardAppbar';
 import { Screen } from '../../../../components/ui/Screen';
 import { EnhancedTimelineView } from '../../../../components/views/EnhancedTimelineView';
-import { commonStyles } from '../../../../constants/styles';
 import { spacing } from '../../../../constants/theme';
 import { useForm2 } from '../../../../contexts/Form2TimelineContext';
 import { useProjects } from '../../../../contexts/ProjectContext';
@@ -91,19 +90,13 @@ export default function TimelineGeneralScreen() {
         </ScrollView>
       ) : (
         // --- STATE 2: Empty State with Actions ---
-        <View style={[commonStyles.centerContent, { padding: spacing.lg }]}>
-          <HeadlineText style={{ marginBottom: spacing.sm }}>Your Timeline is Empty</HeadlineText>
-          <BodyText style={[commonStyles.textCenter, { marginBottom: spacing.xl }]}>
+        <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center', padding: spacing.lg }}>
+          <HeadlineText style={{ marginBottom: spacing.lg }}>Your Timeline is Empty</HeadlineText>
+          <BodyText style={{ marginBottom: spacing.xl }}>
             Get started by adding your first event.
           </BodyText>
           <View style={styles.buttonStack}>
-            <Button mode="outlined" icon="upload" onPress={openImportModal}>
-              Upload Event Data
-            </Button>
-            <Button mode="outlined" icon="gesture-swipe" onPress={() => { /* TODO */ }}>
-              Drag & Drop Events
-            </Button>
-            <Button 
+          <Button 
               mode="contained" 
               icon="plus" 
               onPress={() => currentProject && timelineModal.openModal(currentProject)}
@@ -111,6 +104,12 @@ export default function TimelineGeneralScreen() {
             >
               Add Events Form
             </Button>
+            <Button mode="outlined" icon="upload" onPress={openImportModal}>
+              Upload Event Data
+            </Button>
+            <Button mode="outlined" icon="gesture-swipe" onPress={() => { /* TODO */ }}>
+              Drag & Drop Events
+            </Button>            
           </View>
         </View>
       )}
@@ -130,7 +129,7 @@ export default function TimelineGeneralScreen() {
 const createScreenStyles = (theme: any) =>
   StyleSheet.create({
     header: {
-      padding: spacing.lg,
+      padding: spacing.md,
       paddingBottom: spacing.sm,
       backgroundColor: theme.colors.surface,
       borderBottomWidth: 1,
@@ -140,8 +139,8 @@ const createScreenStyles = (theme: any) =>
       color: theme.colors.onSurfaceVariant,
     },
     buttonStack: {
-      width: '100%',
+      width: '75%',
       maxWidth: 350,
-      gap: spacing.md,
+      gap: spacing.lg,
     },
   });

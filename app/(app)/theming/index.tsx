@@ -1,24 +1,24 @@
 import { Switch, View } from 'react-native';
 import {
-    ActivityIndicator,
-    Avatar,
-    Banner,
-    Button,
-    Card,
-    Checkbox,
-    Chip,
-    Dialog,
-    Divider,
-    IconButton,
-    List,
-    Modal,
-    Portal,
-    ProgressBar,
-    RadioButton,
-    Snackbar,
-    Text,
-    TextInput,
-    useTheme
+  ActivityIndicator,
+  Avatar,
+  Banner,
+  Button,
+  Card,
+  Checkbox,
+  Chip,
+  Dialog,
+  Divider,
+  IconButton,
+  List,
+  Modal,
+  Portal,
+  ProgressBar,
+  RadioButton,
+  Snackbar,
+  Text,
+  TextInput,
+  useTheme
 } from 'react-native-paper';
 
 import React from 'react';
@@ -27,6 +27,13 @@ import { commonStyles } from '../../../constants/styles';
 import { typography } from '../../../constants/typography';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 
+// import TimelineListItem from '../../../components/cards/TimelineListItemCard';
+
+// import { Timestamp } from 'firebase/firestore';
+import { TimelineEventForm } from '../../../components/timeline/TimelineEventForm';
+// import { EventType } from '../../../constants/eventTypes';
+import { TimelineProvider } from '../../../contexts/TimelineContext';
+
 export default function ThemingTestScreen() {
   const theme = useTheme();
   const { toggleTheme, isDarkMode } = useThemeContext();
@@ -34,9 +41,34 @@ export default function ThemingTestScreen() {
   const [showModal, setShowModal] = React.useState(false);
   const [showBanner, setShowBanner] = React.useState(true);
   const [showSnackbar, setShowSnackbar] = React.useState(false);
+  const [showTimelineForm, setShowTimelineForm] = React.useState(false);
+  // const [showTimelineCard, setShowTimelineCard] = React.useState(false);
+
 
   return (
     <Screen scrollable padding="lg" edges={['bottom', 'left', 'right']}>
+       {/* Component Preview Section */}
+       <View style={[commonStyles.marginBottomLg, { gap: 8 }]}>
+        <Text variant="titleLarge">Component Previews</Text>
+        <View style={[commonStyles.rowCenter, { gap: 8 }]}>
+          <Button 
+            mode="outlined" 
+            onPress={() => setShowTimelineForm(true)}
+            icon="plus"
+          >
+            Timeline Form
+          </Button>
+          {/* <Button 
+            mode="outlined" 
+            onPress={() => setShowTimelineCard(true)}
+            icon="view-list"
+          >
+            Timeline Cards
+          </Button> */}
+        </View>
+      </View>
+
+      <Divider style={commonStyles.marginBottomLg} />
       <View style={commonStyles.rowBetween}>
         <Text variant="headlineSmall">Theming & Components</Text>
         <Switch value={isDarkMode} onValueChange={toggleTheme} />
@@ -181,6 +213,62 @@ export default function ThemingTestScreen() {
         <Modal visible={showModal} onDismiss={() => setShowModal(false)} contentContainerStyle={{backgroundColor: theme.colors.surface, padding: 20, margin: 20}}>
           <Text>Example Modal</Text>
         </Modal>
+
+        {/* Timeline Form Preview Modal */}
+        <Modal 
+          visible={showTimelineForm} 
+          onDismiss={() => setShowTimelineForm(false)} 
+          contentContainerStyle={{
+            backgroundColor: theme.colors.surface, 
+            margin: 20,
+            borderRadius: 8,
+            maxHeight: '85%'
+          }}
+        >
+          {/* <TimelineEventForm
+            projectDate={new Date(2024, 5, 15, 12, 0)}
+            onSubmit={handleTimelineFormSubmit}
+            onCancel={() => setShowTimelineForm(false)}
+          /> */}
+            <TimelineProvider>
+            <TimelineEventForm
+              projectDate={new Date()}
+              onSubmit={(event) => console.log('Event created:', event)}
+              onCancel={() => console.log('Cancelled')}
+            />
+          </TimelineProvider>
+        </Modal>
+
+        {/* Timeline Cards Preview Modal */}
+        {/* <Modal 
+          visible={showTimelineCard} 
+          onDismiss={() => setShowTimelineCard(false)} 
+          contentContainerStyle={{
+            backgroundColor: theme.colors.surface, 
+            margin: 20,
+            borderRadius: 8,
+            maxHeight: '80%'
+          }}
+        >
+          <View style={{ padding: 16 }}>
+            <Text variant="headlineSmall" style={{ marginBottom: 16 }}>Timeline Cards Preview</Text>
+            {dummyTimelineEvents.map((event, index) => (
+              <TimelineListItem
+                key={event.eventId}
+                item={event}
+                isFirst={index === 0}
+                isLast={index === dummyTimelineEvents.length - 1}
+              />
+            ))}
+            <Button 
+              mode="contained" 
+              onPress={() => setShowTimelineCard(false)}
+              style={{ marginTop: 16 }}
+            >
+              Close
+            </Button>
+          </View>
+        </Modal> */}
       </Portal>
       
       <Banner
@@ -208,7 +296,7 @@ export default function ThemingTestScreen() {
           label: 'Undo',
           onPress: () => {},
         }}>
-        Hey there! I am a Snackbar.
+        Timeline Event Form submitted successfully!
       </Snackbar>
 
     </Screen>
