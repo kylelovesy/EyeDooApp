@@ -7,98 +7,76 @@ This directory contains all reusable React components for the EyeDooApp photogra
 ## Structure
 
 ### UI Components (`/ui`)
-
-- **`BaseFormModal.tsx`** - Standardized modal component with form submission handling
-- **`CustomButton.tsx`** - Versatile button component with multiple variants and sizes
-- **`CustomDropdown.tsx`** - Dropdown selection component with consistent styling
-- **`EmptyState.tsx`** - Empty state display component with action options
-- **`LoadingState.tsx`** - Loading indicator component with overlay support
-- **`RepeatableSection.tsx`** - Component for dynamic list management with add/remove functionality
-- **`Screen.tsx`** - Base screen wrapper with consistent padding and safe area handling
-- **`Toast.tsx`** - Toast notification system with multiple types and custom actions
-- **`Typography.tsx`** - Comprehensive typography system with standardized text styles
+- **`BaseFormModal.tsx`**: A foundational, unstyled modal component that uses absolute positioning to avoid stacking context issues with overlays like dropdowns.
+- **`CustomButton.tsx`**: A versatile button component with multiple variants (`primary`, `secondary`, `outline`), sizes, and icon support.
+- **`CustomDropdown.tsx`**: A dropdown selection component that renders its options in an absolutely positioned view to ensure visibility.
+- **`EmptyState.tsx`**: A component for displaying empty states with an icon, title, description, and an optional action button.
+- **`FormModal.tsx`**: A standardized, styled modal for forms that wraps `BaseFormModal` and integrates with the `useBaseFormContext` pattern for state and submission handling.
+- **`LoadingState.tsx`**: A loading indicator component with an optional overlay for blocking UI interactions.
+- **`RepeatableSection.tsx`**: A component for dynamically managing lists of items with "add" and "remove" functionality.
+- **`Screen.tsx`**: A base screen wrapper providing consistent padding, safe area handling, and scrollability.
+- **`TagInput.tsx`**: A custom input for selecting and creating tags, with suggestions and a chip-based display for selected items.
+- **`Toast.tsx`**: A toast notification system with a `useToast` hook for easy implementation of success, error, warning, and info messages.
+- **`Typography.tsx`**: A comprehensive typography system with standardized text components (`DisplayText`, `HeadlineText`, `TitleText`, etc.).
 
 ### Card Components (`/cards`)
-
-- **`CustomCard.tsx`** - General-purpose card component with header, content, and action support
-- **`ProjectCard.tsx`** - Specialized card for displaying project information with progress indicators
+- **`CustomCard.tsx`**: A general-purpose card with support for a header, content, icons, and menu actions.
+- **`NextTimelineEventCard.tsx`**: A specialized card to display the current or next upcoming event from a timeline, with a countdown.
+- **`ProjectCard.tsx`**: A detailed card for displaying project information, including client names, dates, and progress indicators.
+- **`TimelineListItemCard.tsx`**: A component for rendering a single event within a timeline view.
+- **`VendorCard.tsx`**: A card for displaying vendor contact information with edit and delete actions.
 
 ### Form Components (`/forms`)
-
-- **`CheckboxInput.tsx`** - Checkbox input with label and validation support
-- **`ControlledTextInput.tsx`** - Text input component with comprehensive validation and styling
-- **`DatePickerInput.tsx`** - Date selection component with cross-platform support
-- **`DropdownInput.tsx`** - Dropdown selection with search and validation
-- **`MultiSelectInput.tsx`** - Multi-selection component with chip display
-- **`RadioGroupInput.tsx`** - Radio button group with horizontal/vertical layouts
-- **`SwitchInput.tsx`** - Switch toggle component with description support
+A library of controlled input components with consistent styling and validation support.
+- **`CheckboxInput.tsx`**, **`ControlledTextInput.tsx`**, **`DatePickerInput.tsx`**, **`DropdownInput.tsx`**, **`MultiSelectInput.tsx`**, **`RadioGroupInput.tsx`**, **`SwitchInput.tsx`**
 
 ### Modal Components (`/modals`)
-
-- **`EssentialInfoForm.tsx`** - ✅ **STANDARDIZED** - Project creation and essential information modal using BaseFormModal
-- **`PeopleForm.tsx`** - ✅ **STANDARDIZED** - People and persona management modal using BaseFormModal
-- **`PhotosForm.tsx`** - ✅ **STANDARDIZED** - Photo requirements and shot list management modal using BaseFormModal
-- **`TimelineForm.tsx`** - ✅ **STANDARDIZED** - Timeline events management modal using BaseFormModal
+These are the primary, user-facing modal forms. They are built using `FormModal` and integrated with their respective contexts for a standardized user experience.
+- **`EssentialInfoForm.tsx`**: Project creation and essential information modal.
+- **`PeopleForm.tsx`**: People and persona management modal.
+- **`PhotosForm.tsx`**: Photo requirements and shot list management modal.
+- **`QRCodeScanner.tsx`**: A full-screen modal that uses the device camera to scan and parse QR codes for vendor information.
+- **`TagForm.tsx`**: A modal form for creating or editing tags.
+- **`VendorForm.tsx`**: A comprehensive modal for adding or editing vendor details.
 
 ### Navigation Components (`/navigation`)
+- **`DashboardAppbar.tsx`**: A dynamic `Appbar` for the dashboard screens, featuring a title, back button, and dynamic action icons for sub-page navigation.
+- **`DeleteProjectModal.tsx`**: (Currently empty). Intended for project deletion confirmation.
+- **`ThemedMaterialTopTabs.tsx`**: A themed Material Design top-tab navigator for creating tabbed layouts.
 
-- **`DeleteProjectModal.tsx`** - Project deletion confirmation modal
-- **`ThemedMaterialTopTabs.tsx`** - Themed material design top tab navigation
+### Timeline Components (`/timeline`)
+- **`AccordionForm.tsx`**: The underlying animated accordion used within the `TimelineEventForm`.
+- **`EventTypeDropdown.tsx`**: A specialized dropdown for selecting from predefined event types with icons.
+- **`TimelineEventForm.tsx`**: The complete form for adding or editing timeline events, designed to be used within a modal.
+
+### Data Import Components (`/import`)
+- **`DataImportComponent.tsx`**: A component that handles the logic for picking and parsing JSON files for data import.
+- **`DataImportModal.tsx`**: A basic modal that wraps the `DataImportComponent` to update project data.
+- **`EnhancedDataImportModal.tsx`**: An advanced version of the import modal with features like merge strategies and data backup.
+
+### View Components (`/views`)
+- **`EnhancedTimelineView.tsx`**: A component that visualizes a series of timeline events in a vertical, chronological list with status indicators.
 
 ### Component Organization
+- **`FormModals.tsx`**: Centralizes the rendering of all primary form modals and exports their respective context hooks for easy access (`useTimelineModal`, `usePhotosModal`, etc.).
+- **`index.ts`**: The central export hub for all reusable components, simplifying imports across the application.
 
-- **`FormModals.tsx`** - ✅ **UPDATED** - Centralized modal management with all standardized modals
-- **`index.ts`** - Central export hub for all reusable components
+## ✅ **MAJOR MILESTONE: Component Standardization Complete**
 
-### ✅ Recent Updates (BaseFormModal Standardization Complete)
+**All primary form modals have been successfully migrated to use the standardized `FormModal` and `BaseFormContext` patterns.**
 
-**All modal components have been successfully migrated to use the standardized `BaseFormModal` pattern:**
-
-1. **Consistent Modal Structure**: All modals now use `BaseFormModal` as wrapper
-2. **Context-based Visibility**: Modal visibility managed through form contexts, not local state
-3. **Standardized Props**: All modals accept `context` prop and use consistent title/subtitle pattern
-4. **Unified Error Handling**: All modals use the same snackbar system via `BaseFormModal`
-5. **Projects Screen Integration**: Updated to use context-based modal opening instead of manual state
-
-**Migration Details:**
-- `EssentialInfoFormModal` now uses `useForm1()` and `BaseFormModal`
-- Removed custom modal wrapper and manual snackbar implementation
-- Updated projects screen to use `ProjectFormProvider` and context-based modal opening
-- All modals now have consistent open/close mechanisms via their respective contexts
+- **Consistent Modal Structure**: All modals share a consistent look and feel.
+- **Context-based Visibility**: Modal visibility is now managed through form contexts, eliminating local state management for modals.
+- **Standardized Props**: All modals accept a `context` prop and use a consistent interface.
+- **Unified Error Handling**: All modals use the same snackbar system via their context.
 
 ## Key Improvements Made
 
-### ✅ Standardized Component Architecture
-- Implemented consistent prop interfaces across all components
-- Added comprehensive TypeScript typing for all component props
-- Established standard naming conventions and file organization
-- Created reusable component patterns for common UI elements
-
-### ✅ Form Component System
-- Built comprehensive form input library with validation support
-- Implemented consistent error handling and helper text patterns
-- Added accessibility features (labels, ARIA attributes, screen reader support)
-- Created standardized validation patterns using Zod schemas
-
-### ✅ Modal Management System
-- **COMPLETED STANDARDIZATION** - All form modals now use `BaseFormModal` pattern
-- Centralized all form modals in `FormModals.tsx` for easy management
-- Implemented consistent modal behavior and styling across all modals
-- Added proper portal usage for modal rendering
-- Created standardized modal interface patterns with context-based visibility
-- **EssentialInfoForm migration completed** - Now follows same pattern as other modals
-
-### ✅ Typography and Design System
-- Established comprehensive typography scale following Material Design 3
-- Created consistent spacing and theme usage patterns
-- Implemented proper color scheme support (light/dark modes)
-- Added standardized component sizing and variants
-
-### ✅ Accessibility and UX
-- Added proper ARIA labels and accessibility attributes
-- Implemented keyboard navigation support
-- Created consistent focus management
-- Added proper loading and error states
+- **✅ Standardized Component Architecture**: Consistent prop interfaces, TypeScript typing, and naming conventions.
+- **✅ Robust Form Component System**: A comprehensive library of form inputs with built-in validation support and accessibility features.
+- **✅ Standardized Modal Management**: All form modals are now centralized, standardized, and controlled via context.
+- **✅ Unified Design System**: A complete typography scale and consistent theme usage for colors and spacing.
+- **✅ Accessibility and UX**: All components are designed with ARIA labels, keyboard navigation, and clear loading/error states in mind.
 
 ## Usage Examples
 
@@ -106,37 +84,12 @@ This directory contains all reusable React components for the EyeDooApp photogra
 
 ```typescript
 // Typography usage
-import { TitleText, BodyText, LabelText } from '@/components/ui/Typography';
+import { TitleText, BodyText } from '@/components/ui/Typography';
 
 const MyScreen = () => (
   <View>
     <TitleText size="large">Project Overview</TitleText>
-    <BodyText size="medium">
-      This is the main content area with detailed information.
-    </BodyText>
-    <LabelText size="small">Last updated: {date}</LabelText>
-  </View>
-);
-
-// Custom Button usage
-import { CustomButton } from '@/components/ui/CustomButton';
-
-const ActionButtons = () => (
-  <View>
-    <CustomButton
-      title="Primary Action"
-      variant="primary"
-      size="large"
-      onPress={handlePrimaryAction}
-      fullWidth
-    />
-    <CustomButton
-      title="Secondary Action"
-      variant="outline"
-      icon="chevron-right"
-      iconPosition="right"
-      onPress={handleSecondaryAction}
-    />
+    <BodyText>This is the main content area.</BodyText>
   </View>
 );
 ```
@@ -144,113 +97,39 @@ const ActionButtons = () => (
 ### Form Components
 
 ```typescript
-// Comprehensive form example
-import {
-  ControlledTextInput,
-  DropdownInput,
-  MultiSelectInput,
-  CheckboxInput,
-  DatePickerInput
-} from '@/components/forms';
+// Form example
+import { ControlledTextInput, DatePickerInput } from '@/components/forms';
 
-const ProjectForm = () => {
-  const [formData, setFormData] = useState(initialData);
-  const [errors, setErrors] = useState({});
-
-  return (
-    <ScrollView>
-      <ControlledTextInput
-        label="Project Name"
-        value={formData.name}
-        onChangeText={(value) => setFormData(prev => ({ ...prev, name: value }))}
-        error={!!errors.name}
-        helperText={errors.name}
-        required
-      />
-      
-      <DropdownInput
-        label="Project Type"
-        value={formData.type}
-        onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
-        options={[
-          { label: 'Wedding', value: 'wedding' },
-          { label: 'Portrait', value: 'portrait' },
-          { label: 'Event', value: 'event' }
-        ]}
-        required
-      />
-      
-      <MultiSelectInput
-        label="Photography Styles"
-        value={formData.styles}
-        onValueChange={(value) => setFormData(prev => ({ ...prev, styles: value }))}
-        options={styleOptions}
-        maxSelections={3}
-      />
-      
-      <DatePickerInput
-        label="Event Date"
-        value={formData.eventDate}
-        onDateChange={(date) => setFormData(prev => ({ ...prev, eventDate: date }))}
-      />
-      
-      <CheckboxInput
-        label="Include engagement session"
-        value={formData.includeEngagement}
-        onValueChange={(value) => setFormData(prev => ({ ...prev, includeEngagement: value }))}
-      />
-    </ScrollView>
-  );
-};
-```
-
-### Card Components
-
-```typescript
-// Project card usage
-import { ProjectCard } from '@/components/cards/ProjectCard';
-
-const ProjectsList = ({ projects, onProjectPress, onProjectDelete }) => (
-  <FlatList
-    data={projects}
-    renderItem={({ item }) => (
-      <ProjectCard
-        project={item}
-        onPress={() => onProjectPress(item)}
-        onDelete={() => onProjectDelete(item.id)}
-        isActive={item.id === currentProjectId}
-      />
-    )}
-    keyExtractor={(item) => item.id}
-  />
-);
-
-// Custom card usage
-import { CustomCard } from '@/components/cards/CustomCard';
-
-const InfoCard = () => (
-  <CustomCard
-    title="Weather Information"
-    subtitle="Today's forecast for your shoot"
-    headerIcon="weather-partly-cloudy"
-    showMenu
-    onMenuPress={handleMenuPress}
-    variant="outlined"
-  >
-    <WeatherContent />
-  </CustomCard>
+const ProjectForm = ({ formData, setFormData, errors }) => (
+  <View>
+    <ControlledTextInput
+      label="Project Name"
+      value={formData.name}
+      onChangeText={(value) => setFormData(prev => ({ ...prev, name: value }))}
+      error={!!errors.name}
+      helperText={errors.name}
+      required
+    />
+    <DatePickerInput
+      label="Event Date"
+      value={formData.eventDate}
+      onDateChange={(date) => setFormData(prev => ({ ...prev, eventDate: date }))}
+    />
+  </View>
 );
 ```
 
 ### Modal System
 
+The modal system is designed for simplicity. All modals are rendered centrally, and you only need to call the appropriate context hook to open one.
+
 ```typescript
-// Using centralized modal system
-import { FormModals, useTimelineModal, usePhotosModal } from '@/components/FormModals';
+// Using the centralized modal system from any screen within the context's provider
+import { useTimelineModal } from '@/components/FormModals';
 
 const DashboardScreen = () => {
   const { openModal: openTimelineModal } = useTimelineModal();
-  const { openModal: openPhotosModal } = usePhotosModal();
+  const { currentProject } = useProjects(); // Assuming you get the project from here
 
   return (
     <Screen>
@@ -258,343 +137,29 @@ const DashboardScreen = () => {
         title="Edit Timeline"
         onPress={() => openTimelineModal(currentProject)}
       />
-      <CustomButton
-        title="Edit Photos"
-        onPress={() => openPhotosModal(currentProject)}
-      />
-      
-      {/* All modals are rendered automatically */}
-      <FormModals />
+      {/* 
+        You DO NOT need to render the modal component here.
+        <FormModals /> is rendered once in the main layout (e.g., app/(app)/dashboard/_layout.tsx).
+      */}
     </Screen>
   );
 };
 ```
 
-### Loading and Empty States
-
-```typescript
-// Loading state usage
-import { LoadingState } from '@/components/ui/LoadingState';
-
-const ProjectsScreen = () => {
-  if (isLoading) {
-    return <LoadingState message="Loading projects..." />;
-  }
-
-  return <ProjectsList projects={projects} />;
-};
-
-// Empty state usage
-import { EmptyState } from '@/components/ui/EmptyState';
-
-const EmptyProjectsList = () => (
-  <EmptyState
-    icon="camera-plus"
-    title="No Projects Yet"
-    description="Create your first photography project to get started"
-    actionTitle="Create Project"
-    onAction={handleCreateProject}
-  />
-);
-```
-
-## Component Patterns
-
-### Consistent Prop Interfaces
-
-All components follow these standard patterns:
-
-```typescript
-interface BaseComponentProps {
-  // Standard props
-  style?: ViewStyle | TextStyle;
-  testID?: string;
-  disabled?: boolean;
-  
-  // Form-specific props (when applicable)
-  error?: boolean;
-  helperText?: string;
-  required?: boolean;
-  
-  // Accessibility props
-  accessible?: boolean;
-  accessibilityLabel?: string;
-  accessibilityHint?: string;
-}
-```
-
-### Theme Integration
-
-```typescript
-// All components use consistent theme integration
-import { useAppTheme } from '@/constants/theme';
-
-const MyComponent = () => {
-  const theme = useAppTheme();
-  
-  const styles = StyleSheet.create({
-    container: {
-      backgroundColor: theme.colors.surface,
-      borderColor: theme.colors.outline,
-    }
-  });
-  
-  return <View style={styles.container} />;
-};
-```
-
-### Validation Patterns
-
-```typescript
-// Standard validation pattern for form components
-interface FormComponentProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  error?: boolean;
-  helperText?: string;
-  validation?: z.ZodSchema;
-}
-
-const FormComponent: React.FC<FormComponentProps> = ({
-  value,
-  onValueChange,
-  error,
-  helperText,
-  validation
-}) => {
-  const [internalError, setInternalError] = useState<string | null>(null);
-  
-  const handleChange = (newValue: string) => {
-    onValueChange(newValue);
-    
-    if (validation) {
-      const result = validation.safeParse(newValue);
-      setInternalError(result.success ? null : result.error.errors[0]?.message);
-    }
-  };
-  
-  const displayError = error || !!internalError;
-  const displayHelperText = helperText || internalError;
-  
-  return (
-    <TextInput
-      value={value}
-      onChangeText={handleChange}
-      error={displayError}
-      helperText={displayHelperText}
-    />
-  );
-};
-```
-
-## Accessibility Guidelines
-
-### Standard Accessibility Features
-
-All components implement:
-
-1. **Proper ARIA labels and roles**
-2. **Keyboard navigation support**
-3. **Screen reader compatibility**
-4. **Focus management**
-5. **High contrast support**
-
-### Example Implementation
-
-```typescript
-const AccessibleButton: React.FC<ButtonProps> = ({
-  title,
-  onPress,
-  disabled,
-  testID,
-  accessibilityLabel,
-  accessibilityHint
-}) => (
-  <TouchableOpacity
-    onPress={onPress}
-    disabled={disabled}
-    testID={testID}
-    accessible={true}
-    accessibilityRole="button"
-    accessibilityLabel={accessibilityLabel || title}
-    accessibilityHint={accessibilityHint}
-    accessibilityState={{ disabled }}
-  >
-    <Text>{title}</Text>
-  </TouchableOpacity>
-);
-```
-
-## Testing Patterns
-
-### Component Testing Utilities
-
-```typescript
-// Test utilities for components
-import { render, fireEvent } from '@testing-library/react-native';
-import { ThemeProvider } from 'react-native-paper';
-
-const renderWithTheme = (component: React.ReactElement) => {
-  return render(
-    <ThemeProvider theme={lightTheme}>
-      {component}
-    </ThemeProvider>
-  );
-};
-
-// Example test
-describe('CustomButton', () => {
-  it('calls onPress when pressed', () => {
-    const mockOnPress = jest.fn();
-    const { getByRole } = renderWithTheme(
-      <CustomButton title="Test Button" onPress={mockOnPress} />
-    );
-    
-    fireEvent.press(getByRole('button'));
-    expect(mockOnPress).toHaveBeenCalledTimes(1);
-  });
-});
-```
-
-## Migration Guide
-
-### Updating Legacy Components
-
-#### Before
-```typescript
-// Old inconsistent component
-const OldButton = ({ text, onPress, type }) => (
-  <TouchableOpacity 
-    onPress={onPress}
-    style={type === 'primary' ? primaryStyle : secondaryStyle}
-  >
-    <Text>{text}</Text>
-  </TouchableOpacity>
-);
-```
-
-#### After
-```typescript
-// New standardized component
-import { CustomButton } from '@/components/ui/CustomButton';
-
-const NewButton = ({ title, onPress, variant = 'primary' }) => (
-  <CustomButton
-    title={title}
-    onPress={onPress}
-    variant={variant}
-    testID="my-button"
-    accessibilityLabel={`${title} button`}
-  />
-);
-```
-
 ## Component Guidelines
 
-### 1. Consistent Interface Design
-- Use standard prop naming conventions
-- Implement proper TypeScript interfaces
-- Add comprehensive JSDoc documentation
-- Include accessibility props
-
-### 2. Theme Integration
-- Always use theme colors and spacing
-- Support both light and dark modes
-- Use consistent font scales and weights
-- Implement proper contrast ratios
-
-### 3. Validation and Error Handling
-- Provide clear error messages
-- Support field-level validation
-- Implement proper loading states
-- Handle edge cases gracefully
-
-### 4. Performance Optimization
-- Use React.memo for expensive components
-- Implement proper prop dependency checking
-- Avoid unnecessary re-renders
-- Optimize list rendering with proper keys
-
-### 5. Testing Requirements
-- Write unit tests for all components
-- Test accessibility features
-- Include integration tests for complex components
-- Maintain high test coverage
+- **Consistency**: Use standard prop naming conventions and TypeScript interfaces.
+- **Theming**: Always use theme colors, spacing, and typography. Support light and dark modes.
+- **Validation**: Provide clear error states and messages for form components.
+- **Performance**: Use `React.memo` for expensive components and optimize list rendering.
+- **Testing**: Write unit tests for all components, especially for user interactions and accessibility.
+- **Accessibility**: Include ARIA attributes, keyboard support, and proper focus management.
 
 ## Contributing
 
 When adding new components:
-
-1. **Follow Established Patterns**: Use existing components as templates
-2. **TypeScript First**: Implement proper typing and interfaces
-3. **Accessibility**: Include ARIA attributes and keyboard support
-4. **Testing**: Write comprehensive tests for new components
-5. **Documentation**: Update this README and add JSDoc comments
-6. **Theme Integration**: Use theme colors, spacing, and typography
-7. **Performance**: Consider memoization and optimization needs
-
-## Component Checklist
-
-Before submitting a new component:
-
-- [ ] Proper TypeScript interfaces
-- [ ] Theme integration (colors, spacing, typography)
-- [ ] Accessibility attributes (ARIA, roles, labels)
-- [ ] Error handling and validation support
-- [ ] Loading states where applicable
-- [ ] Responsive design considerations
-- [ ] Unit tests with good coverage
-- [ ] JSDoc documentation
-- [ ] Example usage in README
-- [ ] Cross-platform compatibility (iOS/Android)
-
-## Best Practices
-
-### Component Architecture
-```typescript
-// Preferred component structure
-interface ComponentProps {
-  // Props interface with proper types
-}
-
-export const Component: React.FC<ComponentProps> = React.memo(({
-  // Destructured props with defaults
-}) => {
-  // Component logic
-  
-  return (
-    // JSX with proper accessibility and styling
-  );
-});
-
-Component.displayName = 'Component';
-```
-
-### Performance Optimization
-```typescript
-// Use React.memo for components that receive stable props
-export const ExpensiveComponent = React.memo<Props>(({ data }) => {
-  const processedData = useMemo(() => {
-    return expensiveProcessing(data);
-  }, [data]);
-  
-  return <View>{processedData}</View>;
-});
-
-// Use proper dependency arrays
-const MemoizedCallback = useCallback(() => {
-  // callback logic
-}, [dependency1, dependency2]);
-```
-
-### Error Boundaries
-```typescript
-// Implement error boundaries for complex components
-const ComponentErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <ErrorBoundary fallback={<ErrorFallback />}>
-      {children}
-    </ErrorBoundary>
-  );
-};
-``` 
+1.  **Follow Patterns**: Use existing components as a template.
+2.  **TypeScript First**: Implement proper typing and interfaces.
+3.  **Document**: Update this README and add JSDoc comments.
+4.  **Theme**: Integrate with the existing theme for colors, spacing, and typography.
+5.  **Test**: Write comprehensive tests.
