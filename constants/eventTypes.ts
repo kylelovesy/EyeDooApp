@@ -1,3 +1,10 @@
+/*-------------------------------------*/
+// constants/eventTypes.ts
+// Status: Complete
+// What it does: 
+// This is the single source of truth for the shape of your event types. 
+// It defines the EventType enum, along with related types like EventTypeDetail, and getEventTypeDetails.
+/*-------------------------------------*/
 import { FC, SVGProps } from 'react';
 
 import BreakfastIcon from '../assets/icons/breakfast.svg';
@@ -17,9 +24,6 @@ import GroomIcon from '../assets/icons/groom.svg';
 import GroupPhotosIcon from '../assets/icons/groupphotos.svg';
 import GuestsIcon from '../assets/icons/guests.svg';
 import SpeechesIcon from '../assets/icons/speeches.svg';
-
-// === TIMELINE ENUMS ===
-
 /**
  * Timeline event type enum
  */

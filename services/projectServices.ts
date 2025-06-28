@@ -31,10 +31,10 @@ export class ProjectService {
    * Helper to parse data against a Zod schema and log detailed errors.
    */
   private static parseData<T extends z.ZodType<any, any>>(schema: T, data: unknown): z.infer<T> {
-    // console.log('EyeDooApp: Parsing data:', data);
+    console.log('projectServices.parseData: Parsing data:', data); 
     const result = schema.safeParse(data);
     if (!result.success) {
-      console.error('EyeDooApp: Zod validation error:', JSON.stringify(result.error.flatten(), null, 2));
+      console.error('projectServices.parseData.error: Zod validation error:', JSON.stringify(result.error.flatten(), null, 2));
       throw new Error('Data validation failed.');
     }
     return result.data;
@@ -44,7 +44,7 @@ export class ProjectService {
    * Converts Firestore timestamps in project data
    */
   private static convertProjectTimestamps(projectData: any): Project {
-    // console.log('EyeDooApp: Converting project timestamps:', projectData);
+    console.log('projectServices.convertProjectTimestamps:', projectData);
     // Convert top-level timestamps
     const converted = convertTimestampFields(projectData, ['createdAt', 'updatedAt']);
     
@@ -60,7 +60,7 @@ export class ProjectService {
    * Creates a new project document in Firestore.
    */
   static async createProject(userId: string, projectInput: CreateProjectInput): Promise<Project> {
-    // console.log('EyeDooApp: Creating project:', projectInput);
+    console.log('projectServices.createProject:', projectInput);
     try {
       // Validate the incoming data against the creation schema.
       const validatedData = this.parseData(CreateProjectSchema, projectInput);
@@ -93,7 +93,7 @@ export class ProjectService {
       console.log('EyeDooApp: Project created successfully:', finalProject.id);
       return finalProject;
     } catch (error) {
-      console.error('EyeDooApp: Create project error:', error);
+      console.error('projectServices.createProject.error: Create project error:', error);
       throw new Error('Failed to create project.');
     }
   }
@@ -102,7 +102,7 @@ export class ProjectService {
    * Get a specific project by ID.
    */
   static async getProject(projectId: string): Promise<Project | null> {
-    console.log('EyeDooApp: Getting project:', projectId);
+    console.log('projectServices.getProject:', projectId);
     try {
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       const projectDoc = await getDoc(projectRef);
@@ -122,7 +122,7 @@ export class ProjectService {
       // console.log('EyeDooApp: Project retrieved successfully:', projectId);
       return project;
     } catch (error) {
-      console.error(`EyeDooApp: Get project error for ID ${projectId}:`, error);
+      console.error(`projectServices.getProject.error: Get project error for ID ${projectId}:`, error);
       throw new Error('Failed to load project.');
     }
   }
@@ -131,7 +131,7 @@ export class ProjectService {
    * Get all projects for a user.
    */
   static async getUserProjects(userId: string): Promise<Project[]> {
-    console.log('EyeDooApp: Getting user projects for:', userId);
+    console.log('projectServices.getUserProjects:', userId);
     try {
       const q = query(
         collection(db, this.COLLECTION_NAME),
@@ -154,7 +154,7 @@ export class ProjectService {
       console.log(`EyeDooApp: Loaded ${projects.length} projects for user ${userId}`);
       return projects;
     } catch (error) {
-      console.error('EyeDooApp: Get user projects error:', error);
+      console.error('projectServices.getUserProjects.error: Get user projects error:', error);
       throw new Error('Failed to load projects.');
     }
   }
@@ -166,7 +166,7 @@ export class ProjectService {
     userId: string,
     callback: (projects: Project[]) => void
   ): () => void {
-    console.log('EyeDooApp: Subscribing to user projects for:', userId);
+    console.log('projectServices.subscribeToUserProjects:', userId);
     const q = query(
       collection(db, this.COLLECTION_NAME),
       where('userId', '==', userId),
@@ -174,21 +174,21 @@ export class ProjectService {
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      // console.log('EyeDooApp: Received snapshot with:', querySnapshot.docs.length, 'projects');
+      console.log('projectServices.subscribeToUserProjects.unsubscribe:', querySnapshot.docs.length);
       const projects = querySnapshot.docs.map(doc => {
         try {
           // Parse each document and convert timestamps
           const rawData = { id: doc.id, ...doc.data() };
           return this.parseData(ProjectSchema, rawData);
         } catch (error) {
-          console.error(`EyeDooApp: Failed to parse project ${doc.id}:`, error);
+          console.error(`projectServices.subscribeToUserProjects.unsubscribe.error: Failed to parse project ${doc.id}:`, error);
           return null;
         }
       }).filter((p): p is Project => p !== null); // Filter out any that failed parsing
 
       callback(projects);
     }, (error) => {
-      console.error('EyeDooApp: Projects subscription error:', error);
+      console.error('projectServices.subscribeToUserProjects.unsubscribe.error:', error);
       callback([]); // Return empty array on error
     });
 
@@ -199,12 +199,12 @@ export class ProjectService {
    * Updates an existing project.
    */
   static async updateProject(projectId: string, updates: UpdateProjectInput): Promise<void> {
-    console.log('EyeDooApp: Updating project:', projectId, 'with updates:', updates);
+    console.log('projectServices.updateProject:', projectId, 'with updates:', updates);
     try {
       const validatedUpdates = this.parseData(UpdateProjectSchema, updates);
 
       if (Object.keys(validatedUpdates).length === 0) {
-        console.warn("EyeDooApp: Update called with no data to change.");
+        console.warn("projectServices.updateProject.warning: Update called with no data to change.");
         return;
       }
 
@@ -213,9 +213,9 @@ export class ProjectService {
         ...validatedUpdates,
         updatedAt: serverTimestamp(),
       });
-      console.log('EyeDooApp: Project updated successfully:', projectId);
+      console.log('projectServices.updateProject.success:', projectId);
     } catch (error) {
-      console.error(`EyeDooApp: Update project error for ID ${projectId}:`, error);
+      console.error(`projectServices.updateProject.error: Update project error for ID ${projectId}:`, error);
       throw new Error('Failed to update project.');
     }
   }
@@ -224,11 +224,11 @@ export class ProjectService {
    * Deletes a project from Firestore.
    */
   static async deleteProject(projectId: string): Promise<void> {
-    console.log('EyeDooApp: Deleting project:', projectId);
+    console.log('projectServices.deleteProject:', projectId);
     try {
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       await deleteDoc(projectRef);
-      console.log('EyeDooApp: Project deleted successfully:', projectId);
+      console.log('projectServices.deleteProject.success:', projectId);
     } catch (error) {
       console.error(`EyeDooApp: Delete project error for ID ${projectId}:`, error);
       throw new Error('Failed to delete project.');

@@ -2,14 +2,15 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { getEventTypeDetails } from '../../constants/eventTypes';
 import { borderRadius, spacing } from '../../constants/theme';
-import { EventStatus, timelineUtils } from '../../services/timelineService';
-import { convertFirestoreTimestamp } from '../../services/utils/timestampHelpers';
-import { EventType, TimelineEvent } from '../../types/timeline';
+import { TTimelineEventForm } from '../../types/timeline';
 import { BodyText, LabelText, TitleText } from '../ui/Typography';
 
+type EventStatus = 'Complete' | 'Active' | 'Background' | 'Next' | 'Upcoming' | 'Draft' | 'Deleted' | 'DayNotStarted';
+
 // Define the processed event type with a status
-interface ProcessedTimelineEvent extends TimelineEvent {
+interface ProcessedTimelineEvent extends TTimelineEventForm {
   status: EventStatus;
 }
 
@@ -22,15 +23,16 @@ const TimelineItem: React.FC<{
   const styles = createItemStyles(theme);
 
   // Get icon and default description from the service
-  const { icon: IconComponent, description: defaultDescription } =
-    timelineUtils.getEventTypeDetails(item.eventType as EventType);
+  const eventDetails = getEventTypeDetails(item.eventType);
+  if (!eventDetails) return null;
+
+  const { Icon: IconComponent, displayName: defaultDescription } = eventDetails;
 
   // Use custom description if provided, otherwise use the default
   const displayDescription = item.description || defaultDescription;
   
   // Handle timestamp conversion for display
-  const eventTime = convertFirestoreTimestamp(item.time);
-  const displayTime = eventTime.toLocaleTimeString([], { 
+  const displayTime = item.time.toLocaleTimeString([], { 
     hour: '2-digit', 
     minute: '2-digit',
     hour12: true 
@@ -39,11 +41,11 @@ const TimelineItem: React.FC<{
   // Get status-specific styles
   const getDotStyle = () => {
     switch (item.status) {
-      case 'completed':
+      case 'Complete':
         return { backgroundColor: theme.colors.onSurfaceVariant };
-      case 'current':
+      case 'Active':
         return { backgroundColor: theme.colors.primary, transform: [{ scale: 1.1 }] };
-      case 'upcoming':
+      case 'Upcoming':
       default:
         return { backgroundColor: theme.colors.secondary };
     }
@@ -51,10 +53,10 @@ const TimelineItem: React.FC<{
 
   const getLineStyle = () => {
     switch (item.status) {
-      case 'completed':
-      case 'upcoming':
+      case 'Complete':
+      case 'Upcoming':
         return { backgroundColor: theme.colors.surfaceVariant };
-      case 'current':
+      case 'Active':
         return { backgroundColor: theme.colors.primary };
       default:
         return { backgroundColor: theme.colors.surfaceVariant };
@@ -63,11 +65,11 @@ const TimelineItem: React.FC<{
 
   const getCardStyle = () => {
     switch (item.status) {
-      case 'completed':
+      case 'Complete':
         return { borderColor: theme.colors.outline, opacity: 0.7 };
-      case 'current':
+      case 'Active':
         return { borderColor: theme.colors.primary, borderWidth: 2 };
-      case 'upcoming':
+      case 'Upcoming':
       default:
         return { borderColor: theme.colors.outline };
     }
@@ -103,19 +105,35 @@ const TimelineItem: React.FC<{
 
 // --- Main Timeline View Component ---
 interface EnhancedTimelineViewProps {
-  events: TimelineEvent[];
+  events: TTimelineEventForm[];
 }
+
+const getEventStatus = (event: TTimelineEventForm, now: Date): EventStatus => {
+    const eventTime = event.time.getTime();
+    // @ts-ignore - duration is not in the type, using a 30-min default.
+    const durationMs = (event.duration || 30) * 60 * 1000;
+    const eventEndTime = eventTime + durationMs;
+    const nowTime = now.getTime();
+
+    if (nowTime > eventEndTime) {
+        return 'Complete';
+    }
+    if (nowTime >= eventTime && nowTime <= eventEndTime) {
+        return 'Active';
+    }
+    return 'Upcoming';
+};
 
 export const EnhancedTimelineView: React.FC<EnhancedTimelineViewProps> = ({ events }) => {
   // Memoize processed events to avoid recalculating on every render
   const processedEvents = useMemo(() => {
     const now = new Date();
     // 1. Sort events chronologically
-    const sorted = timelineUtils.sortEventsByTime(events);
+    const sorted = [...events].sort((a, b) => a.time.getTime() - b.time.getTime());
     // 2. Add a status to each event
     return sorted.map((event) => ({
       ...event,
-      status: timelineUtils.getEventStatus(event, now),
+      status: getEventStatus(event, now),
     }));
   }, [events]);
 
@@ -123,7 +141,7 @@ export const EnhancedTimelineView: React.FC<EnhancedTimelineViewProps> = ({ even
     <View style={{ padding: spacing.md }}>
       {processedEvents.map((event, index) => (
         <TimelineItem
-          key={event.id}
+          key={event.eventId}
           item={event}
           isLast={index === processedEvents.length - 1}
         />

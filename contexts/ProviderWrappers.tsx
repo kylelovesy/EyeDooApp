@@ -1,9 +1,9 @@
 import React from 'react';
 import { ProjectFormProvider } from './Form1EssentialInfoContext';
-import { Form2Provider } from './Form2TimelineContext';
 import { PersonaFormProvider } from './Form3PersonaContext';
 import { Form4PhotosProvider } from './Form4PhotosContext';
 import { ProjectProvider } from './ProjectContext';
+import { TimelineProvider } from './TimelineContext';
 
 // Base Project Provider - always needed
 export const withProjectProvider = <P extends object>(Component: React.ComponentType<P>) => {
@@ -21,13 +21,13 @@ export const withAllFormProviders = <P extends object>(Component: React.Componen
   const WrappedComponent = (props: P) => (
     <ProjectProvider>
       <ProjectFormProvider>
-        <Form2Provider>
+        <TimelineProvider>
           <PersonaFormProvider>
             <Form4PhotosProvider>
               <Component {...props} />
             </Form4PhotosProvider>
           </PersonaFormProvider>
-        </Form2Provider>
+        </TimelineProvider>
       </ProjectFormProvider>
     </ProjectProvider>
   );
@@ -52,13 +52,13 @@ export const withEssentialFormProvider = <P extends object>(Component: React.Com
 export const withDashboardProviders = <P extends object>(Component: React.ComponentType<P>) => {
   const WrappedComponent = (props: P) => (
     <ProjectProvider>
-      <Form2Provider>
+      <TimelineProvider>
         <PersonaFormProvider>
           <Form4PhotosProvider>
             <Component {...props} />
           </Form4PhotosProvider>
         </PersonaFormProvider>
-      </Form2Provider>
+      </TimelineProvider>
     </ProjectProvider>
   );
   WrappedComponent.displayName = `withDashboardProviders(${Component.displayName || Component.name})`;
@@ -69,9 +69,9 @@ export const withDashboardProviders = <P extends object>(Component: React.Compon
 export const withTimelineProvider = <P extends object>(Component: React.ComponentType<P>) => {
   const WrappedComponent = (props: P) => (
     <ProjectProvider>
-      <Form2Provider>
+      <TimelineProvider>
         <Component {...props} />
-      </Form2Provider>
+      </TimelineProvider>
     </ProjectProvider>
   );
   WrappedComponent.displayName = `withTimelineProvider(${Component.displayName || Component.name})`;
@@ -106,13 +106,13 @@ export const withPhotosProvider = <P extends object>(Component: React.ComponentT
 const AllFormProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ProjectProvider>
     <ProjectFormProvider>
-      <Form2Provider>
+      <TimelineProvider>
         <PersonaFormProvider>
           <Form4PhotosProvider>
             {children}
           </Form4PhotosProvider>
         </PersonaFormProvider>
-      </Form2Provider>
+      </TimelineProvider>
     </ProjectFormProvider>
   </ProjectProvider>
 );
@@ -120,13 +120,13 @@ AllFormProviders.displayName = 'FormProviders.All';
 
 const DashboardFormProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ProjectProvider>
-    <Form2Provider>
+    <TimelineProvider>
       <PersonaFormProvider>
         <Form4PhotosProvider>
           {children}
         </Form4PhotosProvider>
       </PersonaFormProvider>
-    </Form2Provider>
+    </TimelineProvider>
   </ProjectProvider>
 );
 DashboardFormProviders.displayName = 'FormProviders.Dashboard';

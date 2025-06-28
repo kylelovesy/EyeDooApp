@@ -29,7 +29,7 @@ export default function AppLayout() {
           headerShown: false,
           animation: 'slide_from_right',
         }}>
-          <Stack.Screen name="theming" />
+          {/* <Stack.Screen name="theming" /> */}
           <Stack.Screen name="projects" />
           <Stack.Screen name="dashboard" />          
         </Stack>

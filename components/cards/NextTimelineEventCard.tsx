@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Card, IconButton, ProgressBar, Text } from 'react-native-paper';
-import { timelineUtils } from '../../services/timelineService';
-import { TimelineEvent } from '../../types/timeline';
+import { Card, IconButton, Text } from 'react-native-paper';
+import { getEventTypeDetails } from '../../constants/eventTypes';
+import { TTimelineEventForm } from '../../types/timeline';
 
 interface NextEventCardProps {
-  events: TimelineEvent[];
+  events: TTimelineEventForm[];
   currentTime?: Date;
-  onEventPress?: (event: TimelineEvent) => void;
+  onEventPress?: (event: TTimelineEventForm) => void;
   style?: any;
 }
 
@@ -25,8 +25,8 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
   style
 }) => {
   const [timeRemaining, setTimeRemaining] = useState<TimeRemaining | null>(null);
-  const [nextEvent, setNextEvent] = useState<TimelineEvent | null>(null);
-  const [currentEvent, setCurrentEvent] = useState<TimelineEvent | null>(null);
+  const [nextEvent, setNextEvent] = useState<TTimelineEventForm | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<TTimelineEventForm | null>(null);
 
   // Calculate time remaining until next event
   const calculateTimeRemaining = (eventTime: Date, currentTime: Date): TimeRemaining => {
@@ -52,44 +52,34 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
   };
 
   // Find current and next events
-  const findCurrentAndNextEvents = (events: TimelineEvent[], currentTime: Date) => {
+  const findCurrentAndNextEvents = (
+    events: TTimelineEventForm[],
+    currentTime: Date
+  ) => {
     if (events.length === 0) return { current: null, next: null };
 
-    const sortedEvents = timelineUtils.sortEventsByTime(events);
-    const now = currentTime;
-    const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+    const sortedEvents = [...events].sort(
+      (a, b) => a.time.getTime() - b.time.getTime()
+    );
+    const now = currentTime.getTime();
 
-    let currentEvent: TimelineEvent | null = null;
-    let nextEvent: TimelineEvent | null = null;
+    let currentEvent: TTimelineEventForm | null = null;
+    let nextEvent: TTimelineEventForm | null = null;
 
-    for (let i = 0; i < sortedEvents.length; i++) {
-      const event = sortedEvents[i];
-      const eventTimeMinutes = event.time.getHours() * 60 + event.time.getMinutes();
-      const eventEndMinutes = eventTimeMinutes + (event.duration || 30);
+    const nextEventIndex = sortedEvents.findIndex(
+      (event) => event.time.getTime() > now
+    );
 
-      // Check if current time is within this event
-      if (currentTimeMinutes >= eventTimeMinutes && currentTimeMinutes < eventEndMinutes) {
-        currentEvent = event;
-        // Next event is the one after current
-        nextEvent = sortedEvents[i + 1] || null;
-        break;
-      }
-      
-      // If we haven't found a current event and this event is in the future
-      if (currentTimeMinutes < eventTimeMinutes) {
-        nextEvent = event;
-        break;
-      }
-    }
-
-    // If no current event found, but we have events, the next one is the first upcoming
-    if (!currentEvent && !nextEvent && sortedEvents.length > 0) {
-      const firstEvent = sortedEvents[0];
-      const firstEventTimeMinutes = firstEvent.time.getHours() * 60 + firstEvent.time.getMinutes();
-      
-      if (currentTimeMinutes < firstEventTimeMinutes) {
-        nextEvent = firstEvent;
-      }
+    if (nextEventIndex === -1) {
+      // All events are in the past. The last event might be considered 'current'.
+      currentEvent = sortedEvents[sortedEvents.length - 1] || null;
+    } else if (nextEventIndex === 0) {
+      // All events are in the future.
+      nextEvent = sortedEvents[0];
+    } else {
+      // We are between two events.
+      currentEvent = sortedEvents[nextEventIndex - 1];
+      nextEvent = sortedEvents[nextEventIndex];
     }
 
     return { current: currentEvent, next: nextEvent };
@@ -134,38 +124,24 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
     return `${time.seconds}s`;
   };
 
-  // Calculate progress for current event
-  const calculateCurrentEventProgress = (event: TimelineEvent, currentTime: Date): number => {
-    const now = currentTime;
-    const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
-    const eventStartMinutes = event.time.getHours() * 60 + event.time.getMinutes();
-    const eventDuration = event.duration || 30;
-    
-    const elapsed = currentTimeMinutes - eventStartMinutes;
-    return Math.max(0, Math.min(1, elapsed / eventDuration));
-  };
-
   // Helper function to format time
   const formatTime = (date: Date): string => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-  };
-
-  // Helper function to calculate end time
-  const calculateEndTime = (startTime: Date, duration: number = 30): Date => {
-    const endTime = new Date(startTime);
-    endTime.setMinutes(endTime.getMinutes() + duration);
-    return endTime;
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
   };
 
   // Helper function to get event display info
-  const getEventDisplayInfo = (event: TimelineEvent) => {
-    const { icon, description: defaultDescription } = timelineUtils.getEventTypeDetails(event.eventType);
-    const displayName = event.description || defaultDescription;
-    
+  const getEventDisplayInfo = (event: TTimelineEventForm) => {
+    const eventDetails = getEventTypeDetails(event.eventType);
+    const displayName = event.description || eventDetails?.displayName;
+    const Icon = eventDetails?.Icon;
+
     return {
-      icon,
+      Icon,
       displayName,
-      IconComponent: () => icon // Since icons are SVG imports, we'll use a fallback
     };
   };
 
@@ -184,16 +160,19 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
 
   // Show current event if there is one
   if (currentEvent) {
-    const progress = calculateCurrentEventProgress(currentEvent, new Date());
-    const endTime = calculateEndTime(currentEvent.time, currentEvent.duration);
-    const timeRange = `${formatTime(currentEvent.time)} - ${formatTime(endTime)}`;
+    const timeDisplay = formatTime(currentEvent.time);
     const { displayName } = getEventDisplayInfo(currentEvent);
 
     return (
-      <Card style={[styles.card, styles.currentEventCard, style]} onPress={() => onEventPress?.(currentEvent)}>
+      <Card
+        style={[styles.card, styles.currentEventCard, style]}
+        onPress={() => onEventPress?.(currentEvent)}
+      >
         <Card.Content style={styles.content}>
           <View style={styles.header}>
-            <View style={[styles.iconContainer, { backgroundColor: '#4caf50' }]}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: '#4caf50' }]}
+            >
               <IconButton
                 icon="play-circle"
                 iconColor="white"
@@ -205,11 +184,15 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
               <Text variant="labelSmall" style={styles.statusLabel}>
                 HAPPENING NOW
               </Text>
-              <Text variant="titleMedium" style={styles.eventTitle} numberOfLines={2}>
+              <Text
+                variant="titleMedium"
+                style={styles.eventTitle}
+                numberOfLines={2}
+              >
                 {displayName}
               </Text>
               <Text variant="bodySmall" style={styles.eventTime}>
-                {timeRange}
+                Started at {timeDisplay}
               </Text>
               {currentEvent.location && (
                 <Text variant="bodySmall" style={styles.eventLocation}>
@@ -218,17 +201,6 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
               )}
             </View>
           </View>
-          
-          <View style={styles.progressContainer}>
-            <ProgressBar 
-              progress={progress} 
-              color="#4caf50" 
-              style={styles.progressBar}
-            />
-            <Text variant="bodySmall" style={styles.progressText}>
-              {Math.round(progress * 100)}% complete
-            </Text>
-          </View>
         </Card.Content>
       </Card>
     );
@@ -236,15 +208,19 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
 
   // Show next event
   if (nextEvent && timeRemaining) {
-    const endTime = calculateEndTime(nextEvent.time, nextEvent.duration);
-    const timeRange = `${formatTime(nextEvent.time)} - ${formatTime(endTime)}`;
+    const timeDisplay = formatTime(nextEvent.time);
     const { displayName } = getEventDisplayInfo(nextEvent);
 
     return (
-      <Card style={[styles.card, style]} onPress={() => onEventPress?.(nextEvent)}>
+      <Card
+        style={[styles.card, style]}
+        onPress={() => onEventPress?.(nextEvent)}
+      >
         <Card.Content style={styles.content}>
           <View style={styles.header}>
-            <View style={[styles.iconContainer, { backgroundColor: '#6200ee' }]}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: '#6200ee' }]}
+            >
               <IconButton
                 icon="clock-outline"
                 iconColor="white"
@@ -256,11 +232,15 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
               <Text variant="labelSmall" style={styles.statusLabel}>
                 NEXT EVENT
               </Text>
-              <Text variant="titleMedium" style={styles.eventTitle} numberOfLines={2}>
+              <Text
+                variant="titleMedium"
+                style={styles.eventTitle}
+                numberOfLines={2}
+              >
                 {displayName}
               </Text>
               <Text variant="bodySmall" style={styles.eventTime}>
-                {timeRange}
+                Starts at {timeDisplay}
               </Text>
               {nextEvent.location && (
                 <Text variant="bodySmall" style={styles.eventLocation}>
@@ -269,12 +249,15 @@ export const NextEventCard: React.FC<NextEventCardProps> = ({
               )}
             </View>
           </View>
-          
+
           <View style={styles.countdownContainer}>
-            <Text variant="headlineSmall" style={[
-              styles.countdown,
-              timeRemaining.isOverdue && styles.overdueCountdown
-            ]}>
+            <Text
+              variant="headlineSmall"
+              style={[
+                styles.countdown,
+                timeRemaining.isOverdue && styles.overdueCountdown,
+              ]}
+            >
               {formatTimeRemaining(timeRemaining)}
             </Text>
             <Text variant="bodySmall" style={styles.countdownLabel}>
@@ -377,20 +360,6 @@ const styles = StyleSheet.create({
   countdownLabel: {
     color: '#666',
     marginTop: 2,
-  },
-  progressContainer: {
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  progressBar: {
-    height: 6,
-    borderRadius: 3,
-    marginBottom: 4,
-  },
-  progressText: {
-    color: '#666',
-    textAlign: 'center',
   },
 });
 

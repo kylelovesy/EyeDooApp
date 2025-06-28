@@ -38,10 +38,10 @@ export const DataImportModal: React.FC<DataImportModalProps> = ({
       // Prepare the update payload
       const updatePayload: Partial<Project> = {};
 
-      // Update form2 (timeline) if timeline data was imported
+      // Update timeline if timeline data was imported
       if (importedData.timeline && importedData.timeline.length > 0) {
-        updatePayload.form2 = {
-          ...project.form2,
+        updatePayload.timeline = {
+          ...project.timeline,
           events: importedData.timeline,
         };
         setUpdateStatus('Updated timeline events...');

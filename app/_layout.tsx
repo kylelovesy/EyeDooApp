@@ -10,8 +10,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { darkTheme, lightTheme } from '../constants/theme';
 import { fontAssets } from '../constants/typography';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
-import { ThemeProvider } from '../contexts/ThemeContext';
-// import { PaperProvider } from 'react-native-paper';
+// import { ThemeProvider } from '../contexts/ThemeContext';
+import { PaperProvider } from 'react-native-paper';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -57,13 +57,13 @@ const RootLayout = () => {
   return (
    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider>
-      <ThemeProvider>
-        {/* <PaperProvider theme={theme}>       */}
+      {/* <ThemeProvider> */}
+        <PaperProvider theme={theme}>      
           <AuthProvider>
             <InitialLayout />
           </AuthProvider>
-        {/* </PaperProvider> */}
-      </ThemeProvider>
+        </PaperProvider>
+      {/* </ThemeProvider> */}
     </SafeAreaProvider>
    </GestureHandlerRootView>
   );

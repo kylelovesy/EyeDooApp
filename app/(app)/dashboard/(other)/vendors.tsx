@@ -90,15 +90,6 @@ export default function VendorsScreen() {
   };
 
 
-  // TODO: Add vendors to the project form
-  // const hasVendors = true;
-  // const hasVendors = currentProject?.form2?.events && currentProject.form2.events.length > 0;
-  // const customVisibility = (subPage: SubPage, currentId: string): boolean => {
-  //   if (subPage.id === 'vendors') {
-  //     return false;
-  //   }
-  //   return subPage.id !== currentId;
-  // };
   return (
     <Screen
       scrollable={false}

@@ -2,12 +2,12 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { z } from 'zod';
 import { Project } from '../types/project';
 import { form4PhotosSchema } from '../types/project-PhotosSchema';
-import { form2TimelineSchema } from '../types/project-TimelineSchema';
+import { CombinedEventsTimelineSchema } from '../types/timeline';
 import { db } from './firebase'; // Adjust path to your Firebase config
 
 // Define the structure for import data
 interface ImportData {
-  timeline?: z.infer<typeof form2TimelineSchema>['events'];
+  timeline?: z.infer<typeof CombinedEventsTimelineSchema>['events'];
   groupShots?: z.infer<typeof form4PhotosSchema>['groupShots'];
   coupleShots?: z.infer<typeof form4PhotosSchema>['coupleShots'];
   candidShots?: z.infer<typeof form4PhotosSchema>['candidShots'];
@@ -18,7 +18,7 @@ interface ImportData {
 
 // Define the update payload structure
 interface ProjectUpdatePayload {
-  form2?: Partial<z.infer<typeof form2TimelineSchema>>;
+  timeline?: Partial<z.infer<typeof CombinedEventsTimelineSchema>>;
   form4?: Partial<z.infer<typeof form4PhotosSchema>>;
   updatedAt?: Date;
 }
@@ -57,12 +57,12 @@ export class DataImportService {
       if (importData.timeline && importData.timeline.length > 0) {
         if (mergeStrategy === 'replace') {
           // Replace existing timeline events
-          updatePayload.form2 = {
+          updatePayload.timeline = {
             events: importData.timeline,
           };
         } else {
           // Merge with existing timeline events
-          const existingEvents = currentProject.form2?.events || [];
+          const existingEvents = currentProject.timeline?.events || [];
           const mergedEvents = [...existingEvents, ...importData.timeline];
           
           // Remove duplicates based on a combination of time and description
@@ -72,7 +72,7 @@ export class DataImportService {
             )
           );
 
-          updatePayload.form2 = {
+          updatePayload.timeline = {
             events: uniqueEvents,
           };
         }
@@ -114,8 +114,8 @@ export class DataImportService {
       }
 
       // Validate the update payload before sending to Firestore
-      if (updatePayload.form2) {
-        const timelineValidation = form2TimelineSchema.safeParse(updatePayload.form2);
+      if (updatePayload.timeline) {
+        const timelineValidation = CombinedEventsTimelineSchema.safeParse(updatePayload.timeline);
         if (!timelineValidation.success) {
           throw new Error(`Timeline data validation failed: ${timelineValidation.error.message}`);
         }
@@ -180,7 +180,7 @@ export class DataImportService {
     // Validate timeline data
     if (importData.timeline) {
       try {
-        form2TimelineSchema.parse({ events: importData.timeline });
+        CombinedEventsTimelineSchema.parse({ events: importData.timeline });
       } catch (error) {
         if (error instanceof z.ZodError) {
           errors.push(`Timeline validation error: ${error.message}`);
@@ -238,7 +238,7 @@ export class DataImportService {
       const project = projectSnap.data() as Project;
       
       const stats = {
-        timelineEvents: project.form2?.events?.length || 0,
+        timelineEvents: project.timeline?.events?.length || 0,
         groupShots: project.form4?.groupShots?.length || 0,
         coupleShots: project.form4?.coupleShots?.length || 0,
         candidShots: project.form4?.candidShots?.length || 0,

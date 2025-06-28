@@ -2,8 +2,9 @@ import { z } from "zod";
 import { form1EssentialInfoSchema } from "./project-EssentialInfoSchema";
 import { form3PeopleSchema } from "./project-PersonaSchema";
 import { form4PhotosSchema } from "./project-PhotosSchema";
-import { form2TimelineSchema } from "./project-TimelineSchema";
 import { FirestoreTimestampSchema } from "./reusableSchemas";
+//TIMELINE
+import { CombinedEventsTimelineSchema } from "./timeline";
 
 /**
  * Complete Project Schema
@@ -19,7 +20,7 @@ export const ProjectSchema = z.object({
   
   // Form data - each form's data is nested under its own key
   form1: form1EssentialInfoSchema.describe('Essential project information'),
-  form2: form2TimelineSchema.describe('Project timeline data'),
+  timeline: CombinedEventsTimelineSchema.describe('Project timeline data'),
   form3: form3PeopleSchema.describe('People involved in the project'),
   form4: form4PhotosSchema.describe('Photo requirements and requests'),
 });
@@ -42,8 +43,9 @@ export const CreateProjectSchema = ProjectSchema.omit({
  */
 export const UpdateProjectSchema = z.object({
   userId: z.string().optional(),
+  projectId: z.string().optional(),
   form1: form1EssentialInfoSchema.partial().optional(),
-  form2: form2TimelineSchema.optional(),
+  timeline: CombinedEventsTimelineSchema.optional(),
   form3: form3PeopleSchema.optional(),
   form4: form4PhotosSchema.optional(),
 }).partial();

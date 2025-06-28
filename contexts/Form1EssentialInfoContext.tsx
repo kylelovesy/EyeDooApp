@@ -6,7 +6,7 @@ import { CreateProjectInput } from '../types/project';
 import { form1EssentialInfoSchema } from '../types/project-EssentialInfoSchema';
 import { form3PeopleSchema } from '../types/project-PersonaSchema';
 import { form4PhotosSchema } from '../types/project-PhotosSchema';
-import { form2TimelineSchema } from '../types/project-TimelineSchema';
+import { CombinedEventsTimelineSchema } from '../types/timeline';
 import { useAuth } from './AuthContext';
 import { useProjects } from './ProjectContext';
 import { BaseFormContextType, useBaseFormContext } from './useBaseFormContext';
@@ -81,7 +81,7 @@ export const Form1Provider = ({ children }: { children: ReactNode }) => {
       // Use the successfully parsed and validated data (`result.data`).
       const projectToCreate: CreateProjectInput = {
         form1: cleanedForm1Data,
-        form2: form2TimelineSchema.parse({}),
+        timeline: CombinedEventsTimelineSchema.parse({}),
         form3: form3PeopleSchema.parse({}),
         form4: form4PhotosSchema.parse({}),
       };

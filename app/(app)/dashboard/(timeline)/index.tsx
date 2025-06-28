@@ -2,15 +2,15 @@
 import { BodyText, HeadlineText } from '@/components/ui/Typography';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
 import { EnhancedDataImportModal } from '../../../../components/import/EnhancedDataImportModal';
 import DashboardAppBar, { NavigationProp, SubPage } from '../../../../components/navigation/DashboardAppbar';
 import { Screen } from '../../../../components/ui/Screen';
 import { EnhancedTimelineView } from '../../../../components/views/EnhancedTimelineView';
 import { spacing } from '../../../../constants/theme';
-import { useForm2 } from '../../../../contexts/Form2TimelineContext';
 import { useProjects } from '../../../../contexts/ProjectContext';
+import { useTimelineContext } from '../../../../contexts/TimelineContext';
 import { convertFirestoreTimestamp } from '../../../../services/utils/timestampHelpers';
 
 const timelineSubPages: SubPage[] = [
@@ -26,7 +26,9 @@ export default function TimelineGeneralScreen() {
 
   const { projectId } = useLocalSearchParams<{ projectId?: string }>();
   const { currentProject, setCurrentProjectById } = useProjects();
-  const timelineModal = useForm2(); // Hook to control the timeline form modal
+  const { events, fetchEvents, loading } = useTimelineContext(); // get the fetchEvents function and loading state
+
+  const timelineModal = useTimelineContext(); // Hook to control the timeline form modal
   
   // State for data import modal
   const [isImportModalVisible, setIsImportModalVisible] = useState(false);
@@ -37,14 +39,21 @@ export default function TimelineGeneralScreen() {
     }
   }, [projectId, setCurrentProjectById]);
 
+   // Add this useEffect to fetch events when the project changes
+   useEffect(() => {
+    if (currentProject) {
+      fetchEvents(currentProject.id);
+    }
+  }, [currentProject]);
+
   const navigation: NavigationProp = {
     goBack: () => router.back(),
     navigate: (route: string) => router.push(route as any),
     push: (route: string) => router.push(route as any),
     replace: (route: string) => router.replace(route as any),
   };
-
-  const hasEvents = currentProject?.form2?.events && currentProject.form2.events.length > 0;
+  const hasEvents = events && events.length > 0;
+  // const hasEvents = currentProject?.timeline?.events && currentProject.timeline.events.length > 0;
 
   // Functions to handle import modal
   const openImportModal = () => {
@@ -74,19 +83,21 @@ export default function TimelineGeneralScreen() {
         onBackPress={() => router.back()}
       />
       
-      {hasEvents ? (
+      {loading ? ( // Add a loading indicator
+        <ActivityIndicator style={{ flex: 1 }} size="large" />
+      ) : hasEvents ? (
         // --- STATE 1: Display Timeline ---
         <ScrollView>
           <View style={styles.header}>
             <HeadlineText size="medium" style={styles.subtitle}>
-              {currentProject.form1.eventDate
+              {currentProject?.form1.eventDate
                 ? convertFirestoreTimestamp(currentProject.form1.eventDate).toLocaleDateString(undefined, {
                     year: 'numeric', month: 'long', day: 'numeric'
                   })
                 : "Event Timeline"}
             </HeadlineText>
           </View>
-          <EnhancedTimelineView events={currentProject.form2.events} />
+          <EnhancedTimelineView events={events} />
         </ScrollView>
       ) : (
         // --- STATE 2: Empty State with Actions ---

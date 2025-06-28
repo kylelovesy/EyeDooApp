@@ -1,3 +1,10 @@
+/*-------------------------------------*/
+// hooks/useAccordionAnimation.ts
+// Status: Complete
+// What it does: 
+// A custom hook to manage the animation logic for an accordion component. 
+// It uses react-native-reanimated to handle the height and rotation animations when an accordion section is toggled.
+/*-------------------------------------*/
 import { useCallback, useState } from 'react';
 import { Animated } from 'react-native';
 

@@ -11,23 +11,24 @@ export * from './user';
 
 // === AUTHENTICATION TYPES ===
 export type {
-    AuthContextType, AuthError,
-    AuthState, ChangePasswordFormData, ResetPasswordFormData, SignInFormData, SignUpFormData
+  AuthContextType, AuthError,
+  AuthState, ChangePasswordFormData, ResetPasswordFormData, SignInFormData, SignUpFormData
 } from './auth';
 
 // === PROJECT TYPES ===
 export type {
-    CreateProjectInput, Project, UpdateProjectInput
+  CreateProjectInput, Project, UpdateProjectInput
 } from './project';
+
+export type { CombinedEventsTimelineSchema } from './timeline';
 
 export type { Form1EssentialInfo } from './project-EssentialInfoSchema';
 export type { Form3People } from './project-PersonaSchema';
 export type { Form4Photos } from './project-PhotosSchema';
-export type { Form2Timeline } from './project-TimelineSchema';
 
 // === UTILITY SCHEMAS ===
 export type {
-    CandidShotSchema, CoupleShotSchema, FirestoreTimestampSchema, GroupShotSchema, LocationInfoSchema, NameSchema, NotesSchema, OtherKeyPersonSchema, PersonInfoSchema, PersonWithRoleSchema, PhoneSchema, PhotoRequestSchema, TimeFormatSchema, TimelineEventSchema, UKPostcodeSchema
+  CandidShotSchema, CoupleShotSchema, FirestoreTimestampSchema, GroupShotSchema, LocationInfoSchema, NameSchema, NotesSchema, OtherKeyPersonSchema, PersonInfoSchema, PersonWithRoleSchema, PhoneSchema, PhotoRequestSchema, TimeFormatSchema, UKPostcodeSchema
 } from './reusableSchemas';
 
 // === OTHER TYPES ===
