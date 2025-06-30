@@ -62,9 +62,9 @@ const styles = StyleSheet.create({
     zIndex: 1000, // High zIndex to ensure it's on top of other content
   },
   modalView: {
-    margin: 20,
-    borderRadius: 20,
-    padding: 25,
+    margin: 16,
+    borderRadius: 8,
+    padding: 16,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -79,10 +79,11 @@ const styles = StyleSheet.create({
     position: 'relative', // Enable absolute positioning for children
   },
   modalTitle: {
-    marginBottom: 15,
+    display: 'none',
+    marginBottom: 8,
     textAlign: 'center',
-    color: '#007AFF', // Using a direct color value instead of colors.primary
-    paddingTop: 20, // Add padding to avoid overlap with close button
+    color: '#333333', // Using a direct color value instead of colors.primary
+    paddingTop: 16, // Add padding to avoid overlap with close button
   },
   scrollView: {
     width: '100%',

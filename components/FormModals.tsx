@@ -1,12 +1,20 @@
 import React from 'react';
+import { useKitChecklistContext } from '../contexts/KitChecklistContext';
 import { useTimelineContext } from '../contexts/TimelineContext';
+
 import { EssentialInfoFormModal } from './modals/EssentialInfoForm';
 import { PeopleFormModal } from './modals/PeopleForm';
 import { PhotosFormModal } from './modals/PhotosForm';
+
+import { KitItemForm } from './kit/KitItemForm';
 import { TimelineEventForm } from './timeline/TimelineEventForm';
+
 import BaseFormModal from './ui/BaseFormModal';
 // Import the specific event type for the onSubmit handler
+import { TKitChecklistItem } from '../types/kitChecklist';
 import { TTimelineEventForm } from '../types/timeline';
+// import { KitChecklistSchema } from '../types/kitChecklist';
+// import { KitChecklistFormModal } from './modals/KitChecklistFormModal';
 
 
 export const FormModals: React.FC = () => {
@@ -16,6 +24,7 @@ export const FormModals: React.FC = () => {
       <TimelineFormModal />
       <PeopleFormModal />
       <PhotosFormModal />
+      <KitChecklistFormModal />
     </>
   );
 };
@@ -23,6 +32,7 @@ export const FormModals: React.FC = () => {
 export { useForm1 as useEssentialInfoModal } from '../contexts/Form1EssentialInfoContext';
 export { usePersonaForm as usePeopleModal } from '../contexts/Form3PersonaContext';
 export { useForm4Photos as usePhotosModal } from '../contexts/Form4PhotosContext';
+export { useKitChecklistContext as useKitChecklistModal } from '../contexts/KitChecklistContext';
 export { useTimelineContext as useTimelineModal } from '../contexts/TimelineContext';
 
 
@@ -68,6 +78,8 @@ const TimelineFormModal = () => {
     closeModal, 
     activeProject, 
     addEvent,
+    removeEvent,
+    updateEvent,
     isSubmitting,
   } = useTimelineContext();
   
@@ -78,6 +90,15 @@ const TimelineFormModal = () => {
     addEvent(activeProject.id, event);
   };
   
+  // FIX: Add handlers for update and delete
+  const handleUpdateEvent = (eventId: string, data: TTimelineEventForm) => {
+    updateEvent(activeProject.id, eventId, data);
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    await removeEvent(activeProject.id, eventId);
+  };
+
   return (
     <BaseFormModal
       visible={isModalVisible}
@@ -91,11 +112,43 @@ const TimelineFormModal = () => {
         onSubmit={handleAddEvent}
         onCancel={() => { /* The inner form's cancel can be a no-op */ }}
         isLoading={isSubmitting}
+        onUpdate={handleUpdateEvent}
+        onDelete={handleDeleteEvent}
+      />      
+    </BaseFormModal>
+  );
+};
+
+const KitChecklistFormModal = () => {
+  const {
+    isModalVisible,
+    closeModal,
+    activeProject,
+    addItem,
+    // deleteItem,
+    // updateItem,
+    // togglePackedStatus,
+    loading, // Note: context uses 'loading', not 'isSubmitting'
+  } = useKitChecklistContext();
+
+  if (!isModalVisible || !activeProject) return null;
+
+  const handleAddItem = async (data: Omit<TKitChecklistItem, 'id' | 'packed'>) => {
+    // The addItem function in the context already handles closing the modal on success
+    await addItem(data);
+  };
+
+  return (
+    <BaseFormModal
+      visible={isModalVisible}
+      onClose={closeModal}
+      title={`Add to ${activeProject.form1.projectName} Kit`}
+    >
+      <KitItemForm
+        onSubmit={handleAddItem}
+        onCancel={closeModal}
+        isSubmitting={loading}
       />
-      {/* You would typically also list the existing events from the context here,
-        allowing the user to edit or delete them. That functionality would be
-        added separately but this code fixes the current errors.
-      */}
     </BaseFormModal>
   );
 };

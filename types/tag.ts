@@ -1,7 +1,7 @@
 import 'react-native-get-random-values'; // Must be imported before uuid
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
-import { TAG_COLORS } from '../constants/tags';
+import { TAG_COLORS } from '../constants/tagsTypes';
 
 export const TagSchema = z.object({
   id: z.string().uuid().default(uuidv4),

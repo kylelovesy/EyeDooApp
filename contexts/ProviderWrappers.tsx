@@ -2,6 +2,7 @@ import React from 'react';
 import { ProjectFormProvider } from './Form1EssentialInfoContext';
 import { PersonaFormProvider } from './Form3PersonaContext';
 import { Form4PhotosProvider } from './Form4PhotosContext';
+import { KitChecklistProvider } from './KitChecklistContext';
 import { ProjectProvider } from './ProjectContext';
 import { TimelineProvider } from './TimelineContext';
 
@@ -24,7 +25,9 @@ export const withAllFormProviders = <P extends object>(Component: React.Componen
         <TimelineProvider>
           <PersonaFormProvider>
             <Form4PhotosProvider>
-              <Component {...props} />
+              <KitChecklistProvider>
+                <Component {...props} />
+              </KitChecklistProvider>
             </Form4PhotosProvider>
           </PersonaFormProvider>
         </TimelineProvider>
@@ -55,13 +58,27 @@ export const withDashboardProviders = <P extends object>(Component: React.Compon
       <TimelineProvider>
         <PersonaFormProvider>
           <Form4PhotosProvider>
-            <Component {...props} />
+            <KitChecklistProvider>
+              <Component {...props} />
+            </KitChecklistProvider>
           </Form4PhotosProvider>
         </PersonaFormProvider>
       </TimelineProvider>
     </ProjectProvider>
   );
   WrappedComponent.displayName = `withDashboardProviders(${Component.displayName || Component.name})`;
+  return WrappedComponent;
+};
+
+export const withKitChecklistProvider = <P extends object>(Component: React.ComponentType<P>) => {
+  const WrappedComponent = (props: P) => (
+    <ProjectProvider>
+      <KitChecklistProvider>
+        <Component {...props} />
+      </KitChecklistProvider>
+    </ProjectProvider>
+  );
+  WrappedComponent.displayName = `withKitChecklistProvider(${Component.displayName || Component.name})`;
   return WrappedComponent;
 };
 
@@ -109,7 +126,9 @@ const AllFormProviders: React.FC<{ children: React.ReactNode }> = ({ children })
       <TimelineProvider>
         <PersonaFormProvider>
           <Form4PhotosProvider>
-            {children}
+            <KitChecklistProvider>
+              {children}
+            </KitChecklistProvider>
           </Form4PhotosProvider>
         </PersonaFormProvider>
       </TimelineProvider>

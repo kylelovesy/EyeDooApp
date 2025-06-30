@@ -3,11 +3,12 @@
 import React from 'react';
 import { ScrollView } from 'react-native';
 
+import { KitChecklistView } from '@/components/views/KitChecklistView';
 import { useRouter } from 'expo-router';
 import { Card } from 'react-native-paper';
 import DashboardAppBar, { NavigationProp, SubPage } from '../../../../components/navigation/DashboardAppbar';
 import { Screen } from '../../../../components/ui/Screen';
-import { BodyText, HeadlineText } from '../../../../components/ui/Typography';
+import { HeadlineText } from '../../../../components/ui/Typography';
 import { otherSubPages } from './_layout';
 
 
@@ -41,7 +42,7 @@ export default function PreperationScreen() {
         <HeadlineText size="large">Preparation</HeadlineText>
         <Card style={{ marginTop: 16 }}>
           <Card.Content>
-            <BodyText>Preparation content goes here...</BodyText>
+          <KitChecklistView />
           </Card.Content>
         </Card>
       </ScrollView>

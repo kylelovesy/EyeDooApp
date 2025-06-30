@@ -1,162 +1,122 @@
 [
   {
-    "id": "event_001",
-    "time": "2025-01-22T10:00:00.000Z",
-    "eventType": "BridalPrep",
-    "description": "Bride and bridal party getting ready - hair, makeup, and dress",
-    "location": "Bridal Suite at The Grand Hotel",
-    "priority": "high",
-    "notification": "Notification",
-    "duration": 180
+    "eventId": "b4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b0c",
+    "eventType": "Bridal Prep",
+    "time": "2024-07-20T11:00:00.000Z",
+    "description": "Bride and bridesmaids getting ready.",
+    "notification": "Push",
+    "status": "Draft"
   },
   {
-    "id": "event_002", 
-    "time": "2025-01-22T11:20:00.000Z",
-    "eventType": "GroomPrep",
-    "description": "Groom and groomsmen getting ready - suits and final preparations",
-    "location": "Groom Suite at The Grand Hotel",
-    "priority": "medium",
-    "notification": "Notification",
-    "duration": 90
+    "eventId": "c4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b0d",
+    "eventType": "Groom Prep",
+    "time": "2024-07-20T12:00:00.000Z",
+    "notification": "None",
+    "status": "Draft"
   },
   {
-    "id": "event_003",
-    "time": "2025-01-22T11:50:00.000Z",
-    "eventType": "GuestsArrive",
-    "description": "Wedding guests begin arriving at the ceremony venue",
-    "location": "St. Mary's Chapel",
-    "priority": "medium",
-    "notification": "Notification",
-    "duration": 30
+    "eventId": "d4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b0e",
+    "eventType": "Guests Arrive",
+    "time": "2024-07-20T13:30:00.000Z",
+    "description": "Guests begin to arrive for the ceremony.",
+    "notification": "None",
+    "status": "Draft"
   },
   {
-    "id": "event_004",
-    "time": "2025-01-22T12:00:00.000Z",
-    "eventType": "CeremonyBegins",
-    "description": "Wedding ceremony starts - processional, vows, ring exchange",
-    "location": "St. Mary's Chapel",
-    "priority": "critical",
-    "notification": "Sound",
-    "duration": 45
+    "eventId": "e4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b0f",
+    "eventType": "Ceremony Begins",
+    "time": "2024-07-20T14:00:00.000Z",
+    "notification": "Push",
+    "status": "Draft"
   },
   {
-    "id": "event_005",
-    "time": "2025-01-22T12:45:00.000Z",
-    "eventType": "ConfettiAndMingling",
-    "description": "Confetti toss and congratulations from guests",
-    "location": "Chapel Grounds",
-    "priority": "medium",
-    "notification": "Notification",
-    "duration": 30
+    "eventId": "f4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b10",
+    "eventType": "Confetti and Mingling",
+    "time": "2024-07-20T14:45:00.000Z",
+    "description": "Confetti throwing and guest mingling.",
+    "notification": "None",
+    "status": "Draft"
   },
   {
-    "id": "event_006",
-    "time": "2025-01-22T13:15:00.000Z",
-    "eventType": "GroupPhotos",
-    "description": "Family group photos and wedding party shots",
-    "location": "Chapel Gardens",
-    "priority": "high",
-    "notification": "Notification",
-    "duration": 60
+    "eventId": "g4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b11",
+    "eventType": "Group Photos",
+    "time": "2024-07-20T15:00:00.000Z",
+    "notification": "Email",
+    "status": "Draft"
   },
   {
-    "id": "event_007",
-    "time": "2025-01-22T14:15:00.000Z",
-    "eventType": "CouplePortraits",
-    "description": "Private couple portrait session - golden hour shots",
-    "location": "Nearby Rose Garden",
-    "priority": "high",
-    "notification": "Notification",
-    "duration": 45
+    "eventId": "h4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b12",
+    "eventType": "Couple Portraits",
+    "time": "2024-07-20T15:30:00.000Z",
+    "description": "Portraits of the newly married couple.",
+    "notification": "None",
+    "status": "Draft"
   },
   {
-    "id": "event_008",
-    "time": "2025-01-22T15:00:00.000Z",
-    "eventType": "ReceptionDrinks",
-    "description": "Cocktail hour with canapés and welcome drinks",
-    "location": "Reception Venue Terrace",
-    "priority": "medium",
-    "notification": "Notification",
-    "duration": 90
+    "eventId": "i4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b13",
+    "eventType": "Reception Drinks",
+    "time": "2024-07-20T16:00:00.000Z",
+    "notification": "None",
+    "status": "Draft"
   },
   {
-    "id": "event_009",
-    "time": "2025-01-22T16:30:00.000Z",
-    "eventType": "WeddingBreakfast",
-    "description": "Seated dinner service with multiple courses",
-    "location": "Main Reception Hall",
-    "priority": "high",
-    "notification": "Notification",
-    "duration": 120
+    "eventId": "j4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b14",
+    "eventType": "Wedding Breakfast",
+    "time": "2024-07-20T17:00:00.000Z",
+    "description": "Guests are seated for the meal.",
+    "notification": "None",
+    "status": "Draft"
   },
   {
-    "id": "event_010",
-    "time": "2025-01-22T18:30:00.000Z",
+    "eventId": "k4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b15",
     "eventType": "Speeches",
-    "description": "Wedding speeches - father of bride, groom, best man",
-    "location": "Main Reception Hall", 
-    "priority": "high",
-    "notification": "Sound",
-    "duration": 45
-  },
-  {
-    "id": "event_011",
-    "time": "2025-01-22T19:30:00.000Z",
-    "eventType": "EveningGuestsArrive",
-    "description": "Evening guests arrive for the party",
-    "location": "Reception Venue Entrance",
-    "priority": "medium",
-    "notification": "Notification",
-    "duration": 30
-  },
-  {
-    "id": "event_012",
-    "time": "2025-01-22T20:00:00.000Z",
-    "eventType": "CakeCutting",
-    "description": "Wedding cake cutting ceremony",
-    "location": "Main Reception Hall",
-    "priority": "high",
-    "notification": "Sound",
-    "duration": 15
-  },
-  {
-    "id": "event_013",
-    "time": "2025-01-22T20:15:00.000Z",
-    "eventType": "FirstDance",
-    "description": "Couple's first dance followed by parent dances",
-    "location": "Dance Floor",
-    "priority": "critical",
-    "notification": "Sound",
-    "duration": 20
-  },
-  {
-    "id": "event_014",
-    "time": "2025-01-22T20:35:00.000Z",
-    "eventType": "EveningEntertainment",
-    "description": "DJ starts evening entertainment and dancing",
-    "location": "Dance Floor",
-    "priority": "medium",
-    "notification": "Sound",
-    "duration": 180
-  },
-  {
-    "id": "event_015",
-    "time": "2025-01-22T22:35:00.000Z",
-    "eventType": "EveningBuffet",
-    "description": "Evening buffet service with light bites",
-    "location": "Buffet Area", 
-    "priority": "low",
+    "time": "2024-07-20T18:30:00.000Z",
     "notification": "None",
-    "duration": 60
+    "status": "Draft"
   },
   {
-    "id": "event_016",
-    "time": "2025-01-23T00:35:00.000Z",
+    "eventId": "l4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b16",
+    "eventType": "Evening Guests Arrive",
+    "time": "2024-07-20T19:30:00.000Z",
+    "description": "Arrival of evening guests.",
+    "notification": "Text",
+    "status": "Draft"
+  },
+  {
+    "eventId": "m4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b17",
+    "eventType": "Cake Cutting",
+    "time": "2024-07-20T20:00:00.000Z",
+    "notification": "None",
+    "status": "Draft"
+  },
+  {
+    "eventId": "n4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b18",
+    "eventType": "First Dance",
+    "time": "2024-07-20T20:15:00.000Z",
+    "description": "The first dance.",
+    "notification": "None",
+    "status": "Draft"
+  },
+  {
+    "eventId": "o4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b19",
+    "eventType": "Evening Entertainment",
+    "time": "2024-07-20T20:30:00.000Z",
+    "notification": "None",
+    "status": "Draft"
+  },
+  {
+    "eventId": "p4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b20",
+    "eventType": "Evening Buffet",
+    "time": "2024-07-20T21:30:00.000Z",
+    "description": "Evening food is served.",
+    "notification": "None",
+    "status": "Draft"
+  },
+  {
+    "eventId": "q4b9b9a0-5b0c-4b9e-8b0a-9b0c9b0c9b21",
     "eventType": "Carriages",
-    "description": "End of celebration - guests depart",
-    "location": "Reception Venue",
-    "priority": "low", 
-    "notification": "None",
-    "duration": 30
+    "time": "2024-07-21T00:00:00.000Z",
+    "notification": "Push",
+    "status": "Draft"
   }
 ] 

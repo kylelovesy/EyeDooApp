@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Button, Card, Modal, Text, TextInput } from 'react-native-paper';
 import { commonStyles } from '../../constants/styles';
-import { TAG_COLORS } from '../../constants/tags';
+import { TAG_COLORS } from '../../constants/tagsTypes';
 import { spacing, useAppTheme } from '../../constants/theme';
 import { Tag, TagSchema } from '../../types/tag';
 import { HeadlineText } from '../ui/Typography';

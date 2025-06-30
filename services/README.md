@@ -6,130 +6,85 @@ This directory contains all backend service integrations and data management log
 
 **All service layer components have been successfully standardized!** This represents a critical infrastructure improvement that provides:
 
-- **Comprehensive Input Validation** - All service methods validate inputs using Zod schemas
-- **Standardized Error Handling** - Consistent error creation, logging, and user feedback
-- **Unified Timestamp Management** - Standardized Firebase timestamp conversion across all services
-- **Type Safety** - Full TypeScript integration with schema-generated types
-- **Configuration Management** - Centralized API configuration with validation
-- **Service Organization** - Clean separation of concerns and consistent patterns
+- **Comprehensive Input Validation**: All service methods validate inputs using Zod schemas.
+- **Standardized Error Handling**: Consistent error creation, logging, and user feedback.
+- **Unified Timestamp Management**: Standardized Firebase timestamp conversion across all services.
+- **Type Safety**: Full TypeScript integration with schema-generated types.
+- **Configuration Management**: Centralized API configuration with validation.
+- **Service Organization**: Clean separation of concerns and consistent patterns.
 
 ## Service Layer Architecture
 
 ### Core Services
 
 #### 🔥 **Firebase Integration**
-- **`firebase.ts`** - Core Firebase configuration and initialization
-- Platform-specific auth persistence (React Native AsyncStorage)
-- Comprehensive configuration validation
-- Connection testing utilities
+- **`firebase.ts`** - Core Firebase configuration and initialization for Expo, with platform-specific auth persistence (React Native AsyncStorage) and comprehensive config validation.
 
 #### 👤 **Authentication Service**
-- **`authService.ts`** - Complete user authentication and profile management
-- Sign up/in with email and password
-- Profile image upload with Firebase Storage
-- User preference management
-- Comprehensive error handling with user-friendly messages
+- **`authService.ts`** - Manages user authentication, profile creation in Firestore, and profile image uploads with Firebase Storage. Handles errors with user-friendly messages.
 
 #### 📋 **Project Management Service**
-- **`projectServices.ts`** - Full CRUD operations for photography projects
-- Real-time project subscriptions with `onSnapshot`
-- Comprehensive timestamp conversion
-- Zod validation for all operations
-- User-specific project filtering
+- **`projectServices.ts`** - Full CRUD operations for projects, featuring real-time subscriptions with `onSnapshot`, Zod validation, and comprehensive timestamp conversion.
 
-#### 📝 **Private Notes Service** ✅ **FULLY STANDARDIZED**
-- **`privateNotesService.ts`** - Note management with comprehensive validation
-- Full input validation using Zod schemas
-- Advanced search functionality
-- Standardized error handling and logging
-- Type-safe CRUD operations
+#### 📂 **Data Import Service**
+- **`dataImportService.ts`** - Handles importing timeline and photo data into projects from external sources, with options for merging or replacing existing data.
 
-#### 🎬 **Shot Checklist Service** ✅ **FULLY STANDARDIZED**
-- **`shotChecklistService.ts`** - Shot list and checklist management
-- Equipment and location tracking
-- Completion status management
-- Search and filtering capabilities
-- Bulk operations support
+#### 📆 **Timeline Service**
+- **`timelineService.ts`** - Manages timeline events for projects, which are stored as a sub-collection in Firestore.
 
-#### 🌤️ **Weather Service** ✅ **FULLY STANDARDIZED**
-- **`weatherService.ts`** - OpenWeatherMap API integration
-- Location-based and coordinate-based weather fetching
-- Configuration management with validation
-- API request timeout and retry logic
-- User-friendly error alerts
+#### 📝 **Private Notes Service**
+- **`privateNotesService.ts`** - Manages private project notes with full CRUD operations, search, and standardized validation.
+
+#### 🎬 **Shot Checklist Service**
+- **`shotChecklistService.ts`** - Manages shot lists and checklists for projects.
+
+#### 🌤️ **Weather Service**
+- **`weatherService.ts`** - Integrates with the OpenWeatherMap API for location-based weather fetching, including configuration management and error handling.
+
+#### 📸 **Local Photo-Tagging Service**
+- **`photoTagLinkService.ts`** - Manages links between photos and tags using the local device file system via `expo-file-system`. Includes CRUD and cleanup functions.
+
+---
+
+### Mock & Deprecated Services
+
+- **`tagService.ts` / `vendorService.ts`**: These are **mock services** that simulate an API for managing tags and vendors, respectively. They are intended for development and will be replaced by a full backend implementation.
+- **`kitChecklistService.ts`**: This service is **deprecated and inactive**, with all code commented out.
 
 ### 📋 **Validation Schemas (`/schemas`)**
 
-Comprehensive validation infrastructure for all service operations:
+A comprehensive validation infrastructure powers all service operations:
 
-#### **Central Schema Export**
-- **`index.ts`** - Single import point for all validation utilities
-- Service and operation name constants
-- Standardized error reporting
-
-#### **Service-Specific Schemas**
-- **`authSchemas.ts`** - Authentication operations (login, register, 2FA, social auth)
-- **`notesSchemas.ts`** - Note management (CRUD, sharing, export/import, templates)
-- **`shotChecklistSchemas.ts`** - Shot management (equipment, locations, technical specs)
-- **`weatherSchemas.ts`** - Weather API operations (forecasts, alerts, location search)
+- **`index.ts`**: Central export for all validation utilities, service/operation constants.
+- **`authSchemas.ts`**: Validation for all authentication operations.
+- **`notesSchemas.ts`**: Schemas for note management.
+- **`shotChecklistSchemas.ts`**: Validation for shot lists, equipment, and locations.
+- **`weatherSchemas.ts`**: Schemas for weather API interactions.
 
 ### 🛠️ **Utility Functions (`/utils`)**
 
-Standardized utility functions used across all services:
-
-#### **Validation Helpers**
-- **`validationHelpers.ts`** - Core validation patterns and error handling
-- `validateAndParse()` - Extended Zod validation with detailed logging
-- `validateSafe()` - Safe validation returning result objects
-- `createServiceError()` - Standardized error creation
-- `CommonSchemas` - Reusable validation schemas
-
-#### **Timestamp Management**
-- **`timestampHelpers.ts`** - Firebase timestamp conversion utilities
-- `convertFirestoreTimestamp()` - Handles various timestamp formats
-- `convertTimestampFields()` - Batch converts multiple fields
-- Consistent date handling across all services
-
-#### **Error Handling**
-- **`errorHelpers.ts`** - Custom error classes and utilities
-- `ServiceError` class for consistent error structure
-
-## Key Improvements Achieved
-
-### ✅ Input Validation
-- **Comprehensive Validation**: All service methods validate inputs using Zod schemas
-- **Parameter Validation**: Required field checks with detailed error messages
-- **Business Rule Validation**: Context-aware validation beyond basic types
-- **Type Safety**: TypeScript types generated from Zod schemas
-
-### ✅ Error Handling
-- **Standardized Errors**: Consistent error creation with service/operation context
-- **User-Friendly Messages**: Clear, actionable error messages for users
-- **Detailed Logging**: Comprehensive error logging for debugging
-- **Graceful Degradation**: Services handle errors without crashing
-
-### ✅ Timestamp Management
-- **Consistent Conversion**: Standardized Firebase timestamp handling
-- **Multi-Format Support**: Handles Timestamp objects, Date objects, and ISO strings
-- **Nested Field Support**: Converts timestamps in nested objects
-- **Default Handling**: Safe fallbacks for invalid timestamps
-
-### ✅ Configuration Management
-- **Environment Variables**: Externalized configuration (Firebase, API keys)
-- **Validation**: Configuration validation on startup
-- **Runtime Updates**: Safe configuration updates with validation
-- **Testing Utilities**: Connection testing and health checks
+- **`validationHelpers.ts`**: Core validation patterns, including `validateAndParse` and standardized error creation.
+- **`timestampHelpers.ts`**: Utilities for converting Firestore Timestamps. **Note: These are being deprecated in favor of Zod schema preprocessing.**
+- **`errorHelpers.ts`**: Custom `ServiceError` class and a `removeUndefinedValues` utility for cleaning data before Firestore writes.
+- **`qrUtils.ts`**: A utility for parsing vendor information from QR codes.
+- **`defaultChecklist.ts`**: Provides default checklist items.
 
 ## Service Implementation Status
 
-| Service | Status | Validation Level | Key Features |
-|---------|--------|------------------|--------------|
-| **projectServices.ts** | ✅ **Standardized** | Complete Zod validation | Real-time subscriptions, timestamp conversion |
-| **privateNotesService.ts** | ✅ **COMPLETED** | Full validation | Search, CRUD operations, error handling |
-| **shotChecklistService.ts** | ✅ **COMPLETED** | Full validation | Equipment tracking, completion status |
-| **weatherService.ts** | ✅ **COMPLETED** | Full validation | API integration, configuration management |
-| **authService.ts** | ⚠️ **Schemas Ready** | Schemas created | User management, profile uploads |
-| **firebase.ts** | ✅ **Configured** | Platform-specific setup | Core Firebase initialization |
+| Service                   | Status                      | Validation Level         | Key Features                                         |
+|---------------------------|-----------------------------|--------------------------|------------------------------------------------------|
+| **`projectServices.ts`**  | ✅ **Standardized**         | Complete Zod validation  | Real-time subscriptions, timestamp conversion        |
+| **`privateNotesService.ts`**| ✅ **Standardized**         | Full validation          | Search, CRUD operations, error handling              |
+| **`shotChecklistService.ts`**| ✅ **Standardized**         | Full validation          | CRUD operations, status filtering                    |
+| **`weatherService.ts`**   | ✅ **Standardized**         | Full validation          | API integration, configuration management            |
+| **`dataImportService.ts`**| ✅ **Standardized**         | Full validation          | Merging/replacement strategies, data backup          |
+| **`timelineService.ts`**  | ✅ **Standardized**         | Zod validation           | Manages sub-collection, Firestore Timestamps         |
+| **`authService.ts`**      | 🟡 **Partially Standardized** | Schemas ready (not fully integrated) | User management, profile uploads                     |
+| **`photoTagLinkService.ts`**| ✅ **Standardized (Local)** | Zod validation           | Uses local file system, CRUD, cleanup logic        |
+| **`vendorService.ts`**    | 🔵 **Mock Service**         | None (mock data)         | Simulates vendor data API                            |
+| **`tagService.ts`**       | 🔵 **Mock Service**         | Zod on creation          | Simulates tag data API                               |
+| **`firebase.ts`**         | ✅ **Configured**           | Config validation        | Core Firebase initialization                         |
+| **`kitChecklistService.ts`**| 🔴 **Deprecated**           | None                     | Inactive and commented out                           |
 
 ## Usage Examples
 
@@ -137,10 +92,10 @@ Standardized utility functions used across all services:
 ```typescript
 import { PrivateNotesService } from '@/services';
 
-// All inputs are validated automatically
+// All inputs are validated automatically inside the service method
 try {
   await PrivateNotesService.addPrivateNote(
-    projectId,    // Validated as non-empty string
+    projectId,    // Validated as a non-empty string
     noteContent   // Validated for length and content
   );
 } catch (error) {
@@ -153,7 +108,7 @@ try {
 ```typescript
 import { CreateNoteInputSchema, validateAndParse } from '@/services/schemas';
 
-// Validate data before processing
+// You can also validate data before processing
 const validatedData = validateAndParse(
   CreateNoteInputSchema,
   userInput,
@@ -165,7 +120,7 @@ const validatedData = validateAndParse(
 ```typescript
 import { createServiceError, SERVICE_NAMES } from '@/services/schemas';
 
-// Create standardized service errors
+// Create standardized service errors for consistent reporting
 throw createServiceError(
   SERVICE_NAMES.NOTES,
   'createNote',
@@ -175,143 +130,54 @@ throw createServiceError(
 ```
 
 ### Timestamp Conversion
-```typescript
-import { convertTimestampFields } from '@/services/utils/timestampHelpers';
+**Note**: Direct conversion is being deprecated. Zod schemas in `types/reusableSchemas.ts` now handle this automatically.
 
-// Convert Firestore timestamps to JavaScript Dates
-const convertedData = convertTimestampFields(
-  firestoreData,
-  ['createdAt', 'updatedAt']
-);
+```typescript
+// Legacy Way (deprecated)
+import { convertTimestampFields } from '@/services/utils/timestampHelpers';
+const convertedData = convertTimestampFields(firestoreData, ['createdAt', 'updatedAt']);
+
+// New Way (Zod handles it during parsing)
+import { ProjectSchema } from '@/types';
+const project = ProjectSchema.parse(firestoreData); // Timestamps are now Date objects
 ```
 
 ## Configuration Setup
 
 ### Firebase Configuration
-```typescript
-// Environment variables in .env
+Set the following in your `.env` file:
+```
 EXPO_PUBLIC_FIREBASE_API_KEY=your_api_key
 EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
 EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-// ... other Firebase config
+# ... other Firebase config
 ```
 
 ### Weather Service Configuration
+The API key must be set before use.
 ```typescript
 import { WeatherService } from '@/services';
 
 // Update API configuration
 WeatherService.updateConfig({
   apiKey: 'your_openweathermap_api_key',
-  timeout: 15000,
-  retryAttempts: 3
+  timeout: 15000
 });
 ```
-
-## Validation Patterns
-
-### Input Validation
-All services follow consistent validation patterns:
-
-1. **Parameter Validation**: Check for required fields
-2. **Schema Validation**: Validate against Zod schemas
-3. **Business Logic Validation**: Context-aware validation
-4. **Error Generation**: Create standardized errors
-
-### Schema Structure
-```typescript
-// Example schema with comprehensive validation
-export const CreateNoteInputSchema = z.object({
-  projectId: CommonSchemas.projectId,
-  title: z.string().min(1).max(200).trim(),
-  content: CommonSchemas.noteContent,
-  category: NoteCategorySchema.default('general'),
-  priority: NotePrioritySchema.default('medium'),
-  // ... additional fields with validation
-});
-```
-
-## Error Handling Patterns
-
-### Service Error Structure
-```typescript
-interface ServiceError {
-  service: string;      // Service name (e.g., 'PrivateNotesService')
-  operation: string;    // Operation name (e.g., 'createNote')
-  originalError: any;   // Original error for debugging
-  message: string;      // User-friendly message
-}
-```
-
-### Consistent Error Messages
-- **Validation Errors**: Clear field-specific messages
-- **Business Logic Errors**: Context-aware error descriptions
-- **API Errors**: User-friendly translations of technical errors
-- **Configuration Errors**: Setup and configuration guidance
 
 ## Best Practices
 
 ### Service Implementation
-1. **Always validate inputs** using appropriate Zod schemas
-2. **Use standardized error creation** with `createServiceError()`
-3. **Log operations** with "EyeDooApp:" prefix for consistency
-4. **Convert timestamps** using standardized helpers
-5. **Handle edge cases** gracefully with fallback values
+1. **Always validate inputs** at the service boundary using the appropriate Zod schemas.
+2. **Use standardized error creation** with `createServiceError()` for consistent logging and error messages.
+3. **Log operations** with the "EyeDooApp:" prefix for easy debugging and tracking.
+4. **Rely on Zod schemas for timestamp conversion** instead of manual utility functions.
+5. **Handle edge cases** gracefully with fallback values and clear error propagation.
 
 ### Schema Design
-1. **Reuse common schemas** from `CommonSchemas`
-2. **Provide clear error messages** for all validation rules
-3. **Use appropriate defaults** for optional fields
-4. **Implement business logic validation** beyond basic types
-5. **Export TypeScript types** from schemas
-
-### Error Handling
-1. **Distinguish between validation and service errors**
-2. **Provide user-friendly messages** for all error types
-3. **Log detailed information** for debugging
-4. **Handle async operations** with proper error propagation
-5. **Use consistent error structures** across all services
-
-## Future Enhancements
-
-### Planned Improvements
-- **Caching Layer**: Implement service-level caching for performance
-- **Offline Support**: Add offline data synchronization
-- **Rate Limiting**: Implement API rate limiting and queuing
-- **Health Monitoring**: Add service health checks and monitoring
-- **Testing Coverage**: Comprehensive unit and integration tests
-
-### Configuration Management
-- **Environment-Specific Configs**: Development, staging, production configs
-- **Dynamic Configuration**: Runtime configuration updates
-- **Feature Flags**: Service-level feature toggles
-- **Monitoring Integration**: Error tracking and performance monitoring
-
-## Related Documentation
-
-- **[Main Project README](../README.md)** - Overview and getting started
-- **[Types Documentation](../types/README.md)** - TypeScript types and schemas
-- **[Components Documentation](../components/README.md)** - UI components
-- **[Contexts Documentation](../contexts/README.md)** - State management
-
-## Architecture Decisions
-
-### Why Zod for Validation?
-- **Runtime Type Safety**: Validates data at runtime, not just compile time
-- **Schema Composition**: Reusable schemas with composition patterns
-- **Error Messages**: Detailed, customizable error messages
-- **TypeScript Integration**: Automatic type generation from schemas
-
-### Why Centralized Error Handling?
-- **Consistency**: Same error structure across all services
-- **Debugging**: Centralized logging and error tracking
-- **User Experience**: Consistent error messages and handling
-- **Maintainability**: Single place to update error handling logic
-
-### Why Service-Specific Schemas?
-- **Organization**: Clear separation of validation logic
-- **Reusability**: Schemas can be reused across different operations
-- **Maintainability**: Easy to update validation rules for specific services
-- **Documentation**: Schemas serve as API documentation
+1. **Reuse common schemas** from `CommonSchemas` in `services/schemas/validationHelpers.ts`.
+2. **Provide clear error messages** for all validation rules in your Zod schemas.
+3. **Use appropriate defaults** for optional fields to ensure consistent object shapes.
+4. **Export TypeScript types** inferred from your schemas for use throughout the app.
 
 This service layer provides a robust, type-safe, and maintainable foundation for all backend operations in the EyeDooApp. 

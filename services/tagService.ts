@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
-import { TAG_COLORS } from '../constants/tags';
+import { TAG_COLORS } from '../constants/tagsTypes';
 import { Tag, TagSchema } from '../types/tag';
 
 // Mock data simulating a database source

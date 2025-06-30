@@ -11,7 +11,7 @@ import { Screen } from '../../components/ui/Screen';
 import { TagInput } from '../../components/ui/TagInput';
 import { HeadlineText } from '../../components/ui/Typography';
 import { commonStyles } from '../../constants/styles';
-import { TAG_COLORS } from '../../constants/tags';
+import { TAG_COLORS } from '../../constants/tagsTypes';
 import { useProjects } from '../../contexts/ProjectContext';
 import { usePhotoTagLinks } from '../../hooks/usePhotoTagLinks';
 import { useTags } from '../../hooks/useTags';

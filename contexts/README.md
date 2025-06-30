@@ -8,68 +8,69 @@ This directory contains all React Context implementations for the EyeDooApp phot
 
 ### Core Context Files
 
-- **`AuthContext.tsx`** - User authentication and profile management
-- **`ProjectContext.tsx`** - Main project data management with CRUD operations
-- **`useBaseFormContext.ts`** - Standardized base context hook for all form contexts
+- **`AuthContext.tsx`** - User authentication and profile management.
+- **`ProjectContext.tsx`** - Main project data management with CRUD operations.
+- **`ThemeContext.tsx`** - Manages the application's light and dark themes.
+- **`useBaseFormContext.ts`** - Standardized base context hook for all form contexts.
 
 ### Form Context Files
 
-- **`Form1EssentialInfoContext.tsx`** - ✅ **STANDARDIZED** - Essential project information form management
-- **`Form2TimelineContext.tsx`** - ✅ **STANDARDIZED** - Timeline events form management
-- **`Form3PersonaContext.tsx`** - ✅ **STANDARDIZED** - People and persona form management  
-- **`Form4PhotosContext.tsx`** - ✅ **STANDARDIZED** - Photo requirements form management
+- **`Form1EssentialInfoContext.tsx`** - ✅ **STANDARDIZED** - Essential project information form management.
+- **`TimelineContext.tsx`** - ✅ **STANDARDIZED** - Timeline events form management.
+- **`Form3PersonaContext.tsx`** - ✅ **STANDARDIZED** - People and persona form management.  
+- **`Form4PhotosContext.tsx`** - ✅ **STANDARDIZED** - Photo requirements form management.
 
 ### Provider Management
 
-- **`ProviderWrappers.tsx`** - HOCs and compound components for clean provider composition
+- **`ProviderWrappers.tsx`** - HOCs and compound components for clean provider composition.
 
 ## Key Improvements Made
 
 ### ✅ Standardized Base Context Pattern
-- Created `useBaseFormContext` hook with consistent interface for all form contexts
-- Unified modal management, form validation, and error handling patterns
-- Added proper TypeScript generics for type safety across all form types
-- Implemented consistent snackbar notification system
+- Created `useBaseFormContext` hook with a consistent interface for all form contexts.
+- Unified modal management, form validation, and error handling patterns.
+- Added proper TypeScript generics for type safety across all form types.
+- Implemented a consistent snackbar notification system.
 
 ### ✅ Provider Wrapper System
-- Created HOCs for flexible provider composition (`withProjectProvider`, `withAllFormProviders`, etc.)
-- Added compound components pattern (`FormProviders.All`, `FormProviders.Dashboard`, etc.)
-- Simplified app layout from 35+ lines of nested providers to 3 lines
-- Enabled targeted provider usage for specific screen requirements
+- Created HOCs for flexible provider composition (`withProjectProvider`, `withAllFormProviders`, etc.).
+- Added compound components pattern (`FormProviders.All`, `FormProviders.Dashboard`, etc.).
+- Simplified app layout from 35+ lines of nested providers to just a few lines.
+- Enabled targeted provider usage for specific screen requirements.
 
 ### ✅ Consistent Modal Integration
-- Standardized modal visibility management across all form contexts
-- Added proper form submission and validation patterns
-- Implemented consistent error handling and success messaging
-- Created unified interface for modal operations
+- Standardized modal visibility management across all form contexts.
+- Added proper form submission and validation patterns.
+- Implemented consistent error handling and success messaging.
+- Created a unified interface for modal operations.
 
 ### ✅ Form Context Standardization - **COMPLETED**
-- **ALL FORM CONTEXTS MIGRATED** - All 4 form contexts now use `useBaseFormContext`
-- Added consistent validation using Zod schemas across all forms
-- Implemented proper project update functionality in all contexts
-- Added backward compatibility with legacy naming conventions
-- **EssentialInfo Context Integration** - Form1 now fully integrated with BaseFormModal pattern
+- **ALL FORM CONTEXTS MIGRATED** - All 4 form contexts now use `useBaseFormContext`.
+- Added consistent validation using Zod schemas across all forms.
+- Implemented proper project update functionality in all contexts.
+- Added backward compatibility with legacy naming conventions.
+- **EssentialInfo Context Integration** - Form1 now fully integrated with the BaseFormModal pattern.
 
 ## ✅ **STANDARDIZATION COMPLETED - ALL CONTEXTS UNIFIED**
 
 **As of the latest update, all form contexts have been successfully standardized:**
 
 ### Context Standardization Status:
-- ✅ **Form1EssentialInfoContext** - COMPLETED - Now uses `useBaseFormContext` and `BaseFormModal`
-- ✅ **Form2TimelineContext** - COMPLETED - Standardized pattern with modal integration
-- ✅ **Form3PersonaContext** - COMPLETED - Unified with base context pattern
-- ✅ **Form4PhotosContext** - COMPLETED - Full standardization with shot management
+- ✅ **Form1EssentialInfoContext** - COMPLETED - Now uses `useBaseFormContext` and `BaseFormModal`.
+- ✅ **TimelineContext** - COMPLETED - Standardized pattern with modal integration and custom event handling.
+- ✅ **Form3PersonaContext** - COMPLETED - Unified with base context pattern.
+- ✅ **Form4PhotosContext** - COMPLETED - Full standardization with custom shot management functions.
 
 ### Modal Integration Status:
-- ✅ **All modals use BaseFormModal** - Consistent UI and behavior across all forms
-- ✅ **Context-based visibility** - No more manual modal state management
-- ✅ **Unified error handling** - Consistent snackbar system across all modals
-- ✅ **Centralized modal management** - All modals managed through FormModals.tsx
+- ✅ **All modals use BaseFormModal** - Consistent UI and behavior across all forms.
+- ✅ **Context-based visibility** - No more manual modal state management.
+- ✅ **Unified error handling** - Consistent snackbar system across all modals.
+- ✅ **Centralized modal management** - All modals managed through `FormModals.tsx`.
 
 ### Provider Integration Status:
-- ✅ **Projects screen updated** - Now uses context-based modal opening
-- ✅ **Provider wrappers enhanced** - Support for all standardized contexts
-- ✅ **App layout simplified** - Clean provider composition patterns
+- ✅ **Projects screen updated** - Now uses context-based modal opening.
+- ✅ **Provider wrappers enhanced** - Support for all standardized contexts.
+- ✅ **App layout simplified** - Clean provider composition patterns.
 
 **This marks the completion of the major context and modal standardization effort!**
 
@@ -79,7 +80,7 @@ This directory contains all React Context implementations for the EyeDooApp phot
 
 ```typescript
 // Using a standardized form context
-import { useForm2 } from '@/contexts/Form2TimelineContext';
+import { useTimelineContext } from '@/contexts/TimelineContext';
 
 const TimelineScreen = () => {
   const {
@@ -90,8 +91,11 @@ const TimelineScreen = () => {
     closeModal,
     handleSubmit,
     isValid,
-    errors
-  } = useForm2();
+    errors,
+    // Custom functions from TimelineContext
+    addEvent,
+    removeEvent,
+  } = useTimelineContext();
   
   const handleEditTimeline = (project: Project) => {
     openModal(project); // Opens modal with project data pre-filled
@@ -124,8 +128,10 @@ export default function AppLayout() {
 }
 
 // Screen that only needs specific providers
+import { withTimelineProvider } from '@/contexts/ProviderWrappers';
+
 const TimelineScreen = withTimelineProvider(() => {
-  const { openModal } = useForm2();
+  const { openModal } = useTimelineContext();
   return <TimelineContent />;
 });
 ```
@@ -167,35 +173,36 @@ const ProjectsScreen = () => {
 ### Custom Context Extension
 
 ```typescript
-// Extending base form context for specific functionality
+// Extending base form context for specific functionality (example from Form4PhotosContext)
 import { BaseFormContextType, useBaseFormContext } from './useBaseFormContext';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ExtendedContextType extends BaseFormContextType<MyFormData> {
-  customFunction: () => void;
-  specialValidation: boolean;
+  addShot: (shotType: keyof MyFormData) => void;
 }
 
 export const useExtendedForm = (): ExtendedContextType => {
   const baseContext = useBaseFormContext(
     myFormSchema,
-    'myFormKey',
+    'formKey',
     initialData,
     { successMessage: 'Success!' }
   );
   
-  const customFunction = () => {
-    // Custom functionality
+  const addShot = (shotType: keyof MyFormData) => {
+    const newShot = { id: uuidv4(), /* ... other properties */ };
+    baseContext.setFormData(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [shotType]: [...(prev[shotType] as any[] || []), newShot]
+      };
+    });
   };
-  
-  const specialValidation = useMemo(() => {
-    // Custom validation logic
-    return baseContext.isValid && someSpecialCondition;
-  }, [baseContext.isValid]);
   
   return {
     ...baseContext,
-    customFunction,
-    specialValidation
+    addShot,
   };
 };
 ```
@@ -230,10 +237,13 @@ export const useExtendedForm = (): ExtendedContextType => {
 
 ```typescript
 import { composeProviders } from '@/contexts/ProviderWrappers';
+import { TimelineProvider } from '@/contexts/TimelineContext';
+import { Form4PhotosProvider } from '@/contexts/Form4PhotosContext';
+import { ProjectProvider } from '@/contexts/ProjectContext';
 
 const CustomProviders = composeProviders(
   ProjectProvider,
-  Form2Provider,
+  TimelineProvider,
   Form4PhotosProvider
 );
 
@@ -247,7 +257,7 @@ const CustomProviders = composeProviders(
 
 ### Base Form Context Interface
 
-All form contexts implement this standardized interface:
+All form contexts implement this standardized interface from `useBaseFormContext`:
 
 ```typescript
 interface BaseFormContextType<T> {
@@ -282,18 +292,18 @@ interface BaseFormContextType<T> {
 #### Before
 ```typescript
 // Old inconsistent pattern
-const ProjectFormContext = createContext<ProjectFormContextType | undefined>(undefined);
+const LegacyFormContext = createContext<LegacyFormContextType | undefined>(undefined);
 
-export const ProjectFormProvider = ({ children }) => {
+export const LegacyFormProvider = ({ children }) => {
   const [formData, setFormData] = useState(initialData);
   const [isModalVisible, setIsModalVisible] = useState(false);
   // Custom validation logic...
   // Custom error handling...
   
   return (
-    <ProjectFormContext.Provider value={value}>
+    <LegacyFormContext.Provider value={value}>
       {children}
-    </ProjectFormContext.Provider>
+    </LegacyFormContext.Provider>
   );
 };
 ```
@@ -329,51 +339,53 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
 ## Context Guidelines
 
 ### 1. Always Use Base Context for Forms
-- Extend `useBaseFormContext` for all form-related contexts
-- Maintain consistent interface across all form contexts
-- Add custom functionality through composition, not replacement
+- Extend `useBaseFormContext` for all form-related contexts.
+- Maintain a consistent interface across all form contexts.
+- Add custom functionality through composition, not by replacing base functionality.
 
 ### 2. Provider Organization
-- Use appropriate provider wrappers for different screen needs
-- Prefer compound components over HOCs for app-level providers
-- Keep provider nesting as shallow as possible
+- Use the appropriate provider wrappers (`FormProviders.All`, `FormProviders.Dashboard`) for different screen needs.
+- Prefer compound components over HOCs for app-level providers.
+- Keep provider nesting as shallow as possible.
 
 ### 3. Type Safety
-- Always provide proper TypeScript types for context values
-- Use Zod schemas for form validation
-- Implement proper error boundaries for context providers
+- Always provide proper TypeScript types for context values.
+- Use Zod schemas for form validation.
+- Consider implementing error boundaries for context providers.
 
 ### 4. Error Handling
-- Use standardized snackbar notifications
-- Implement consistent error messaging
-- Provide fallback states for loading and error conditions
+- Use the standardized snackbar for user notifications.
+- Implement consistent error messaging.
+- Provide fallback states for loading and error conditions.
 
 ### 5. Performance Considerations
-- Use `useMemo` and `useCallback` for expensive operations
-- Implement proper dependency arrays in hooks
-- Consider context splitting for large applications
+- Use `useMemo` and `useCallback` for expensive operations.
+- Implement proper dependency arrays in hooks.
+- Consider context splitting for large-scale applications if performance becomes an issue.
 
 ## Contributing
 
 When adding new contexts:
 
-1. **Form Contexts**: Extend `useBaseFormContext` and follow the established pattern
-2. **Provider Wrappers**: Add new combinations to `ProviderWrappers.tsx`
-3. **Documentation**: Update this README with new patterns and examples
-4. **Type Safety**: Ensure all contexts have proper TypeScript interfaces
-5. **Testing**: Add unit tests for custom context logic
-6. **Backward Compatibility**: Maintain legacy export names where appropriate
+1. **Form Contexts**: Extend `useBaseFormContext` and follow the established patterns seen in `Form3PersonaContext.tsx` or `Form4PhotosContext.tsx`.
+2. **Provider Wrappers**: Add new combinations to `ProviderWrappers.tsx` if needed.
+3. **Documentation**: Update this README with new patterns and examples.
+4. **Type Safety**: Ensure all contexts have proper TypeScript interfaces and use Zod for validation.
+5. **Testing**: Add unit tests for any custom context logic.
+6. **Backward Compatibility**: Maintain legacy export names where appropriate for a smoother transition.
 
 ## Best Practices
 
 ### Context Performance
-- Split contexts by concern (auth, projects, forms)
-- Use multiple smaller contexts instead of one large context
-- Implement proper memoization for context values
+- Split contexts by concern (auth, projects, forms).
+- Use multiple smaller contexts instead of one large monolithic context.
+- Implement proper memoization for context values using `useMemo` and `useCallback`.
 
 ### Error Boundaries
 ```typescript
-// Implement error boundaries for context providers
+// Implement error boundaries for critical context providers
+import ErrorBoundary from 'your-error-boundary-library';
+
 const ContextErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ErrorBoundary fallback={<ErrorFallback />}>
@@ -386,6 +398,9 @@ const ContextErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ childre
 ### Testing Contexts
 ```typescript
 // Create test utilities for context testing
+import { render } from '@testing-library/react-native';
+import { FormProviders } from '@/contexts/ProviderWrappers';
+
 export const renderWithContexts = (ui: React.ReactElement) => {
   return render(
     <FormProviders.All>

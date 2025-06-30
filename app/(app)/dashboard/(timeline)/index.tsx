@@ -44,7 +44,7 @@ export default function TimelineGeneralScreen() {
     if (currentProject) {
       fetchEvents(currentProject.id);
     }
-  }, [currentProject]);
+  }, [currentProject, fetchEvents]);
 
   const navigation: NavigationProp = {
     goBack: () => router.back(),
