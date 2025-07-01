@@ -63,19 +63,17 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) {
+    // Only subscribe if user exists and setup is complete
+    if (!user || user.setup?.firstTimeSetup) {
       dispatch({ type: 'SET_PROJECTS', payload: [] });
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: null });
       dispatch({ type: 'SET_LOADING', payload: false });
       return;
     }
-
     dispatch({ type: 'SET_LOADING', payload: true });
-
     const unsubscribe = ProjectService.subscribeToUserProjects(user.id, (projects) => {
       dispatch({ type: 'SET_PROJECTS', payload: projects });
     });
-
     return () => unsubscribe();
   }, [user]);
   

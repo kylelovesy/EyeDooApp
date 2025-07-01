@@ -71,7 +71,17 @@ export const UserPreferencesSchema = z.object({
     allowDataCollection: z.boolean().default(false)
   }).default({}),
   locale: z.string().min(2).max(10).default('en'),
-  timezone: z.string().min(3).max(50).default('UTC')
+  timezone: z.string().min(3).max(50).default('UTC'),  
+});
+
+export const UserSetupSchema = z.object({
+  firstTimeSetup: z.boolean().default(true),
+  showOnboarding: z.boolean().default(true),
+  customKitListSetup: z.boolean().default(false),
+  customTaskListSetup: z.boolean().default(false),
+  customNFCBusinessCardSetup: z.boolean().default(false),
+  customGroupShotsSetup: z.boolean().default(false),
+  customCoupleShotsSetup: z.boolean().default(false),  
 });
 
 // User subscription schema (for future premium features)
@@ -164,6 +174,7 @@ export const LogoutSchema = z.object({
 });
 
 // Type exports for use in services
+export type UserSetup = z.infer<typeof UserSetupSchema>;
 export type RegisterInput = z.infer<typeof RegisterInputSchema>;
 export type LoginInput = z.infer<typeof LoginInputSchema>;
 export type PasswordResetInput = z.infer<typeof PasswordResetInputSchema>;

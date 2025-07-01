@@ -4,7 +4,7 @@ import { form3PeopleSchema } from "./project-PersonaSchema";
 import { form4PhotosSchema } from "./project-PhotosSchema";
 import { FirestoreTimestampSchema } from "./reusableSchemas";
 //TIMELINE
-import { KitChecklistSchema, TaskChecklistSchema } from "./kitChecklist";
+import { KitChecklistItemSchema } from "./kitChecklist";
 import { CombinedEventsTimelineSchema } from "./timeline";
 
 /**
@@ -24,8 +24,8 @@ export const ProjectSchema = z.object({
   timeline: CombinedEventsTimelineSchema.describe('Project timeline data'),
   form3: form3PeopleSchema.describe('People involved in the project'),
   form4: form4PhotosSchema.describe('Photo requirements and requests'),
-  kitChecklist: KitChecklistSchema.optional().describe('Photographer\'s kit checklist'),
-  taskChecklist: TaskChecklistSchema.optional().describe('Photographer\'s task checklist'),
+  kitChecklist: KitChecklistItemSchema.optional().describe('Photographer\'s kit checklist'),
+  // taskChecklist: TaskChecklistSchema.optional().describe('Photographer\'s task checklist'),
 });
 
 /**
@@ -51,8 +51,8 @@ export const UpdateProjectSchema = z.object({
   timeline: CombinedEventsTimelineSchema.optional(),
   form3: form3PeopleSchema.optional(),
   form4: form4PhotosSchema.optional(),
-  kitChecklist: KitChecklistSchema.optional(),
-  taskChecklist: TaskChecklistSchema.optional(),
+  kitChecklist: KitChecklistItemSchema.optional(),
+  // taskChecklist: TaskChecklistSchema.optional(),
 }).partial();
 
 // Export types for use throughout the application

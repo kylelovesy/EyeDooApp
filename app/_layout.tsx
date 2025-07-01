@@ -28,10 +28,28 @@ const InitialLayout = () => {
     if (loading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inSetupGroup = segments[0] === '(app)' && segments[1] === 'setup';
+    const inAppGroup = segments[0] === '(app)' && segments[1] !== 'setup';
 
-    if (user && inAuthGroup) {
-      router.replace('/(app)/projects');
+    if (user) {
+      // User is authenticated
+      if (inAuthGroup) {
+        // Check if user needs first-time setup
+        if (user.setup?.firstTimeSetup) {
+          router.replace('/(app)/setup');
+        } else {
+          router.replace('/(app)/projects');
+        }
+      } else if (user.setup?.firstTimeSetup && !inSetupGroup) {
+        // User is authenticated but needs setup and not already in setup
+        router.replace('/(app)/setup');
+      } else if (!user.setup?.firstTimeSetup && inSetupGroup) {
+        // User has completed setup but is in setup screens, redirect to projects
+        router.replace('/(app)/projects');
+      }
+      // If user is in the right place based on their setup status, do nothing
     } else if (!user && !inAuthGroup) {
+      // User is not authenticated and not in auth screens
       router.replace('/(auth)/login');
     }
   }, [user, loading, segments, router]);

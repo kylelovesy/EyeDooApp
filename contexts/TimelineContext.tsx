@@ -136,7 +136,7 @@ export const TimelineProvider: React.FC<TimelineProviderProps> = ({ children }) 
   const openModal = (project?: Project) => {
     if (project) {
       setActiveProject(project);
-      fetchEvents(project.id); // Fetch events when the modal is opened
+      fetchEvents(project.id as string); // Fetch events when the modal is opened
     }
     baseContext.openModal(project);
   };

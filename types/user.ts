@@ -52,18 +52,6 @@ export enum WeatherUnit {
   IMPERIAL = 'imperial',
 }
 
-/**
- * Photography specialty enum
- */
-export enum Specialty {
-  WEDDING_PHOTOGRAPHY = 'Wedding Photography',
-  PORTRAIT_PHOTOGRAPHY = 'Portrait Photography',
-  EVENT_PHOTOGRAPHY = 'Event Photography',
-  COMMERCIAL_PHOTOGRAPHY = 'Commercial Photography',
-  FASHION_PHOTOGRAPHY = 'Fashion Photography',
-  LANDSCAPE_PHOTOGRAPHY = 'Landscape Photography',
-  OTHER = 'Other',
-}
 
 // === CONVERT ENUMS TO ARRAYS FOR DROPDOWN OPTIONS ===
 
@@ -71,7 +59,6 @@ export const SUBSCRIPTION_PLANS = Object.values(SubscriptionPlan);
 export const SUBSCRIPTION_FEATURES = Object.values(SubscriptionFeature);
 export const LANGUAGE_OPTIONS = Object.values(LanguageOption);
 export const WEATHER_UNITS = Object.values(WeatherUnit);
-export const SPECIALTIES = Object.values(Specialty);
 
 // === USER PREFERENCE SCHEMA ===
 export const UserPreferencesSchema = z.object({
@@ -100,6 +87,17 @@ export const UserPreferencesSchema = z.object({
     .max(6)
     .default(1)
     .describe('Day of week that calendar starts on (0=Sunday, 1=Monday)'),
+});
+
+// === USER SETUP SCHEMA ===
+export const UserSetupSchema = z.object({
+  firstTimeSetup: z.boolean().default(true),
+  showOnboarding: z.boolean().default(true),
+  customKitListSetup: z.boolean().default(false),
+  customTaskListSetup: z.boolean().default(false),
+  customNFCBusinessCardSetup: z.boolean().default(false),
+  customGroupShotsSetup: z.boolean().default(false),
+  customCoupleShotsSetup: z.boolean().default(false),
 });
 
 // === SUBSCRIPTION SCHEMA ===
@@ -156,11 +154,9 @@ export const UserSchema = z.object({
     .describe('Profile photo URL'),
   
   // Timestamp fields
-  createdAt: FirestoreTimestampSchema
-    .describe('Account creation timestamp'),
+  createdAt: FirestoreTimestampSchema.optional().describe('Account creation timestamp'),
   
-  updatedAt: FirestoreTimestampSchema
-    .describe('Last profile update timestamp'),
+  updatedAt: FirestoreTimestampSchema.optional().describe('Last profile update timestamp'),
   
   lastLoginAt: OptionalFirestoreTimestampSchema
     .describe('Last login timestamp'),
@@ -170,13 +166,15 @@ export const UserSchema = z.object({
     .optional()
     .describe('Phone number'),
   
-  // Nested objects  
-  
+  // Nested objects    
   preferences: UserPreferencesSchema
     .describe('User preferences and settings'),
   
   subscription: UserSubscriptionSchema
     .describe('Subscription information'),
+
+  setup: UserSetupSchema
+    .describe('User setup information'),
   
   // Account status
   isEmailVerified: z.boolean()
@@ -221,6 +219,7 @@ export const PublicUserProfileSchema = UserSchema.pick({
 
 // === EXPORT TYPES ===
 export type User = z.infer<typeof UserSchema>;
+export type UserSetup = z.infer<typeof UserSetupSchema>;
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
 export type PublicUserProfile = z.infer<typeof PublicUserProfileSchema>;

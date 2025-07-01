@@ -2,6 +2,7 @@
 import {
   User,
   UserPreferences,
+  UserSetup,
   UserSubscription
 } from './user';
 
@@ -24,6 +25,9 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   
+  // User setup
+  updateUserSetup: (updates: Partial<UserSetup>) => Promise<void>;
+
   // Profile management
   updateProfile: (updates: Partial<User>) => Promise<void>;
   updatePreferences: (updates: Partial<UserPreferences>) => Promise<void>;
@@ -51,7 +55,6 @@ export interface SignUpFormData {
   confirmPassword: string;
   displayName: string;
   businessName: string;
-  specialties: string[];
   location: string;
   acceptTerms: boolean;
   acceptMarketing?: boolean;
@@ -103,5 +106,5 @@ export interface AuthState {
 }
 
 // Re-export User types for convenience
-export type { User, UserPreferences, UserSubscription } from './user';
+export type { User, UserPreferences, UserSetup, UserSubscription } from './user';
 

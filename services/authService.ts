@@ -29,6 +29,7 @@ export class AuthService {
     displayName?: string
   ): Promise<User> {
     try {
+      console.log('authService.ts > signUp > email', email);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
@@ -42,10 +43,9 @@ export class AuthService {
         id: firebaseUser.uid,
         email: firebaseUser.email!,
         displayName: displayName || firebaseUser.displayName || '',
-        // ✅ Only include photoURL if it exists
         ...(firebaseUser.photoURL && { photoURL: firebaseUser.photoURL }),
-        createdAt: serverTimestamp() as any,
-        updatedAt: serverTimestamp() as any,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         preferences: {
           notifications: true,
           darkMode: false,
@@ -56,10 +56,18 @@ export class AuthService {
         },
         subscription: {
           plan: SubscriptionPlan.FREE,
-          // expiresAt: undefined,
           features: [],
           isActive: true,
           autoRenew: false,
+        },
+        setup: {
+          firstTimeSetup: true,
+          showOnboarding: true,
+          customKitListSetup: false,
+          customTaskListSetup: false,
+          customNFCBusinessCardSetup: false,
+          customGroupShotsSetup: false,
+          customCoupleShotsSetup: false,
         },
         isEmailVerified: firebaseUser.emailVerified || false,
         isActive: true,
@@ -90,6 +98,7 @@ export class AuthService {
    * Sign in with email and password
    */
   static async signIn(email: string, password: string): Promise<User> {
+    console.log('authService.ts > signIn > email', email);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
@@ -112,11 +121,10 @@ export class AuthService {
           id: firebaseUser.uid,
           email: firebaseUser.email!,
           displayName: firebaseUser.displayName || '',
-          // ✅ Only include photoURL if it exists
           ...(firebaseUser.photoURL && { photoURL: firebaseUser.photoURL }),
-          createdAt: new Date() as any,
-          updatedAt: new Date() as any,
-          lastLoginAt: new Date() as any,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastLoginAt: new Date(),
           preferences: {
             notifications: true,
             darkMode: false,
@@ -127,10 +135,18 @@ export class AuthService {
           },
           subscription: {
             plan: SubscriptionPlan.FREE,
-            // expiresAt: undefined,
             features: [],
             isActive: true,
             autoRenew: false,
+          },
+          setup: {
+            firstTimeSetup: true,
+            showOnboarding: true,
+            customKitListSetup: false,
+            customTaskListSetup: false,
+            customNFCBusinessCardSetup: false,
+            customGroupShotsSetup: false,
+            customCoupleShotsSetup: false,
           },
           isEmailVerified: firebaseUser.emailVerified || false,
           isActive: true,
@@ -188,6 +204,7 @@ export class AuthService {
    * Update user profile
    */
   static async updateUserProfile(userId: string, updates: Partial<User>): Promise<void> {
+    console.log('authService.ts > updateUserProfile > userId', userId);
     try {
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {
@@ -200,11 +217,41 @@ export class AuthService {
       throw this.handleAuthError(error);
     }
   }
+  /**
+   * Update user setup configuration
+  */
+  static async updateUserSetup(userId: string, setupUpdates: Partial<{
+    firstTimeSetup: boolean;
+    showOnboarding: boolean;
+    customKitListSetup: boolean;
+    customTaskListSetup: boolean;
+    customNFCBusinessCardSetup: boolean;
+    customGroupShotsSetup: boolean;
+    customCoupleShotsSetup: boolean;
+  }>): Promise<void> {
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      
+      const updateFields = Object.keys(setupUpdates).reduce((acc, key) => {
+        acc[`setup.${key}`] = setupUpdates[key as keyof typeof setupUpdates];
+        return acc;
+      }, {} as Record<string, any>);
 
+      updateFields.updatedAt = serverTimestamp();
+
+      await updateDoc(userDocRef, updateFields);
+      console.log('EyeDooApp: User setup updated successfully');
+    } catch (error: any) {
+      console.error('EyeDooApp: Update user setup error:', error);
+      throw this.handleAuthError(error);
+    }
+  }
+  
   /**
    * Get current user data
    */
   static async getCurrentUserData(): Promise<User | null> {
+    console.log('authService.ts > getCurrentUserData > auth.currentUser', auth.currentUser);
     try {
       const currentUser = auth.currentUser;
       if (!currentUser) return null;
@@ -326,6 +373,15 @@ export class AuthService {
         isActive: true,
         autoRenew: false,
       },
+      setup: {
+        firstTimeSetup: true,
+        showOnboarding: true,
+        customKitListSetup: false,
+        customTaskListSetup: false,
+        customNFCBusinessCardSetup: false,
+        customGroupShotsSetup: false,
+        customCoupleShotsSetup: false,
+      },
       isEmailVerified: firebaseUser.emailVerified || false,
       isActive: true,
     };
@@ -337,4 +393,6 @@ export class AuthService {
 
     return userData;
   }
+
+  
 }

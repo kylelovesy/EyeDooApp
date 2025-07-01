@@ -1,8 +1,10 @@
 // src/contexts/AuthContext.tsx
 import { LoadingState } from '@/components/ui/LoadingState';
+import { useRouter } from 'expo-router';
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import { AuthService } from '../services/authService';
-import { AuthContextType, User, UserPreferences, UserSubscription } from '../types/auth';
+import { getUserDoc } from '../services/userService';
+import { AuthContextType, User, UserPreferences, UserSetup, UserSubscription } from '../types/auth';
 
 interface AuthState {
   user: User | null;
@@ -43,7 +45,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-
+  const router = useRouter();
+  console.log('AuthContext.tsx > AuthProvider > state', state);
   useEffect(() => {
     // Subscribe to authentication state changes
     const unsubscribe = AuthService.onAuthStateChanged((user) => {
@@ -63,6 +66,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const user = await AuthService.signIn(email, password);
       dispatch({ type: 'SET_USER', payload: user });
+
+      const userDoc = await getUserDoc(user.id);
+
+      if (userDoc.setup?.firstTimeSetup) {
+        router.replace('/(app)/setup');
+      } else {
+        router.replace('/(app)/projects');
+      }
     } catch (error: any) {
       dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
       throw error;
@@ -76,6 +87,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const user = await AuthService.signUp(email, password, displayName);
       dispatch({ type: 'SET_USER', payload: user });
+
+      const userDoc = await getUserDoc(user.id);
+
+      if (userDoc.setup?.firstTimeSetup) {
+        router.replace('/(app)/setup');
+      } else {
+        router.replace('/(app)/projects');
+      }
     } catch (error: any) {
       dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
       throw error;
@@ -113,6 +132,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
       throw error;
     }
+  };  
+
+  const updateUserSetup = async (updates: Partial<UserSetup>): Promise<void> => {
+    try {
+      if (!state.user) throw new Error('No user logged in');
+      
+      await AuthService.updateUserSetup(state.user.id, updates);
+      const updatedUser = {
+        ...state.user,
+        setup: { ...state.user.setup, ...updates }
+      };
+      dispatch({ type: 'SET_USER', payload: updatedUser });
+    } catch (error: any) {
+      dispatch({ type: 'SET_ERROR', payload: error.userMessage || error.message });
+      throw error;
+    }
   };
 
   const uploadProfileImage = async (imageUri: string): Promise<string> => {
@@ -137,6 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     updateProfile,
     uploadProfileImage,
+    updateUserSetup,
     updatePreferences: function (updates: Partial<UserPreferences>): Promise<void> {
       throw new Error('Function not implemented.');
     },

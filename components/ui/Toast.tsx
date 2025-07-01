@@ -1,7 +1,7 @@
 // src/components/ui/Toast.tsx
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Snackbar, useTheme } from 'react-native-paper';
 
 interface ToastProps {
@@ -121,7 +121,7 @@ export const Toast: React.FC<ToastProps> = ({
           color={toastStyle.color}
           style={styles.icon}
         />
-        {message}
+        <Text style={{ color: toastStyle.color, flexShrink: 1 }}>{message}</Text>
       </View>
     </Snackbar>
   );

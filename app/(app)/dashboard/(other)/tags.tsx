@@ -31,7 +31,12 @@ export default function SocialFeedScreen() {
   const styles = useStyles(theme);
   
   const { currentProject } = useProjects();
-  const { links, loading: linksLoading, removePhotoTagLink, getLinksForProject } = usePhotoTagLinks();
+  const { 
+    // links, 
+    loading: linksLoading, 
+    removePhotoTagLink, 
+    getLinksForProject 
+  } = usePhotoTagLinks();
   const { tags, loading: tagsLoading } = useTags();
   const [cleanupLoading, setCleanupLoading] = React.useState(false);
 

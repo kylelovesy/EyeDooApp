@@ -65,7 +65,9 @@ export const useBaseFormContext = <S extends z.ZodType<any, any, any>>(
   const openModal = useCallback((project?: Project) => {
     if (project) {
       setProjectToUpdate(project);
-      setFormData((project as any)[formKey] as T);
+       // Fix: Use proper type-safe access
+       const projectData = project[formKey as keyof Project];
+       setFormData(projectData as T);
     } else {
       setProjectToUpdate(null);
       setFormData(initialData);
@@ -103,7 +105,7 @@ export const useBaseFormContext = <S extends z.ZodType<any, any, any>>(
     setIsSubmitting(true);
     try {
       if (projectToUpdate) {
-        await updateProject(projectToUpdate.id, { [formKey]: validationResult.data } as UpdateProjectInput);
+        await updateProject(projectToUpdate.id as string, { [formKey]: validationResult.data } as UpdateProjectInput);
         showSnackbar(options?.successMessage || 'Updated successfully!', 'success');
       } else {
         // Handle creation - this would need to be implemented differently for Form1

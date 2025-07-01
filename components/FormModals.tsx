@@ -1,17 +1,19 @@
 import React from 'react';
-import { useKitChecklistContext } from '../contexts/KitChecklistContext';
+// import { useKitChecklistContext } from '../contexts/KitChecklistContext';
 import { useTimelineContext } from '../contexts/TimelineContext';
+import { useKitChecklist } from '../hooks/useKitChecklist';
 
 import { EssentialInfoFormModal } from './modals/EssentialInfoForm';
 import { PeopleFormModal } from './modals/PeopleForm';
 import { PhotosFormModal } from './modals/PhotosForm';
 
-import { KitItemForm } from './kit/KitItemForm';
+// import { KitItemForm } from './kit/KitItemForm';
+import MasterKitForm from './kit/MasterKitForm';
 import { TimelineEventForm } from './timeline/TimelineEventForm';
 
 import BaseFormModal from './ui/BaseFormModal';
 // Import the specific event type for the onSubmit handler
-import { TKitChecklistItem } from '../types/kitChecklist';
+// import { TKitChecklistItem } from '../types/kitChecklist';
 import { TTimelineEventForm } from '../types/timeline';
 // import { KitChecklistSchema } from '../types/kitChecklist';
 // import { KitChecklistFormModal } from './modals/KitChecklistFormModal';
@@ -24,7 +26,8 @@ export const FormModals: React.FC = () => {
       <TimelineFormModal />
       <PeopleFormModal />
       <PhotosFormModal />
-      <KitChecklistFormModal />
+      <MasterKitModal />
+      {/* <KitChecklistFormModal /> */}
     </>
   );
 };
@@ -32,7 +35,7 @@ export const FormModals: React.FC = () => {
 export { useForm1 as useEssentialInfoModal } from '../contexts/Form1EssentialInfoContext';
 export { usePersonaForm as usePeopleModal } from '../contexts/Form3PersonaContext';
 export { useForm4Photos as usePhotosModal } from '../contexts/Form4PhotosContext';
-export { useKitChecklistContext as useKitChecklistModal } from '../contexts/KitChecklistContext';
+// export { useKitChecklistContext as useKitChecklistModal } from '../contexts/KitChecklistContext';
 export { useTimelineContext as useTimelineModal } from '../contexts/TimelineContext';
 
 
@@ -47,6 +50,7 @@ export interface ModalControlInterface {
 export enum ModalType {
   ESSENTIAL_INFO = 'essential_info',
   TIMELINE = 'timeline',
+  MASTER_KIT = 'master_kit',
   PEOPLE = 'people',
   PHOTOS = 'photos',
 }
@@ -55,6 +59,7 @@ export const getModalDisplayName = (modalType: ModalType): string => {
   const displayNames = {
     [ModalType.ESSENTIAL_INFO]: 'Essential Information',
     [ModalType.TIMELINE]: 'Timeline',
+    [ModalType.MASTER_KIT]: 'Master Kit',
     [ModalType.PEOPLE]: 'People & Persona',
     [ModalType.PHOTOS]: 'Photo Requirements',
   };
@@ -86,17 +91,38 @@ const TimelineFormModal = () => {
   // Don't render if the modal isn't visible or if there's no project selected.
   if (!isModalVisible || !activeProject) return null;
 
+  // Type guard to ensure activeProject has the expected structure
+  if (!activeProject.form1?.eventDate) {
+    console.error('Project missing eventDate');
+    return null;
+  }
+
+  // Convert Firestore Timestamp to Date if needed
+  const getEventDate = (): Date => {
+    const eventDate = activeProject.form1?.eventDate;
+    if (eventDate instanceof Date) {
+      return eventDate;
+    }
+    // If it's a Firestore Timestamp, convert to Date
+    if (eventDate && typeof eventDate === 'object' && 'toDate' in eventDate) {
+      return (eventDate as any).toDate();
+    }
+    // Fallback to current date if conversion fails
+    console.warn('Unable to parse eventDate, using current date');
+    return new Date();
+  };
+
   const handleAddEvent = (event: TTimelineEventForm) => {
-    addEvent(activeProject.id, event);
+    addEvent(activeProject.id as string, event);
   };
   
   // FIX: Add handlers for update and delete
   const handleUpdateEvent = (eventId: string, data: TTimelineEventForm) => {
-    updateEvent(activeProject.id, eventId, data);
+    updateEvent(activeProject.id as string, eventId, data);
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    await removeEvent(activeProject.id, eventId);
+    await removeEvent(activeProject.id as string, eventId);
   };
 
   return (
@@ -108,7 +134,7 @@ const TimelineFormModal = () => {
       // The buttons and submission logic are now handled entirely within TimelineEventForm.
     >
       <TimelineEventForm
-        projectDate={activeProject.form1.eventDate}
+        projectDate={getEventDate()}
         onSubmit={handleAddEvent}
         onCancel={() => { /* The inner form's cancel can be a no-op */ }}
         isLoading={isSubmitting}
@@ -119,39 +145,76 @@ const TimelineFormModal = () => {
   );
 };
 
-const KitChecklistFormModal = () => {
+const MasterKitModal = () => {
   const {
     isModalVisible,
-    closeModal,
-    activeProject,
-    addItem,
-    // deleteItem,
-    // updateItem,
-    // togglePackedStatus,
-    loading, // Note: context uses 'loading', not 'isSubmitting'
-  } = useKitChecklistContext();
+    closeMasterKitModal,
+    masterCategories,
+    masterKitList,
+    updateMasterKit,
+    isLoading,
+  } = useKitChecklist();
 
-  if (!isModalVisible || !activeProject) return null;
-
-  const handleAddItem = async (data: Omit<TKitChecklistItem, 'id' | 'packed'>) => {
-    // The addItem function in the context already handles closing the modal on success
-    await addItem(data);
-  };
+  if (!isModalVisible) return null;
 
   return (
     <BaseFormModal
       visible={isModalVisible}
-      onClose={closeModal}
-      title={`Add to ${activeProject.form1.projectName} Kit`}
+      onClose={closeMasterKitModal}
+      title="Customize Your Master Kit"
     >
-      <KitItemForm
-        onSubmit={handleAddItem}
-        onCancel={closeModal}
-        isSubmitting={loading}
+      <MasterKitForm
+        initialKitList={masterKitList}
+        initialCategories={masterCategories}
+        onSave={updateMasterKit}
+        onCancel={closeMasterKitModal}
+        isSaving={isLoading}
       />
     </BaseFormModal>
   );
 };
+
+
+
+
+
+
+
+
+
+// const KitChecklistFormModal = () => {
+//   const {
+//     isModalVisible,
+//     closeModal,
+//     activeProject,
+//     addItem,
+//     // deleteItem,
+//     // updateItem,
+//     // togglePackedStatus,
+//     loading, // Note: context uses 'loading', not 'isSubmitting'
+//   } = useKitChecklistContext();
+
+//   if (!isModalVisible || !activeProject) return null;
+
+//   const handleAddItem = async (data: Omit<TKitChecklistItem, 'id' | 'packed'>) => {
+//     // The addItem function in the context already handles closing the modal on success
+//     await addItem(data);
+//   };
+
+//   return (
+//     <BaseFormModal
+//       visible={isModalVisible}
+//       onClose={closeModal}
+//       title={`Add to ${activeProject.form1.projectName} Kit`}
+//     >
+//       <KitItemForm
+//         onSubmit={handleAddItem}
+//         onCancel={closeModal}
+//         isSubmitting={loading}
+//       />
+//     </BaseFormModal>
+//   );
+// };
 
 export default FormModals;
 

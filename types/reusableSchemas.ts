@@ -25,8 +25,21 @@ import {
 export const FirestoreTimestampSchema = z.preprocess(
   (val) => {
     // Handle Firestore Timestamp objects
-    if (val && typeof val === 'object' && 'toDate' in val && typeof val.toDate === 'function') {
-      return val.toDate();
+    if (val && typeof val === 'object') {
+      // If it has a toDate method, use it
+      if ('toDate' in val && typeof (val as any).toDate === 'function') {
+        return (val as any).toDate();
+      }
+      // If it has seconds and nanoseconds as numbers, convert to Date
+      if (
+        'seconds' in val && 'nanoseconds' in val &&
+        typeof (val as any).seconds === 'number' &&
+        typeof (val as any).nanoseconds === 'number'
+      ) {
+        return new Date(
+          (val as any).seconds * 1000 + Math.floor((val as any).nanoseconds / 1000000)
+        );
+      }
     }
     
     // Handle Firebase Timestamp objects

@@ -29,11 +29,11 @@ export default function VendorsScreen() {
   const {
         vendors,
         isLoading,
-        error,
+        // error,
         searchQuery,
         setSearchQuery,
-        selectedCategory,
-        setSelectedCategory,
+        // selectedCategory,
+        // setSelectedCategory,
         addVendor,
         updateVendor,
         deleteVendor,
@@ -137,108 +137,6 @@ export default function VendorsScreen() {
         onSave={handleSave}
         initialData={editingVendor || undefined}
       />
-      {/* <ScrollView style={{ flex: 1, padding: 16 }}>
-        <HeadlineText size="large">Vendors</HeadlineText>
-        <Card style={{ marginTop: 16 }}>
-          <Card.Content>
-            <BodyText>Vendors content goes here...</BodyText>
-          </Card.Content>
-        </Card>
-      </ScrollView> */}
     </Screen>
   );
 }
-
-
-// import React, { useState } from 'react';
-// import { FlatList, View } from 'react-native';
-// import { FAB, Searchbar, ActivityIndicator } from 'react-native-paper';
-// import { useVendors } from '../hooks/useVendors';
-// import { Screen } from '../components/ui/Screen';
-// import { EmptyState } from '../components/ui/EmptyState';
-// import { VendorCard } from '../components/vendors/VendorCard';
-// import { VendorForm } from '../components/modals/VendorForm';
-// import { VendorContact } from '../types/vendor';
-// // Assume VendorFilter component exists for filter chips
-// // import { VendorFilter } from '../components/vendors/VendorFilter'; 
-
-// export default function VendorsScreen() {
-//   const {
-//     vendors,
-//     isLoading,
-//     error,
-//     searchQuery,
-//     setSearchQuery,
-//     selectedCategory,
-//     setSelectedCategory,
-//     addVendor,
-//     updateVendor,
-//     deleteVendor,
-//   } = useVendors();
-  
-//   const [formVisible, setFormVisible] = useState(false);
-//   const [editingVendor, setEditingVendor] = useState<Partial<VendorContact> | null>(null);
-
-//   const handleAddNew = () => {
-//     setEditingVendor(null);
-//     setFormVisible(true);
-//   };
-
-//   const handleEdit = (vendor: VendorContact) => {
-//     setEditingVendor(vendor);
-//     setFormVisible(true);
-//   };
-
-//   const handleSave = async (vendorData: VendorContact) => {
-//     if (editingVendor?.id) {
-//       await updateVendor(editingVendor.id, vendorData);
-//     } else {
-//       await addVendor(vendorData);
-//     }
-//   };
-
-//   const handleDelete = async (vendorId: string) => {
-//     // Optional: Add a confirmation dialog here
-//     await deleteVendor(vendorId);
-//   };
-  
-//   if (isLoading) {
-//     return <ActivityIndicator style={{ flex: 1 }} size="large" />;
-//   }
-
-//   return (
-//     <Screen>
-//       {/* <DashboardAppBar ... /> */}
-//       <Searchbar
-//         placeholder="Search vendors..."
-//         value={searchQuery}
-//         onChangeText={setSearchQuery}
-//       />
-//       {/* <VendorFilter selected={selectedCategory} onSelect={setSelectedCategory} /> */}
-      
-//       <FlatList
-//         data={vendors}
-//         keyExtractor={item => item.id!}
-//         renderItem={({ item }) => (
-//           <VendorCard vendor={item} onEdit={handleEdit} onDelete={handleDelete} />
-//         )}
-//         ListEmptyComponent={
-//           <EmptyState
-//             title="No Vendors Found"
-//             description="Try adjusting your search or add a new vendor."
-//             onAction={handleAddNew}
-//           />
-//         }
-//       />
-
-//       <FAB icon="plus" onPress={handleAddNew} style={{ position: 'absolute', margin: 16, right: 0, bottom: 0 }} />
-
-//       <VendorForm
-//         visible={formVisible}
-//         onDismiss={() => setFormVisible(false)}
-//         onSave={handleSave}
-//         initialData={editingVendor || undefined}
-//       />
-//     </Screen>
-//   );
-// }
