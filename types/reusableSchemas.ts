@@ -3,7 +3,6 @@ import {
   CandidShotCategory,
   ContactType,
   CoupleShotCategory,
-  GroupShotCategory,
   ImportanceLevel,
   LocationType,
   PhotoRequestType,
@@ -320,29 +319,7 @@ const BasePhotoSchema = z.object({
     .describe('Whether this shot should always be included')
 });
 
-/**
- * Group shot schema
- * For organized group photography
- */
-export const GroupShotSchema = BasePhotoSchema.extend({
-  groupShotType: z.nativeEnum(GroupShotCategory)
-    .default(GroupShotCategory.OTHER)
-    .describe('Category of group shot'),
-  
-  groupName: z.string()
-    .max(60, 'Group name must be under 60 characters')
-    .optional()
-    .describe('Name of the group'),
-  
-  groupDescription: z.string()
-    .max(100, 'Group description must be under 100 characters')
-    .optional()
-    .describe('Description of the group'),
-  
-  groupMembers: z.array(z.string())
-    .optional()
-    .describe('List of people in this group'),
-});
+
 
 /**
  * Couple shot schema

@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Checkbox, List, Snackbar, Text } from 'react-native-paper';
-import { GenericIcon, PREDEFINED_CATEGORY_ICONS } from '../../constants/kitChecklistTypes';
+import { GenericIcon, PREDEFINED_KIT_CATEGORY_ICONS } from '../../constants/kitChecklistTypes';
 import { useKitChecklist } from '../../hooks/useKitChecklist';
 import { TKitChecklistItemWithFirestoreId } from '../../services/kitChecklistService';
 
@@ -62,7 +62,7 @@ export const KitChecklistView = () => {
             const totalCount = itemsInCategory.length;
 
             // Dynamically select the icon
-            const Icon = PREDEFINED_CATEGORY_ICONS[category.id] || GenericIcon;
+            const Icon = PREDEFINED_KIT_CATEGORY_ICONS[category.id] || GenericIcon;
 
             return (
               <List.Accordion

@@ -176,27 +176,27 @@ export enum NotificationType {
   OTHER = 'Other',
 }
 
-// === GROUP SHOT CATEGORIES ===
+// // === GROUP SHOT CATEGORIES ===
 
-/**
- * Group shot category enum
- */
-export enum GroupShotCategory {
-  COUPLE_WITH_EACH_PARENT = 'Couple with each parent individually',
-  COUPLE_WITH_BOTH_PARENTS = 'Couple with both sets of parents',
-  COUPLE_WITH_SIBLINGS = 'Couple with siblings',
-  COUPLE_WITH_IMMEDIATE_FAMILY = 'Couple with immediate family (parents & siblings)',
-  COUPLE_WITH_GRANDPARENTS = 'Couple with grandparents',
-  COUPLE_WITH_EXTENDED_FAMILY = 'Couple with extended family (aunts/uncles/cousins)',
-  COUPLE_WITH_WEDDING_PARTY = 'Couple with full wedding party',
-  BRIDE_GROOM_WITH_BRIDESMAIDS_GROOMSMEN = 'Bride/Groom with bridesmaids/groomsmen',
-  BRIDE_WITH_MOH_GROOM_WITH_BESTMAN = 'Bride with maid of honour / Groom with best man',
-  BRIDE_GROOM_WITH_FLOWER_GIRLS_PAGE_BOYS = 'Bride/Groom with flower girls / page boys',
-  COUPLE_WITH_CLOSE_FRIENDS = 'Couple with close friends',
-  COUPLE_WITH_SCHOOL_FRIENDS = 'Couple with university or school friends',
-  COUPLE_WITH_WORK_FRIENDS = 'Couple with work friends',
-  OTHER = 'Other',
-}
+// /**
+//  * Group shot category enum
+//  */
+// export enum GroupShotCategory {
+//   COUPLE_WITH_EACH_PARENT = 'Couple with each parent individually',
+//   COUPLE_WITH_BOTH_PARENTS = 'Couple with both sets of parents',
+//   COUPLE_WITH_SIBLINGS = 'Couple with siblings',
+//   COUPLE_WITH_IMMEDIATE_FAMILY = 'Couple with immediate family (parents & siblings)',
+//   COUPLE_WITH_GRANDPARENTS = 'Couple with grandparents',
+//   COUPLE_WITH_EXTENDED_FAMILY = 'Couple with extended family (aunts/uncles/cousins)',
+//   COUPLE_WITH_WEDDING_PARTY = 'Couple with full wedding party',
+//   BRIDE_GROOM_WITH_BRIDESMAIDS_GROOMSMEN = 'Bride/Groom with bridesmaids/groomsmen',
+//   BRIDE_WITH_MOH_GROOM_WITH_BESTMAN = 'Bride with maid of honour / Groom with best man',
+//   BRIDE_GROOM_WITH_FLOWER_GIRLS_PAGE_BOYS = 'Bride/Groom with flower girls / page boys',
+//   COUPLE_WITH_CLOSE_FRIENDS = 'Couple with close friends',
+//   COUPLE_WITH_SCHOOL_FRIENDS = 'Couple with university or school friends',
+//   COUPLE_WITH_WORK_FRIENDS = 'Couple with work friends',
+//   OTHER = 'Other',
+// }
 
 // === COUPLE SHOT CATEGORIES ===
 
@@ -278,7 +278,7 @@ export const LOCATION_TYPES = Object.values(LocationType);
 // export const TIMELINE_EVENT_ICONS = Object.values(TimelineEventIcon);
 export const PHOTO_REQUEST_TYPES = Object.values(PhotoRequestType);
 export const IMPORTANCE_LEVELS = Object.values(ImportanceLevel);
-export const GROUP_SHOT_CATEGORIES = Object.values(GroupShotCategory);
+// export const GROUP_SHOT_CATEGORIES = Object.values(GroupShotCategory);
 export const COUPLE_SHOT_CATEGORIES = Object.values(CoupleShotCategory);
 export const CANDID_SHOT_CATEGORIES = Object.values(CandidShotCategory);
 // export const VENDOR_TYPES = Object.values(VendorTypes);

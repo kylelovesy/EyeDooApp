@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, IconButton, List, Snackbar, Text, TextInput } from 'react-native-paper';
 import { v4 as uuidv4 } from 'uuid';
-import { GenericIcon, PREDEFINED_CATEGORY_ICONS } from '../../constants/kitChecklistTypes';
+import { GenericIcon, PREDEFINED_KIT_CATEGORY_ICONS } from '../../constants/kitChecklistTypes';
 import { TKitChecklistItem, TMasterCategory } from '../../types/kitChecklist';
 
 interface MasterKitFormProps {
   initialKitList: TKitChecklistItem[];
-  initialCategories: TMasterCategory[];
+  initialKitCategories: TMasterCategory[];
   onSave: (updatedList: TKitChecklistItem[], updatedCategories: TMasterCategory[]) => void;
   onCancel: () => void;
   isSaving: boolean;
@@ -16,15 +16,15 @@ interface MasterKitFormProps {
 
 const MasterKitForm: React.FC<MasterKitFormProps> = ({ 
   initialKitList, 
-  initialCategories, 
+  initialKitCategories, 
   onSave, 
   onCancel, 
   isSaving,
-  title = "Edit Photography Kit"
+  title
 }) => {
   // Working copies - these are what get modified during editing
   const [workingKitList, setWorkingKitList] = useState<TKitChecklistItem[]>([]);
-  const [workingCategories, setWorkingCategories] = useState<TMasterCategory[]>([]);
+  const [workingKitCategories, setWorkingKitCategories] = useState<TMasterCategory[]>([]);
   
   const [newItemName, setNewItemName] = useState<{ [categoryId: string]: string }>({});
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -32,15 +32,15 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
 
   useEffect(() => {
     try {
-      console.log('MasterKitForm: Initializing with', initialKitList.length, 'items and', initialCategories.length, 'categories');
+      // console.log('MasterKitForm: Initializing with', initialKitList.length, 'items and', initialKitCategories.length, 'categories');
       // Create deep copies for working data
       setWorkingKitList(JSON.parse(JSON.stringify(initialKitList)));
-      setWorkingCategories(JSON.parse(JSON.stringify(initialCategories)));
+      setWorkingKitCategories(JSON.parse(JSON.stringify(initialKitCategories)));
     } catch (error) {
       console.error('MasterKitForm: Error initializing data:', error);
       setError('Failed to load master kit data');
     }
-  }, [initialKitList, initialCategories]);
+  }, [initialKitList, initialKitCategories]);
 
   const groupedList = useMemo(() => {
     try {
@@ -125,7 +125,7 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
         displayName: name,
         isPredefined: false,
       };
-      setWorkingCategories(prev => [...prev, newCategory]);
+      setWorkingKitCategories(prev => [...prev, newCategory]);
       setNewCategoryName('');
       setError(null);
     } catch (error) {
@@ -147,7 +147,7 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
             onPress: () => {
               try {
                 console.log('MasterKitForm: Deleting category', categoryToDelete.id);
-                setWorkingCategories(prev => prev.filter(c => c.id !== categoryToDelete.id));
+                setWorkingKitCategories(prev => prev.filter(c => c.id !== categoryToDelete.id));
                 setWorkingKitList(prev => prev.filter(item => item.categoryId !== categoryToDelete.id));
                 setError(null);
               } catch (error) {
@@ -166,9 +166,9 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
 
   const handleSave = () => {
     try {
-      console.log('MasterKitForm: Saving master kit with', workingKitList.length, 'items and', workingCategories.length, 'categories');
+      console.log('MasterKitForm: Saving master kit with', workingKitList.length, 'items and', workingKitCategories.length, 'categories');
       // Only now do we actually save the data by calling the parent's onSave
-      onSave(workingKitList, workingCategories);
+      onSave(workingKitList, workingKitCategories);
       setError(null);
     } catch (error) {
       console.error('MasterKitForm: Error saving:', error);
@@ -180,7 +180,7 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
     try {
       // Reset working data to original values
       setWorkingKitList(JSON.parse(JSON.stringify(initialKitList)));
-      setWorkingCategories(JSON.parse(JSON.stringify(initialCategories)));
+      setWorkingKitCategories(JSON.parse(JSON.stringify(initialKitCategories)));
       setNewItemName({});
       setNewCategoryName('');
       setError(null);
@@ -200,20 +200,20 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
 
       <ScrollView style={styles.scrollContainer}>
         <List.AccordionGroup>
-          {workingCategories.map((category) => {
-            const itemsInCategory = groupedList[category.id] || [];
-            const Icon = PREDEFINED_CATEGORY_ICONS[category.id] || GenericIcon;
+          {workingKitCategories.map((kitCategory) => {
+            const itemsInCategory = groupedList[kitCategory.id] || [];
+            const Icon = PREDEFINED_KIT_CATEGORY_ICONS[kitCategory.id] || GenericIcon;
 
             return (
               <List.Accordion 
-                key={category.id} 
-                title={category.displayName || 'Unnamed Category'} 
-                id={String(category.id)}
+                key={kitCategory.id} 
+                title={kitCategory.displayName || 'Unnamed Category'} 
+                id={String(kitCategory.id)}
                 left={(props) => (
                   <View style={styles.iconContainer}>
                     <Icon 
-                      width={20} 
-                      height={20} 
+                      width={28} 
+                      height={28} 
                       color={props.color}
                       style={styles.icon} 
                     />
@@ -222,15 +222,20 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
               >
                 {itemsInCategory.map(item => (
                   <List.Item 
+                    
                     key={item.id} 
-                    title={item.name} 
+                    title={item.name}
+                    titleStyle={{ fontSize: 12, padding: 0, margin: 0, marginLeft: 4, textAlign: 'left' }}
                     titleNumberOfLines={1}
                     left={() => (
-                      <IconButton 
-                        icon="delete" 
-                        size={20} 
-                        onPress={() => handleDeleteItem(item.id)} 
-                      />
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <IconButton 
+                          icon="trash-can-outline" 
+                          size={24} 
+                          onPress={() => handleDeleteItem(item.id)} 
+                          style={{ marginRight: 0, marginLeft: 4, marginTop: 0, marginBottom: 0, padding: 0 }}
+                        />                        
+                      </View>                      
                     )}
                     right={() => (
                       <View style={styles.quantityControl}>
@@ -252,22 +257,22 @@ const MasterKitForm: React.FC<MasterKitFormProps> = ({
                 <View style={styles.addItemRow}>
                   <TextInput 
                     style={styles.input} 
-                    label={`Add to ${category.displayName}`} 
-                    value={newItemName[category.id] || ''} 
-                    onChangeText={text => setNewItemName(prev => ({ ...prev, [category.id]: text }))} 
+                    label={`Add to ${kitCategory.displayName}`} 
+                    value={newItemName[kitCategory.id] || ''} 
+                    onChangeText={text => setNewItemName(prev => ({ ...prev, [kitCategory.id]: text }))} 
                   />
                   <IconButton 
                     icon="plus-circle" 
                     mode="contained" 
                     size={24} 
-                    onPress={() => handleAddItem(category.id)} 
+                    onPress={() => handleAddItem(kitCategory.id)} 
                   />
                 </View>
-                {!category.isPredefined && (
+                {!kitCategory.isPredefined && (
                   <View style={styles.categoryActions}>
                     <Button 
                       icon="delete-sweep" 
-                      onPress={() => handleDeleteCategory(category)}
+                      onPress={() => handleDeleteCategory(kitCategory)}
                     >
                       Remove Category
                     </Button>
@@ -396,7 +401,7 @@ export default MasterKitForm;
 // import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 // import { BodyText, Button, Divider, IconButton, List, Snackbar, Text, TextInput } from 'react-native-paper';
 // import { v4 as uuidv4 } from 'uuid';
-// import { GenericIcon, PREDEFINED_CATEGORY_ICONS } from '../../constants/kitChecklistTypes';
+// import { GenericIcon, PREDEFINED_KIT_CATEGORY_ICONS } from '../../constants/kitChecklistTypes';
 // import { TKitChecklistItem, TMasterCategory } from '../../types/kitChecklist';
 
 // interface MasterKitFormProps {
@@ -562,7 +567,7 @@ export default MasterKitForm;
 //         <List.AccordionGroup>
 //           {categories.map((category) => {
 //             const itemsInCategory = groupedList[category.id] || [];
-//             const Icon = PREDEFINED_CATEGORY_ICONS[category.id] || GenericIcon;
+//             const Icon = PREDEFINED_KIT_CATEGORY_ICONS[category.id] || GenericIcon;
 
 //             return (
 //               <List.Accordion 

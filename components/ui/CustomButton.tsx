@@ -64,7 +64,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
       case 'small':
         return { 
           paddingVertical: spacing.xs, 
-          paddingHorizontal: spacing.sm,
+          paddingHorizontal: spacing.xs,
           minHeight: 32,
         };
       case 'large':

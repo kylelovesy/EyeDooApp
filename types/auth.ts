@@ -18,6 +18,7 @@ import {
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
+  initialized: boolean;
   
   // Authentication methods
   signIn: (email: string, password: string) => Promise<void>;

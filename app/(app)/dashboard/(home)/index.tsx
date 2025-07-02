@@ -201,7 +201,10 @@ const DashboardHomeScreen = () => {
           </Card.Content>
         </Card>
         <NextTimelineEventCard
-          events={timeline?.events || []}
+          events={timeline?.events?.map(event => ({
+            ...event,
+            time: convertFirestoreTimestamp(event.time)
+          })) || []}
         /> 
       </View>
       {/* </View> */}

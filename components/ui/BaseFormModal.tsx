@@ -14,7 +14,7 @@ import { TitleText } from './Typography';
 type BaseFormModalProps = {
   visible: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
   children: React.ReactNode;
   closeButton?: React.ReactNode;
 };

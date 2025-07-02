@@ -98,3 +98,14 @@ export const isValidTimestamp = (timestamp: any): boolean => {
   
   return false;
 };
+
+/**
+ * Converts all relevant timestamp fields in a user document to JS Date objects.
+ */
+export const convertUserTimestamps = (userData: any): any => ({
+  ...userData,
+  createdAt: convertFirestoreTimestamp(userData.createdAt),
+  updatedAt: convertFirestoreTimestamp(userData.updatedAt),
+  lastLoginAt: userData.lastLoginAt ? convertFirestoreTimestamp(userData.lastLoginAt) : undefined,
+  // Add more fields as needed
+});

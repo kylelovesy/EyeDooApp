@@ -51,8 +51,8 @@ export const KitChecklistProvider = ({ children }: { children: ReactNode }) => {
       console.log('KitChecklistContext: Loading data for user:', user.id, 'project:', currentProject.id);
       
       // 1. Get or create the user's master kit (categories and items)
-      const masterKit = await UserService.getOrCreateMasterKit(user.id);
-      setMasterCategories(masterKit.categories);
+      const masterKit = await UserService.getMasterKit(user.id);
+      setMasterCategories(masterKit?.categories || []);
       setMasterKitList(masterKit.items);
       
       // 2. Check if the current project already has a packing list

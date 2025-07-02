@@ -12,6 +12,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { User } from '../types/auth';
 import { LanguageOption, SubscriptionPlan, UserSchema, WeatherUnit } from '../types/user';
 import { auth, db, storage } from './firebase';
+import { convertUserTimestamps } from './utils/timestampHelpers';
 
 export interface AuthError {
   code: string;
@@ -259,9 +260,8 @@ export class AuthService {
       const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        
-        // Convert timestamp fields using standardized helper
-        return UserSchema.parse(userData);
+        const safeUserData = convertUserTimestamps(userData);
+        return UserSchema.parse(safeUserData);
       }
       return null;
     } catch (error: any) {
